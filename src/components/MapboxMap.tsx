@@ -40,7 +40,6 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ vehicles, depots, city, onVehicle
   const map = useRef<mapboxgl.Map | null>(null);
   const vehicleMarkersRef = useRef<mapboxgl.Marker[]>([]);
   const depotMarkersRef = useRef<mapboxgl.Marker[]>([]);
-  const [mapboxToken, setMapboxToken] = useState('pk.eyJ1Ijoib3R0b3lhcmQiLCJhIjoiY21lZWY5cjduMGtsdzJpb2wxNWpweGg4NCJ9.NfsLzQ2-o8wEHOfRrPO5WQ');
   const [isTokenSet, setIsTokenSet] = useState(true);
 
   const handleTokenSubmit = () => {
