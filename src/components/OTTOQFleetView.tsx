@@ -19,6 +19,7 @@ import { OEMVehicleIcon } from "@/components/OEMVehicleIcon";
 import { MaintenancePanel } from "./MaintenancePanel";
 import { OemMidFlowFlagDialog } from "./OemMidFlowFlagDialog";
 import { VisitReportCard } from "./VisitReportCard";
+import { OttoQSequenceCard } from "./OttoQSequenceCard";
 import { useVehicleVisitHistory } from "@/hooks/use-orchestra-progression";
 import { 
   predictiveMaintenanceData, 
@@ -722,6 +723,9 @@ export const OTTOQFleetView = ({ selectedCityName, highlightedVehicleId, onAddTo
                             )}
                           </div>
                         )}
+
+                        {/* OTTO-Q Sequence */}
+                        <OttoQSequenceCard vehicleId={vehicle.id} />
 
                         {/* Vehicle Details */}
                         <div className="grid grid-cols-2 gap-2 text-xs">
