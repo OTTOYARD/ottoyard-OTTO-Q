@@ -138,13 +138,13 @@ export function FleetSchedulingTile() {
         <StatBlock
           icon={<Zap className="h-3.5 w-3.5" />}
           label="kWh Saved"
-          value={data.summary.estimated_savings_kwh_24h.toFixed(0)}
+          value={(data.summary.estimated_savings_kwh_24h ?? 0).toFixed(0)}
           sub="24h"
         />
         <StatBlock
           icon={<DollarSign className="h-3.5 w-3.5" />}
           label="Cost Saved"
-          value={`$${data.summary.estimated_savings_usd_24h.toFixed(0)}`}
+          value={`$${(data.summary.estimated_savings_usd_24h ?? 0).toFixed(0)}`}
           sub="24h"
         />
       </div>
@@ -395,7 +395,7 @@ function PendingOptimizationRow({
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
           <ConfidenceBadge confidence={o.confidence} />
           <span className="text-[9px] text-muted-foreground tabular-nums">
-            P: {o.priority_score.toFixed(2)}
+            P: {(o.priority_score ?? 0).toFixed(2)}
           </span>
         </div>
       </div>
