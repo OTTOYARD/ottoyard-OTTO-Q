@@ -138,13 +138,13 @@ export function FleetSchedulingTile() {
         <StatBlock
           icon={<Zap className="h-3.5 w-3.5" />}
           label="kWh Saved"
-          value={data.summary.estimated_savings_kwh_24h.toFixed(0)}
+          value={(data.summary.estimated_savings_kwh_24h ?? 0).toFixed(0)}
           sub="24h"
         />
         <StatBlock
           icon={<DollarSign className="h-3.5 w-3.5" />}
           label="Cost Saved"
-          value={`$${data.summary.estimated_savings_usd_24h.toFixed(0)}`}
+          value={`$${(data.summary.estimated_savings_usd_24h ?? 0).toFixed(0)}`}
           sub="24h"
         />
       </div>
