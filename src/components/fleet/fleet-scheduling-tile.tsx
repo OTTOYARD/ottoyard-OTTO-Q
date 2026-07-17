@@ -395,7 +395,7 @@ function PendingOptimizationRow({
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
           <ConfidenceBadge confidence={o.confidence} />
           <span className="text-[9px] text-muted-foreground tabular-nums">
-            P: {o.priority_score.toFixed(2)}
+            P: {(o.priority_score ?? 0).toFixed(2)}
           </span>
         </div>
       </div>
