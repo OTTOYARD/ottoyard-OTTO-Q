@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppHeader } from "@/components/shared/AppHeader";
-import { OperationsOverview, ThroughputAnalytics, EnergyDashboard, PredictionPerformance, AlertsConfigPanel } from "@/components/FleetCommand/OttoQIntelligence";
+import { OperationsOverview, ThroughputAnalytics, EnergyDashboard, PredictionPerformance, FleetComms, AlertsConfigPanel } from "@/components/FleetCommand/OttoQIntelligence";
 import DepotFloorPlan from "@/components/OttoQ/DepotMap/DepotFloorPlan";
 import QueueManager from "@/components/OttoQ/QueueManager";
 import { AVPipelineView } from "@/components/OttoQ/AVCommand";
 import { useAVOrchestrator } from "@/hooks/useAVOrchestrator";
-import { Activity, BarChart3, Zap, Target, Map, Bot, ListOrdered, Settings } from "lucide-react";
+import { Activity, BarChart3, Zap, Target, Map, Bot, ListOrdered, Radio, Settings } from "lucide-react";
 import type { City } from "@/components/CitySearchBar";
 
 const defaultCity: City = { name: "Nashville", coordinates: [-86.7816, 36.1627], country: "USA" };
@@ -18,6 +18,7 @@ const tabs = [
   { value: "predictions", label: "Predictions", icon: Target },
   { value: "depot-map", label: "Depot Map", icon: Map },
   { value: "av-command", label: "AV Command", icon: Bot },
+  { value: "comms", label: "Comms", icon: Radio },
   { value: "queue", label: "Queue", icon: ListOrdered },
   { value: "settings", label: "Settings", icon: Settings },
 ] as const;
@@ -52,6 +53,7 @@ const FleetCommandOttoQ = () => {
           <TabsContent value="predictions" className="animate-fade-in-up"><PredictionPerformance /></TabsContent>
           <TabsContent value="depot-map" className="animate-fade-in-up"><DepotFloorPlan depotId="demo" /></TabsContent>
           <TabsContent value="av-command" className="animate-fade-in-up"><AVPipelineView pipelines={av.pipelines} /></TabsContent>
+          <TabsContent value="comms" className="animate-fade-in-up"><FleetComms /></TabsContent>
           <TabsContent value="queue" className="animate-fade-in-up"><QueueManager /></TabsContent>
           <TabsContent value="settings" className="animate-fade-in-up"><AlertsConfigPanel /></TabsContent>
         </Tabs>
