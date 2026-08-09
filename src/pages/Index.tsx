@@ -42,7 +42,7 @@ import { generateAnalyticsReportPDF } from "@/utils/analyticsReportPDF";
 import { toast as sonnerToast } from "sonner";
 import { WeatherButton } from "@/components/WeatherButton";
 import { AppHeader } from "@/components/shared/AppHeader";
-import { useOTTOQRealtime } from "@/hooks/useOTTOQRealtime";
+
 import { computeVehicleStatusCounts, computeDepotTotals, occupancyRatePct } from "@/lib/ottoq/ottoqClient";
 import type { UiVehicle, UiDepot } from "@/lib/ottoq/ottoqTypes";
 import { FleetSummaryOverlay } from "@/components/overview/fleet-summary-overlay";
@@ -437,18 +437,7 @@ const Index = () => {
     fetchCityData(ottoqCity); // Fetch real data for the mapped OTTO-Q city
   };
 
-  // Use realtime hook to refresh city data on OTTO-Q table changes
-  useOTTOQRealtime({
-    enabled: true,
-    cityName: selectedCityForOTTOQ,
-    onChange: useCallback(() => {
-      // Refresh current city data for live demos, only if not already loading
-      if (!loadingData) {
-        fetchCityData(selectedCityForOTTOQ);
-      }
-    }, [loadingData, selectedCityForOTTOQ]),
-    debounceMs: 500
-  });
+  
 
   // Calculate city-specific metrics using UI statuses only (active/charging/maintenance/idle)
   const statusCounts = computeVehicleStatusCounts(vehicles as UiVehicle[]);

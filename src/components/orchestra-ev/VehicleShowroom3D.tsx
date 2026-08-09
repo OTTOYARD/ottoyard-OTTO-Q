@@ -10,8 +10,10 @@ interface VehicleShowroom3DProps {
   vehicleColor: string;
 }
 
+// TODO: Verify the vehicle-renders bucket exists on gxdrc storage.
+// If not, fall back to the legacy ycsisvozzgmisboumfqc bucket.
 const GLB_URL =
-  "https://ycsisvozzgmisboumfqc.supabase.co/storage/v1/object/public/vehicle-renders/Tesla/2023_tesla_model_3_performance.glb";
+  "https://gxdrcyphqjzjsuhxuqtg.supabase.co/storage/v1/object/public/vehicle-renders/Tesla/2023_tesla_model_3_performance.glb";
 
 const statusColors: Record<string, string> = {
   ready: "#22c55e",

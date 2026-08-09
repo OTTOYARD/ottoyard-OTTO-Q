@@ -37,7 +37,9 @@ export interface WeatherData {
 
 async function fetchWeather(lat: number, lng: number): Promise<WeatherData> {
   const response = await fetch(
-    `https://ycsisvozzgmisboumfqc.supabase.co/functions/v1/weather-data?lat=${lat}&lng=${lng}`,
+    // TODO: Verify the weather-data edge function is deployed on gxdrc.
+    // If not, fall back to the legacy ycsisvozzgmisboumfqc URL.
+    `https://gxdrcyphqjzjsuhxuqtg.supabase.co/functions/v1/weather-data?lat=${lat}&lng=${lng}`,
     {
       headers: {
         'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc2lzdm96emdtaXNib3VtZnFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM0NzI5NTcsImV4cCI6MjA2OTA0ODk1N30.8Na6XnuBNbHifv4BcNPGMltaEsmX3QVYMASbopT1MGI`,
