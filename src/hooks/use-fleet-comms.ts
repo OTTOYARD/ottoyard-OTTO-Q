@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ottoqTable } from "@/lib/otto-q-api";
+import { ottoqTable } from "../lib/otto-q-api";
 
 // Live fleet comms bus on otto-q-core (Pillar 2). Reads ottoq_comms_messages directly via
 // PostgREST — the vehicle <-> OTTO-Q <-> teleoperator traffic that the twin emits each tick.
