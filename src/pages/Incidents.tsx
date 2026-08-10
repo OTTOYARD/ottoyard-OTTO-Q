@@ -10,7 +10,7 @@ import { useIncidentsStore } from "@/stores/incidentsStore";
 import { IncidentCard } from "@/components/IncidentCard";
 import { IncidentDetails } from "@/components/IncidentDetails";
 import { OTTOWDispatchDialog } from "@/components/OTTOWDispatchDialog";
-import { IncidentStatus } from "@/data/incidents-mock";
+import { IncidentStatus } from "@/types/incidents";
 
 const allStatuses: IncidentStatus[] = ["Reported", "Dispatched", "Secured", "At Depot", "Closed"];
 

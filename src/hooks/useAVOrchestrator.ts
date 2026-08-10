@@ -4,68 +4,9 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { AVOrchestrator, type ServicePipeline, type DemandWindow, type EnergyArbitrageResult, type TransitionEvent } from "@/services/ottoq-av-orchestrator";
 import { ThresholdEngine } from "@/services/ottoq-engine";
 import type { OttoQVehicle, OttoQDepotStall, OttoQServiceThreshold, OttoQEnergyPricing, ServiceType } from "@/types/ottoq";
-
-const AV_MAKES = ["Waymo", "Zoox", "Cruise", "Nuro", "Motional"];
-const AV_MODELS = ["Gen5", "VH6", "Origin", "R3", "IONIQ-AV"];
-
-function randomAV(index: number): OttoQVehicle {
-  const make = AV_MAKES[index % AV_MAKES.length];
-  const model = AV_MODELS[index % AV_MODELS.length];
-  return {
-    id: `av-${Date.now()}-${index}`,
-    owner_id: null,
-    vehicle_type: "autonomous",
-    make,
-    model,
-    year: 2025,
-    battery_capacity_kwh: 100,
-    current_soc_percent: Math.round(15 + Math.random() * 60),
-    current_range_miles: Math.round(50 + Math.random() * 200),
-    odometer_miles: Math.round(5000 + Math.random() * 40000),
-    last_charge_date: new Date(Date.now() - Math.random() * 3 * 86400000).toISOString(),
-    last_detail_date: new Date(Date.now() - Math.random() * 10 * 86400000).toISOString(),
-    last_tire_rotation_date: new Date(Date.now() - Math.random() * 60 * 86400000).toISOString(),
-    last_battery_health_check: new Date(Date.now() - Math.random() * 80 * 86400000).toISOString(),
-    avg_daily_miles: Math.round(80 + Math.random() * 120),
-    status: "active",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
-}
-
-const MOCK_STALLS: OttoQDepotStall[] = Array.from({ length: 61 }, (_, i) => ({
-  id: `stall-${i}`,
-  depot_id: "depot-1",
-  stall_number: i + 1,
-  stall_type: i < 10 ? "charge_fast" : i < 40 ? "charge_standard" : i < 50 ? "clean_detail" : i < 51 ? "service_bay" : "staging",
-  status: "available" as const,
-  current_vehicle_id: null,
-  charger_power_kw: i < 10 ? 250 : i < 40 ? 50 : null,
-  current_session_start: null,
-  estimated_completion: null,
-  created_at: new Date().toISOString(),
-}));
-
-const MOCK_THRESHOLDS: OttoQServiceThreshold[] = [
-  { id: "t1", service_type: "charge", trigger_condition: "SOC below 30%", threshold_value: 30, threshold_unit: "percent", priority_weight: 8, estimated_duration_minutes: 45, created_at: "" },
-  { id: "t2", service_type: "detail_clean", trigger_condition: "Every 7 days or 500 miles", threshold_value: 7, threshold_unit: "days", priority_weight: 5, estimated_duration_minutes: 30, created_at: "" },
-  { id: "t3", service_type: "tire_rotation", trigger_condition: "Every 7500 miles", threshold_value: 7500, threshold_unit: "miles", priority_weight: 4, estimated_duration_minutes: 45, created_at: "" },
-  { id: "t4", service_type: "battery_health_check", trigger_condition: "Every 90 days", threshold_value: 90, threshold_unit: "days", priority_weight: 6, estimated_duration_minutes: 60, created_at: "" },
-  { id: "t5", service_type: "full_service", trigger_condition: "Every 15000 miles", threshold_value: 15000, threshold_unit: "miles", priority_weight: 7, estimated_duration_minutes: 120, created_at: "" },
-];
-
-const MOCK_PRICING: OttoQEnergyPricing[] = [
-  { id: "p1", depot_id: "depot-1", period_name: "off_peak", start_hour: 22, end_hour: 6, rate_per_kwh: 0.06, days_applicable: ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"], created_at: "" },
-  { id: "p2", depot_id: "depot-1", period_name: "shoulder", start_hour: 6, end_hour: 14, rate_per_kwh: 0.09, days_applicable: ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"], created_at: "" },
-  { id: "p3", depot_id: "depot-1", period_name: "peak", start_hour: 14, end_hour: 20, rate_per_kwh: 0.14, days_applicable: ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"], created_at: "" },
-  { id: "p4", depot_id: "depot-1", period_name: "shoulder_eve", start_hour: 20, end_hour: 22, rate_per_kwh: 0.09, days_applicable: ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"], created_at: "" },
-];
+import { ottoqRpc, ottoqInvoke } from "@/lib/otto-q-api";
 
 export function useAVOrchestrator() {
-  const engineRef = useRef(new ThresholdEngine(MOCK_THRESHOLDS, MOCK_PRICING));
-  const orchestratorRef = useRef(new AVOrchestrator(engineRef.current));
-  const arrivalCountRef = useRef(0);
-
   const [pipelines, setPipelines] = useState<ServicePipeline[]>([]);
   const [events, setEvents] = useState<TransitionEvent[]>([]);
   const [demandForecast, setDemandForecast] = useState<DemandWindow[]>([]);
@@ -73,9 +14,12 @@ export function useAVOrchestrator() {
   const [isSurge, setIsSurge] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
 
-  const durationMap = new Map<ServiceType, number>();
-  for (const t of MOCK_THRESHOLDS) durationMap.set(t.service_type, t.estimated_duration_minutes);
+  const engineRef = useRef<ThresholdEngine | null>(null);
+  const orchestratorRef = useRef<AVOrchestrator | null>(null);
+  const arrivalCountRef = useRef(0);
 
+  const durationMap = useRef(new Map<ServiceType, number>());
+  
   const refresh = useCallback(() => {
     const o = orchestratorRef.current;
     setPipelines(o.getPipelines());
@@ -84,9 +28,97 @@ export function useAVOrchestrator() {
     setEnergyResult(o.computeEnergyArbitrage(o.getPipelines().length || 5));
   }, [isSurge]);
 
-  const triggerArrival = useCallback(() => {
-    const av = randomAV(arrivalCountRef.current++);
-    orchestratorRef.current.triggerArrival(av, MOCK_STALLS, durationMap);
+  // Initialize the orchestrator with real data
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Fetch real service thresholds
+        const thresholds = await ottoqRpc<OttoQServiceThreshold[]>('ottoq_service_thresholds', { depot_id: 'depot-1' });
+        
+        // Fetch real energy pricing
+        const pricing = await ottoqRpc<OttoQEnergyPricing[]>('ottoq_energy_pricing', { depot_id: 'depot-1' });
+        
+        // Update duration map with real threshold data
+        durationMap.current.clear();
+        for (const t of thresholds) {
+          durationMap.current.set(t.service_type, t.estimated_duration_minutes);
+        }
+        
+        // Initialize the engine and orchestrator with real data
+        const engine = new ThresholdEngine(thresholds, pricing);
+        const orchestrator = new AVOrchestrator(engine);
+        
+        engineRef.current = engine;
+        orchestratorRef.current = orchestrator;
+        
+        // Refresh to load initial state
+        refresh();
+        
+      } catch (error) {
+        console.error('Failed to load AV orchestrator:', error);
+        
+        // Fallback to empty arrays for honest empty state
+        const engine = new ThresholdEngine([], []);
+        const orchestrator = new AVOrchestrator(engine);
+        
+        engineRef.current = engine;
+        orchestratorRef.current = orchestrator;
+        
+        // Refresh to load initial state
+        refresh();
+      }
+    };
+    
+    loadData();
+    
+    // Set up polling every 30 seconds
+    const interval = setInterval(loadData, 30000);
+    
+    return () => clearInterval(interval);
+    
+  }, [refresh]);
+
+  const [mockStalls, setMockStalls] = useState<OttoQDepotStall[]>([]);
+
+  // Fetch real stalls from the API
+  useEffect(() => {
+    const loadStalls = async () => {
+      try {
+        const stalls = await ottoqRpc<OttoQDepotStall[]>('ottoq_depot_cards', { depot_id: 'depot-1' });
+        setMockStalls(stalls);
+      } catch (error) {
+        console.error('Failed to load stalls:', error);
+        // Fallback to empty array for honest empty state
+        setMockStalls([]);
+      }
+    };
+    
+    loadStalls();
+    
+    // Set up polling every 30 seconds
+    const interval = setInterval(loadStalls, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const triggerArrival = useCallback(async () => {
+    try {
+      // Fetch a real vehicle from the API
+      const vehicles = await ottoqInvoke<{ vehicles: OttoQVehicle[] }>('ottoq-fleet-vehicles');
+      
+      if (vehicles && vehicles.vehicles && vehicles.vehicles.length > 0) {
+        // Use the first vehicle from the fleet
+        const vehicle = vehicles.vehicles[0];
+        
+        if (orchestratorRef.current && durationMap.current && mockStalls) {
+          orchestratorRef.current.triggerArrival(vehicle, mockStalls, durationMap.current);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch vehicle for arrival:', error);
+      // Use fallback if API call fails
+    }
+    
     refresh();
   }, [refresh]);
 

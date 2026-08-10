@@ -9,7 +9,7 @@ import {
   createIncident,
   getRandomTruck,
   TimelineEntry,
-} from '@/data/incidents-mock';
+} from '@/types/incidents';
 
 interface IncidentsStore {
   incidents: Incident[];

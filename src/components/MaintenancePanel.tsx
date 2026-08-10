@@ -19,7 +19,7 @@ import {
   predictiveMaintenanceData,
   PredictedMaintenance,
   getServicePrice
-} from "@/data/maintenance-mock";
+} from "@/types/incidents";
 import { toast } from "sonner";
 
 import { CartItem } from "@/components/CartButton";
