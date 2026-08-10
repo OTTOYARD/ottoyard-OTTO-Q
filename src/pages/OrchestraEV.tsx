@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppHeader } from "@/components/shared/AppHeader";
 import { OttoCommandPanel } from "@/components/OttoCommand";
@@ -9,20 +9,7 @@ import { EVTowing } from "@/components/orchestra-ev/EVTowing";
 
 import { EVReports } from "@/components/orchestra-ev/EVReports";
 import { LayoutDashboard, Building2, Wrench, Truck, BarChart3 } from "lucide-react";
-
-// Mock data
-import {
-  mockSubscriber,
-  mockVehicle,
-  mockServiceRecords,
-  mockMaintenancePredictions,
-  mockTowRequests,
-  mockAmenityReservations,
-  mockDepotServiceStages,
-  mockNotifications,
-  mockEvents,
-  mockAmenityAvailability,
-} from "@/lib/orchestra-ev/mockData";
+import { ottoqInvoke } from "@/lib/otto-q-api";
 
 import type { City } from "@/components/CitySearchBar";
 
@@ -32,6 +19,148 @@ const defaultCity: City = {
   coordinates: [-86.7816, 36.1627],
   country: "USA",
 };
+
+// Type definitions for real data
+interface Subscriber {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  membershipTier: string;
+  subscriptionStatus: string;
+  memberSince: string;
+  homeAddress: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    lat: number;
+    lng: number;
+  };
+  preferredDepotId: string;
+}
+
+interface SubscriberVehicle {
+  id: string;
+  subscriberId: string;
+  make: string;
+  model: string;
+  year: number;
+  color: string;
+  vin: string;
+  licensePlate: string;
+  batteryCapacityKwh: number;
+  currentSoc: number;
+  currentStatus: string;
+  currentLocation: { lat: number; lng: number };
+  currentDepotId: string;
+  currentStallId: string;
+  healthScore: number;
+  odometerMiles: number;
+  chargingPreferencePct: number;
+  estimatedRangeMiles: number;
+  tirePressure: { fl: number; fr: number; rl: number; rr: number; unit: string };
+  brakeWearPct: { front: number; rear: number };
+  batteryHealthPct: number;
+  lastDiagnosticDate: string;
+}
+
+interface ServiceRecord {
+  id: string;
+  type: string;
+  status: string;
+  depotName: string;
+  scheduledAt: string;
+  startedAt: string;
+  completedAt: string;
+  cost: number;
+  notes: string;
+  technicianName: string;
+}
+
+interface MaintenancePrediction {
+  id: string;
+  serviceType: string;
+  label: string;
+  predictedDueDate: string;
+  confidence: string;
+  urgency: string;
+  reasoning: string;
+  mileageTrigger: number;
+}
+
+interface TowRequest {
+  id: string;
+  status: string;
+  pickupLocation: { lat: number; lng: number; address: string };
+  destinationDepot: string;
+  issueType: string;
+  issueDescription: string;
+  driverName: string;
+  driverVehicle: string;
+  driverPhone: string;
+  requestedAt: string;
+  completedAt: string;
+}
+
+interface AmenityReservation {
+  id: string;
+  type: string;
+  depotName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  durationMinutes: number;
+  status: string;
+  bayNumber: string;
+}
+
+interface DepotServiceStages {
+  vehicleId: string;
+  depotName: string;
+  depotAddress: string;
+  depotHours: string;
+  depotStatus: string;
+  stages: {
+    name: string;
+    status: string;
+    timestamp: string;
+    estimatedCompletion: string;
+  }[];
+  currentStall: {
+    id: string;
+    type: string;
+    subType: string;
+    power: string;
+    currentRate: string;
+    energyConsumed: number;
+  };
+}
+
+interface EVNotification {
+  id: string;
+  message: string;
+  time: string;
+  type: string;
+  read: boolean;
+}
+
+interface EVEvent {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  description: string;
+  rsvpd: boolean;
+}
+
+interface AmenityAvailability {
+  simGolf: { bayNumber: string; slots: string[] }[];
+  coworkTables: { tableId: string; type: string; amenities: string[]; slots: string[] }[];
+  privacyPods: { podId: string; capacity: number; equipment: string[]; slots: string[] }[];
+}
 
 const tabItems = [
   { value: "overview", label: "Overview", icon: LayoutDashboard },
