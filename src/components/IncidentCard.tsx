@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MapPin, FileText, Download, Loader2 } from "lucide-react";
-import { Incident } from "@/data/incidents-mock";
+import { Incident } from "@/types/incidents";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

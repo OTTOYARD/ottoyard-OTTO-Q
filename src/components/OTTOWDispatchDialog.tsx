@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Truck } from "lucide-react";
 import { useIncidentsStore } from "@/stores/incidentsStore";
-import { IncidentType } from "@/data/incidents-mock";
-import { vehicles } from "@/data/mock";
+import { IncidentType } from "@/types/incidents";
+import { vehicles } from "@/types/incidents";
 import { useToast } from "@/hooks/use-toast";
 
 export function OTTOWDispatchDialog() {

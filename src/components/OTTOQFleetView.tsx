@@ -26,7 +26,7 @@ import {
   upcomingMaintenance, 
   upcomingDetailing,
   getServicePrice
-} from "@/data/maintenance-mock";
+} from "@/types/incidents";
 
 interface Vehicle {
   id: string;

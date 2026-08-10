@@ -1,5 +1,5 @@
 // Enhanced Fleet Scheduling Service for OttoCommand AI
-import { fleetIntelligence } from "../data/mock";
+import { fleetIntelligence } from "./fleetIntelligence";
 import { Vehicle, Stall, ChargingAssignment } from "../agent/tools";
 
 export class FleetSchedulingService {

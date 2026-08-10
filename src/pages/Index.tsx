@@ -31,7 +31,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Filter, RefreshCw } from "lucide-react";
-import { IncidentStatus } from "@/data/incidents-mock";
+import { IncidentStatus } from "@/types/incidents";
 import { OTTOQFleetView } from "@/components/OTTOQFleetView";
 import { FleetSchedulingTile } from "@/components/fleet/fleet-scheduling-tile";
 import { PendingOemGatesBanner } from "@/components/PendingOemGatesBanner";

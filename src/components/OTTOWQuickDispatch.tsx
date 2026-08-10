@@ -1,7 +1,7 @@
 // Helper for OttoCommand AI to dispatch OTTOW
-import { vehicles } from "@/data/mock";
+import { vehicles } from "@/types/incidents";
 import { useIncidentsStore } from "@/stores/incidentsStore";
-import { IncidentType } from "@/data/incidents-mock";
+import { IncidentType } from "@/types/incidents";
 
 export function createOTTOWDispatchFromAI(params: {
   city: string;

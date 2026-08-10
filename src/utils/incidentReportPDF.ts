@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Incident } from '@/data/incidents-mock';
-import { IncidentReportData, generateIncidentReportData } from '@/data/incident-report-mock';
+import { Incident } from '@/types/incidents';
+import { IncidentReportData, generateIncidentReportData } from '@/types/incidentReport';
 import { supabase } from '@/integrations/supabase/client';
 
 interface GeneratePDFOptions {
