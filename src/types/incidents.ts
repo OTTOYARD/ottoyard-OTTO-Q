@@ -26,7 +26,6 @@ export interface Incident {
   tow: TowInfo;
 }
 
-// Maintenance record type
 export interface MaintenanceRecord {
   id: string;
   vehicle: string;
@@ -37,7 +36,24 @@ export interface MaintenanceRecord {
   notes: string;
 }
 
-// Service pricing (from maintenance-mock) — explicit; not fake data
+export interface TimelineEntry {
+  id: string;
+  incidentId: string;
+  timestamp: string;
+  action: string;
+  description: string;
+}
+
+export interface PredictedMaintenance {
+  id: string;
+  vehicle: string;
+  type: string;
+  predictedDate: string;
+  confidence: number;
+  estimatedCost: number;
+  notes: string;
+}
+
 export const servicePricing: Record<string, number> = {
   "Tire Rotation": 75,
   "Brake Pad Replacement": 350,
@@ -48,12 +64,16 @@ export const servicePricing: Record<string, number> = {
   "Exterior Wash": 45,
   "Interior Sanitization": 80,
 };
-// All other stubs and exports are now replaced with real data from the twin via useTwinData hook.
-// See src/hooks/useTwinData.ts for the implementation that replaces:
-// - getRandomTruck
-// - seedIncidents
-// - vehicles array
-// - predictiveMaintenanceData
-// - upcomingMaintenance
-// - upcomingDetailing
-// - createIncident
+
+// Compatibility stubs — components should use useTwinData instead
+export const vehicles: any[] = [];
+export const predictiveMaintenanceData: any[] = [];
+export const upcomingMaintenance: any[] = [];
+export const upcomingDetailing: any[] = [];
+
+export function getRandomTruck(): string { return ''; }
+export function seedIncidents(): any[] { return []; }
+export function createIncident(): any { return null; }
+export function getServicePrice(service: string): number {
+  return servicePricing[service] ?? 0;
+}
