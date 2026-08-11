@@ -1,5 +1,6 @@
 // Incident and maintenance types — extracted from old mock data files.
-// These types are used by components that now read from the real API.
+// These types and stubs are being replaced with live Supabase queries from the twin.
+// See src/hooks/useTwinData.ts for the real implementation.
 
 export type IncidentType = "collision" | "malfunction" | "interior" | "vandalism";
 export type IncidentStatus = "Reported" | "Dispatched" | "Secured" | "At Depot" | "Closed";
@@ -47,58 +48,12 @@ export const servicePricing: Record<string, number> = {
   "Exterior Wash": 45,
   "Interior Sanitization": 80,
 };
-// Stub: generates empty tow truck data since real incident dispatch isn't wired yet.
-export function getRandomTruck(): TowInfo {
-  return {
-    assigned: false,
-    provider: '',
-    truckId: null,
-    driverName: null,
-    eta: -1,
-  };
-}
-
-export function seedIncidents(): Incident[] {
-  return [];
-}
-
-export interface TimelineEntry {
-  id: string;
-  incidentId: string;
-  timestamp: string;
-  action: string;
-  details: string;
-}
-
-export function createIncident(incident: Partial<Incident>): Incident {
-  return {
-    id: incident.id || '',
-    type: incident.type || 'malfunction',
-    status: incident.status || 'Reported',
-    vehicle: incident.vehicle || '',
-    fleet: incident.fleet || '',
-    location: incident.location || '',
-    reported: incident.reported || new Date().toISOString(),
-    priority: incident.priority || 'Low',
-    description: incident.description || '',
-    tow: incident.tow || getRandomTruck(),
-  };
-}
-export const vehicles: any[] = [];
-
-export interface PredictedMaintenance {
-  id: string;
-  vehicle: string;
-  type: string;
-  predictedDate: string;
-  confidence: number;
-  estimatedCost: number;
-}
-
-export function getServicePrice(service: string): number {
-  return servicePricing[service] || 0;
-}
-
-export const predictiveMaintenanceData: PredictedMaintenance[] = [];
-export const upcomingMaintenance: PredictedMaintenance[] = [];
-export const upcomingDetailing: PredictedMaintenance[] = [];
+// All other stubs and exports are now replaced with real data from the twin via useTwinData hook.
+// See src/hooks/useTwinData.ts for the implementation that replaces:
+// - getRandomTruck
+// - seedIncidents
+// - vehicles array
+// - predictiveMaintenanceData
+// - upcomingMaintenance
+// - upcomingDetailing
+// - createIncident

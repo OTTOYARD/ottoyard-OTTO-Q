@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ottoQFetch, ottoqInvoke } from "@/lib/otto-q-api";
 import { useIncidentsStore } from "@/stores/incidentsStore";
+import { useTwinData } from "@/hooks/useTwinData";
 
 // Map an otto-q-core vehicle_state to the legacy uppercase status vocab that the
 // fleet metric computations below already key off (IN_SERVICE / AT_DEPOT / IDLE /
@@ -110,16 +111,12 @@ export interface FleetContext {
 export function useFleetContext(): FleetContext {
   const incidents = useIncidentsStore((state) => state.incidents);
 
-  // Fetch vehicles from the shared otto-q-core brain (same fleet OTTO-PULSE sees)
-  const { data: vehiclesData, isLoading: vehiclesLoading, error: vehiclesError } = useQuery({
-    queryKey: ["fleetContext", "vehicles"],
-    queryFn: async () => {
-      const resp = await ottoqInvoke<{ vehicles?: any[] }>("ottoq-fleet-vehicles", { limit: 500 });
-      return resp?.vehicles ?? [];
-    },
-    staleTime: 30000, // 30 seconds
-    refetchInterval: 60000, // Refetch every minute
-  });
+  // Fetch vehicles from the twin via useTwinData hook
+  const { vehicles: twinVehicles, loading: twinLoading, error: twinError } = useTwinData("current_sim_run_id"); // TODO: get real sim run ID
+
+  const vehiclesData = twinVehicles;
+  const vehiclesLoading = twinLoading;
+  const vehiclesError = twinError;
 
   // Fetch depot aggregates from the shared brain fleet summary
   const { data: depotsData, isLoading: depotsLoading, error: depotsError } = useQuery({
@@ -173,28 +170,31 @@ export function useFleetContext(): FleetContext {
 
   // Transform vehicles
   const vehicles: VehicleSummary[] = (vehiclesData || []).map((v: any) => ({
-    id: String(v.id),
-    oem: v.oem || "",
+    id: String(v.vehicle_id),
+    oem: v.display_name || "",
     plate: v.plate ?? null,
-    soc: (Number(v.soc) || 0) / 100, // otto-q-core soc is 0-100 int; context uses 0-1
-    status: mapStateToLegacyStatus(v.state),
+    soc: (Number(v.soc_pct) || 0) / 100, // otto-q-core soc is 0-100 int; context uses 0-1
+    status: mapStateToLegacyStatus(v.status),
     cityId: v.city || "",
     cityName: v.city || "Unknown",
-    odometerKm: 0,
-    healthScore: 100,
-    lastTelemetryAt: v.soc_updated_at ?? null,
+    odometerKm: v.odometer_miles * 1.609 || 0,
+    healthScore: 100 - Math.round(v.wear_metrics.brake_wear_pct + v.wear_metrics.tire_wear_pct) / 2 || 80,
+    lastTelemetryAt: v.last_seen_at ?? null,
   }));
 
-  // Derive the cities list from the vehicle/depot payloads (no cities table on otto-q-core)
-  const citiesData = Array.from(
-    new Set(
-      (vehiclesData || [])
-        .map((v: any) => String(v.city || ""))
-        .filter(Boolean)
-    )
-  ).map((name) => ({ id: name as string, name: name as string, tz: "" }));
+  // Calculate incident metrics
+  const incidentMetrics: IncidentMetrics = {
+    totalIncidents: incidents.length,
+    activeIncidents: incidents.filter((i) => i.status === "Dispatched" || i.status === "Secured").length,
+    pendingIncidents: incidents.filter((i) => i.status === "Reported").length,
+    closedIncidents: incidents.filter((i) => i.status === "Closed").length,
+    incidentsByType: incidents.reduce((acc, i) => {
+      acc[i.type] = (acc[i.type] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>),
+  };
 
-  // Calculate fleet metrics
+  // Calculate fleet metrics from twin vehicles
   const fleetMetrics: FleetMetrics = {
     totalVehicles: vehicles.length,
     activeVehicles: vehicles.filter((v) => v.status === "IN_SERVICE" || v.status === "ON_TRIP").length,
@@ -248,7 +248,6 @@ export function useFleetContext(): FleetContext {
     jobs,
     fleetMetrics,
     depotMetrics,
-    incidentMetrics,
     cities: citiesData || [],
     timestamp: new Date().toISOString(),
     isLoading,
