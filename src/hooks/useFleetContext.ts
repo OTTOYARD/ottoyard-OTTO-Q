@@ -227,18 +227,6 @@ export function useFleetContext(): FleetContext {
     completedJobsToday: 0, // Would need additional query
   };
 
-  // Calculate incident metrics
-  const incidentMetrics: IncidentMetrics = {
-    totalIncidents: incidents.length,
-    activeIncidents: incidents.filter((i) => i.status === "Dispatched" || i.status === "Secured").length,
-    pendingIncidents: incidents.filter((i) => i.status === "Reported").length,
-    closedIncidents: incidents.filter((i) => i.status === "Closed").length,
-    incidentsByType: incidents.reduce((acc, i) => {
-      acc[i.type] = (acc[i.type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>),
-  };
-
   const isLoading = vehiclesLoading || depotsLoading || jobsLoading;
   const error = vehiclesError?.message || depotsError?.message || jobsError?.message || null;
 
