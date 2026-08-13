@@ -228,7 +228,13 @@ export function useFleetContext(): FleetContext {
   };
 
   const isLoading = vehiclesLoading || depotsLoading || jobsLoading;
-  const error = vehiclesError?.message || depotsError?.message || jobsError?.message || null;
+  const anyError = (vehiclesError || depotsError || jobsError) as unknown;
+  const error =
+    anyError == null
+      ? null
+      : typeof anyError === "string"
+      ? anyError
+      : (anyError as Error).message ?? "Unknown error";
 
   return {
     vehicles,
@@ -236,7 +242,8 @@ export function useFleetContext(): FleetContext {
     jobs,
     fleetMetrics,
     depotMetrics,
-    cities: citiesData || [],
+    incidentMetrics,
+    cities: [],
     timestamp: new Date().toISOString(),
     isLoading,
     error,
