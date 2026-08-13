@@ -54,7 +54,7 @@ export interface MaintenanceRecord {
 export interface TimelineEntry {
   id?: string;
   incidentId?: string;
-  timestamp: string;
+  timestamp?: string;
   action?: string;
   description?: string;
   status?: string;
@@ -94,9 +94,9 @@ export const predictiveMaintenanceData: any[] = [];
 export const upcomingMaintenance: any[] = [];
 export const upcomingDetailing: any[] = [];
 
-export function getRandomTruck(): string { return ''; }
+export function getRandomTruck(): any { return { id: '', driver: '' }; }
 export function seedIncidents(): any[] { return []; }
-export function createIncident(): any { return null; }
+export function createIncident(...args: any[]): any { return null; }
 export function getServicePrice(service: string): number {
   return servicePricing[service] ?? 0;
 }
