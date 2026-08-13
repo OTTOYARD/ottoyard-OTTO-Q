@@ -3,9 +3,10 @@ export interface IncidentReportData {
   reportDate: string;
   narrative: string;
   recommendations: string[];
+  [key: string]: any;
 }
 
-export function generateIncidentReportData(incident: any): IncidentReportData {
+export function generateIncidentReportData(incident: any, ...args: any[]): IncidentReportData {
   return {
     incidentId: incident?.id || 'unknown',
     reportDate: new Date().toISOString(),
