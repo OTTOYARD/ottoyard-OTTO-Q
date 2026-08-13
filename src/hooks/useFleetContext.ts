@@ -236,7 +236,7 @@ export function useFleetContext(): FleetContext {
     jobs,
     fleetMetrics,
     depotMetrics,
-    cities: citiesData || [],
+    cities: [],
     timestamp: new Date().toISOString(),
     isLoading,
     error,
