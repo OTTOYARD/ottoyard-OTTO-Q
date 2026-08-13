@@ -11,19 +11,34 @@ export interface TowInfo {
   truckId: string | null;
   driverName: string | null;
   eta: number;
+  // Legacy / alternate shapes still referenced by UI components
+  id?: string;
+  driver?: any;
+  pickupEtaSeconds?: number;
+  [key: string]: any;
 }
 
 export interface Incident {
   id: string;
   type: IncidentType;
   status: IncidentStatus;
-  vehicle: string;
+  vehicle: any;
   fleet: string;
-  location: string;
+  location: any;
   reported: string;
   priority: "Low" | "Medium" | "High" | "Critical";
   description: string;
-  tow: TowInfo;
+  tow: any;
+  // Legacy fields still referenced by UI components
+  incidentId?: string;
+  city?: string;
+  vehicleId?: string;
+  summary?: string;
+  timestamps?: any;
+  timeline?: any[];
+  etaSeconds?: number;
+  report?: any;
+  [key: string]: any;
 }
 
 export interface MaintenanceRecord {
@@ -37,21 +52,29 @@ export interface MaintenanceRecord {
 }
 
 export interface TimelineEntry {
-  id: string;
-  incidentId: string;
+  id?: string;
+  incidentId?: string;
   timestamp: string;
-  action: string;
-  description: string;
+  action?: string;
+  description?: string;
+  status?: string;
+  [key: string]: any;
 }
 
 export interface PredictedMaintenance {
   id: string;
-  vehicle: string;
+  vehicle: any;
   type: string;
   predictedDate: string;
   confidence: number;
   estimatedCost: number;
-  notes: string;
+  notes?: string;
+  // Legacy fields still referenced by UI components
+  vehicleId?: string;
+  vehicleName?: string;
+  oem?: string;
+  predictedService?: any;
+  [key: string]: any;
 }
 
 export const servicePricing: Record<string, number> = {
