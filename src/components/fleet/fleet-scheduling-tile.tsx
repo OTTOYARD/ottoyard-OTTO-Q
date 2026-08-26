@@ -84,7 +84,7 @@ export function FleetSchedulingTile() {
               })
             }
             disabled={reopt.isPending}
-            title="Run OTTO-Q depot-wide re-optimization (cuOpt + energy cap + safety shield)"
+            title="Run OTTO-Q depot-wide re-optimization (deterministic core + gated proposers, energy cap, 52-rule shield)"
             className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 transition disabled:opacity-50"
           >
             {reopt.isPending ? (

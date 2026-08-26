@@ -2,7 +2,7 @@
 
 **Powered by OTTO-Q Technology**
 
-OTTO-Q is a production-ready backend system for managing electric vehicle charging, maintenance, and detailing reservations across multi-city depot networks.
+OTTO-Q is a demo backend, built to production patterns, for managing electric vehicle charging, maintenance, and detailing reservations across simulated multi-city depot networks. (The production engine lives in otto-q-core; this repo is the cockpit — see AGENTS.md.)
 
 ## 🏗️ Architecture
 
@@ -147,7 +147,7 @@ curl -X POST http://localhost:54321/functions/v1/ottoq-simulator \
 
 ### Resource Selection
 1. Find available resources by type (CHARGE_STALL, CLEAN_DETAIL_STALL, MAINTENANCE_BAY)
-2. Use row-level locking (`FOR UPDATE SKIP LOCKED`) to prevent double-booking
+2. Reserve via an optimistic status-guarded update (`.eq('status','AVAILABLE')`). NOTE: this legacy scheduler has NO row-level locking — earlier versions of this doc claimed `FOR UPDATE SKIP LOCKED`, which the code never implemented, and a 0-row match is not surfaced as an error. The real double-booking guarantee lives in otto-q-core's booking calendar (EXCLUDE constraint on `ottoq_stall_bookings`).
 3. Reserve resource and create SCHEDULED job
 4. Calculate ETA based on job type:
    - CHARGE: 40 min ± 10 min
@@ -165,9 +165,9 @@ Vehicles with SOC ≤ threshold (default 20%) automatically trigger CHARGE jobs
 ## 🔒 Security & Reliability
 
 ### Concurrency
-- Row-level locking prevents double-booking
-- Optimistic locking on resource updates
+- Optimistic status-guarded updates on resources (no row-level locking — see Resource Selection note)
 - Transaction-based state changes
+- The hard double-booking guarantee is otto-q-core's EXCLUDE-constraint booking calendar, not this scheduler
 
 ### Idempotency
 - Accept `Idempotency-Key` header on job creation
@@ -334,8 +334,8 @@ const channel = supabase
 - Verify depot has correct resource types
 
 ### Double-booking
-- Should never happen due to row-locking
-- If occurs, check Postgres isolation level
+- The legacy scheduler's optimistic update can race (no row locking) — treat any occurrence as expected legacy behavior, not a Postgres mystery
+- On the current core-backed path, double-booking is physically excluded by `ottoq_stall_bookings`' EXCLUDE constraint
 - Review scheduler transaction logs
 
 ## 📚 API Reference

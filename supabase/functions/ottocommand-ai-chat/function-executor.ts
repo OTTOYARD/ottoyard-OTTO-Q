@@ -1374,8 +1374,8 @@ async function autoQueueCharging(args: any, fleetContext: any) {
           : 0,
       },
       message: dry_run
-        ? `Preview: cuOpt assigned ${queuedVehicles.length} vehicles to charging stalls (${result?.candidates ?? "?"} candidates, ${result?.offered_stalls ?? "?"} stalls offered, source: ${result?.source ?? "n/a"}). Execute with dry_run=false to commit.`
-        : `✓ Committed ${queuedVehicles.length} cuOpt charging assignments (source: ${result?.source ?? "n/a"}).`,
+        ? `Preview: OTTO-Q assigned ${queuedVehicles.length} vehicles to charging stalls (${result?.candidates ?? "?"} candidates, ${result?.offered_stalls ?? "?"} stalls offered, engine: ${result?.source ?? "n/a"}). Execute with dry_run=false to commit.`
+        : `✓ Committed ${queuedVehicles.length} charging assignments (engine: ${result?.source ?? "n/a"}).`,
     };
   } catch (err) {
     console.error("auto_queue_charging real call failed, using heuristic:", err);

@@ -62,7 +62,9 @@ export interface OrchestrateTickResult {
   };
 }
 
-// Triggers OTTO-Q's depot-wide re-optimizer (cuOpt assignment + energy cap + 52-rule shield).
+// Triggers OTTO-Q's depot-wide re-optimizer: the deterministic decide path disposes, with
+// gated proposers (cuOpt et al.) upstream, under the energy cap and the 52-rule shield.
+// The response's charge_source says which engine actually produced each assignment.
 // Defaults to the primary depot if no depotId is given.
 export function useReoptimizeDepot(depotId?: string) {
   const qc = useQueryClient();
