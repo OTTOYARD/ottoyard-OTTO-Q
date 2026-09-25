@@ -8,7 +8,7 @@ export function NoLiveRun({ what = "live data" }: { what?: string }) {
     <div className="rounded-lg border border-dashed border-border bg-card/50 p-8 text-center">
       <p className="text-sm font-medium">No live run</p>
       <p className="mt-1 text-xs text-muted-foreground">
-        Start a run in OTTO-TWIN and {what} appears here within 5 seconds. Nothing is shown until the twin is running.
+        Start a run in OTTO-TWIN to see {what} here, live, within 5 seconds. Nothing is shown until the twin is running.
       </p>
     </div>
   );
