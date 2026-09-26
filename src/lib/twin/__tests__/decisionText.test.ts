@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import fx from "./fixtures/live_capture.json";
 import type { ActivityRow, DepotCardsResponse } from "../cards";
 import { decisionCategory, describeDecision, holdText, isPlace } from "../decisionText";
-import { cardDecisionText, simTime } from "../model";
+import { cardDecisionText, decisionActor, simTime } from "../model";
 
 const feed = fx.feed as unknown as ActivityRow[];
 const cards = fx.cards as unknown as DepotCardsResponse;
@@ -43,6 +43,15 @@ describe("every decision in the capture reads as a verdict in words", () => {
     const places = feed.filter((r) => isPlace(r.target, typeof r.rationale?.verb === "string" ? r.rationale.verb : ""));
     expect(places.length).toBeGreaterThan(0);
     for (const r of places) expect(r.target).toMatch(/^NASH-/);
+  });
+
+  it("names the actor: the agent and the battery are not vehicles", () => {
+    const agent = feed.find((r) => r.action === "orchestrator_agent")!;
+    const battery = feed.find((r) => r.action === "bess_dispatch")!;
+    const car = feed.find((r) => r.action === "redeployment")!;
+    expect(decisionActor(agent)).toBe("OTTO-Q agent");       // the feed names it "OTTO-Q PRIME", a vehicle row's column
+    expect(decisionActor(battery)).toBe("Site battery");
+    expect(decisionActor(car)).toBe(car.display_name);
   });
 
   it("files decisions the way the twin does, plan re-timings apart", () => {

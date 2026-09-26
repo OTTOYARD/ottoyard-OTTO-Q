@@ -6,7 +6,7 @@
 // and the UI must say so. Tested against real captures in __tests__.
 // ============================================================================
 import type { TwinFleetCondition, TwinLayout, TwinSnapshot, TwinVehicleCondition, TwinVisitCard } from "./types";
-import type { CardDecision, CardVehicle, DepotCardsResponse, DepotReservation } from "./cards";
+import type { ActivityRow, CardDecision, CardVehicle, DepotCardsResponse, DepotReservation } from "./cards";
 import { describeDecision, type DecisionText } from "./decisionText";
 
 // ── vehicle_state enum → stage ───────────────────────────────────────────────
@@ -326,6 +326,13 @@ export function chargingNow(rows: FleetRow[]): { dcfc: FleetRow[]; l2: FleetRow[
 // A decision is worded in ONE place, ./decisionText.ts, which is the twin cockpit's own file carried verbatim, so
 // the three cockpits say the same thing about the same decision. The engine's name ("deterministic_v1") and the
 // action's name ("Task start") are not the verdict and are not shown as one.
+
+/** Who a decision is about: the agent's pass and the site battery are not vehicles. */
+export function decisionActor(d: ActivityRow): string {
+  if (d.action === "orchestrator_agent") return "OTTO-Q agent";
+  if (d.action === "bess_dispatch") return "Site battery";
+  return d.display_name ?? "OTTO-Q";
+}
 
 /** A card's last decision in the feed's words. The card carries the verb beside the rationale rather than in it. */
 export function cardDecisionText(dec: CardDecision): DecisionText {

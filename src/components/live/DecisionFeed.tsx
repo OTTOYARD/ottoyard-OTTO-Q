@@ -3,7 +3,7 @@
 // row, not one per tick. The wording is src/lib/twin/decisionText.ts, which is the twin's own file carried verbatim.
 import { useMemo, useState } from "react";
 import { useActivityFeed, useDepotCards, useSnapshot } from "@/lib/twin/hooks";
-import { simTime } from "@/lib/twin/model";
+import { decisionActor, simTime } from "@/lib/twin/model";
 import {
   CATEGORY_LABEL,
   DEFAULT_CATEGORIES,
@@ -18,12 +18,6 @@ import { LiveRunBar, NoLiveRun } from "./LiveRunBar";
 import { DECISION_TONE } from "./ui";
 
 const CATEGORIES = Object.keys(CATEGORY_LABEL) as DecisionCategory[];
-
-function who(d: ActivityRow): string {
-  if (d.action === "orchestrator_agent") return "OTTO-Q agent";
-  if (d.action === "bess_dispatch") return "Site battery";
-  return d.display_name ?? "OTTO-Q";
-}
 
 /** The agent's first applied directive, when it gave one: the one sentence of its reasoning worth a line. */
 function agentDirective(d: ActivityRow): string | null {
@@ -106,7 +100,7 @@ export function DecisionFeed({ vehicleIds, limit = 60, scopeLabel }: { vehicleId
                     <span className="font-mono text-muted-foreground">{simTime(d.occurred_at)}</span>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="font-mono font-semibold">{who(d)}</span>
+                        <span className="font-mono font-semibold">{decisionActor(d)}</span>
                         {place ? <span className="font-mono text-sky-300">→ {place}</span> : null}
                         <span className={DECISION_TONE[text.tone]}>{text.title}</span>
                       </div>
