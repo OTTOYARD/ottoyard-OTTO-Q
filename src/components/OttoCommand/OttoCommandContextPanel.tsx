@@ -33,7 +33,7 @@ interface FleetContextData {
     avgSoc: number;
     lowBatteryCount: number;
     criticalBatteryCount: number;
-    avgHealthScore: number;
+    avgHealthScore: number | null;
   };
   depotMetrics?: {
     totalDepots: number;
@@ -146,7 +146,7 @@ const FleetContextView: React.FC<{
 
   const socStatus = fleet.avgSoc >= 60 ? "good" : fleet.avgSoc >= 35 ? "warning" : "critical";
   const healthStatus =
-    fleet.avgHealthScore >= 90 ? "good" : fleet.avgHealthScore >= 75 ? "warning" : "critical";
+    fleet.avgHealthScore === null ? "warning" : fleet.avgHealthScore >= 90 ? "good" : fleet.avgHealthScore >= 75 ? "warning" : "critical";
 
   return (
     <div className="space-y-3">
@@ -186,7 +186,7 @@ const FleetContextView: React.FC<{
         <div className="px-2">
           <Progress value={fleet.avgSoc} className="h-1.5" />
         </div>
-        <MetricRow icon={Activity} label="Health Score" value={`${fleet.avgHealthScore}/100`} status={healthStatus} />
+        <MetricRow icon={Activity} label="Battery Health" value={fleet.avgHealthScore === null ? "n/a" : `${fleet.avgHealthScore}%`} status={healthStatus} />
         <MetricRow
           icon={AlertTriangle}
           label="Low Battery"

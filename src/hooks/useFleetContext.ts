@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ottoQFetch, ottoqInvoke } from "@/lib/otto-q-api";
 import { useIncidentsStore } from "@/stores/incidentsStore";
-import { useTwinData } from "@/hooks/useTwinData";
+import { useDepotCards, useFleetCondition } from "@/lib/twin/hooks";
 
 // Map an otto-q-core vehicle_state to the legacy uppercase status vocab that the
 // fleet metric computations below already key off (IN_SERVICE / AT_DEPOT / IDLE /
@@ -29,8 +29,8 @@ export interface VehicleSummary {
   status: string;
   cityId: string;
   cityName: string;
-  odometerKm: number;
-  healthScore: number;
+  /** Battery state of health, %, as drawn for the live run (ottoq_twin_fleet_condition). null when not drawn. */
+  healthScore: number | null;
   lastTelemetryAt: string | null;
 }
 
@@ -70,7 +70,8 @@ export interface FleetMetrics {
   avgSoc: number;
   lowBatteryCount: number;
   criticalBatteryCount: number;
-  avgHealthScore: number;
+  /** Mean battery state of health over the vehicles that have one; null when none do. */
+  avgHealthScore: number | null;
 }
 
 export interface DepotMetrics {
@@ -111,12 +112,13 @@ export interface FleetContext {
 export function useFleetContext(): FleetContext {
   const incidents = useIncidentsStore((state) => state.incidents);
 
-  // Fetch vehicles from the twin via useTwinData hook
-  const { vehicles: twinVehicles, loading: twinLoading, error: twinError } = useTwinData("current_sim_run_id"); // TODO: get real sim run ID
-
-  const vehiclesData = twinVehicles;
-  const vehiclesLoading = twinLoading;
-  const vehiclesError = twinError;
+  // Vehicles from the shared twin layer: the depot card feed (the same per-vehicle contract every cockpit panel
+  // reads) and, for battery health, the live run's fleet condition. This used to call a hook with the literal run
+  // id "current_sim_run_id" and the wrong argument names, so the assistant was handed no vehicles at all.
+  const cards = useDepotCards(null);
+  const condition = useFleetCondition(cards.data?.sim_run_id ?? null);
+  const vehiclesLoading = cards.isLoading;
+  const vehiclesError = cards.error ? String((cards.error as Error).message) : null;
 
   // Fetch depot aggregates from the shared brain fleet summary
   const { data: depotsData, isLoading: depotsLoading, error: depotsError } = useQuery({
@@ -169,18 +171,22 @@ export function useFleetContext(): FleetContext {
   });
 
   // Transform vehicles
-  const vehicles: VehicleSummary[] = (vehiclesData || []).map((v: any) => ({
-    id: String(v.vehicle_id),
-    oem: v.display_name || "",
-    plate: v.plate ?? null,
-    soc: (Number(v.soc_pct) || 0) / 100, // otto-q-core soc is 0-100 int; context uses 0-1
-    status: mapStateToLegacyStatus(v.status),
-    cityId: v.city || "",
-    cityName: v.city || "Unknown",
-    odometerKm: v.odometer_miles * 1.609 || 0,
-    healthScore: 100 - Math.round(v.wear_metrics.brake_wear_pct + v.wear_metrics.tire_wear_pct) / 2 || 80,
-    lastTelemetryAt: v.last_seen_at ?? null,
-  }));
+  const soh = new Map((condition.data?.vehicles ?? []).map((c) => [c.vehicle_id, c.battery_soh_pct] as const));
+  const vehicles: VehicleSummary[] = (cards.data?.vehicles ?? []).map((v) => {
+    const h = soh.get(v.vehicle_id);
+    return {
+      id: v.vehicle_id,
+      oem: v.oem ?? "",
+      plate: v.display_name,
+      soc: (v.soc ?? 0) / 100, // otto-q-core soc is 0-100; context uses 0-1
+      status: mapStateToLegacyStatus(v.state),
+      cityId: "nashville",
+      cityName: "Nashville", // the twin depot (OTTOYARD Nashville Flagship) is the only site simulated
+      healthScore: typeof h === "number" && Number.isFinite(h) ? Math.round(h) : null,
+      lastTelemetryAt: null,
+    };
+  });
+  const withHealth = vehicles.filter((v) => v.healthScore !== null);
 
   // Calculate incident metrics
   const incidentMetrics: IncidentMetrics = {
@@ -205,7 +211,7 @@ export function useFleetContext(): FleetContext {
     avgSoc: vehicles.length > 0 ? Math.round((vehicles.reduce((sum, v) => sum + v.soc, 0) / vehicles.length) * 100) : 0,
     lowBatteryCount: vehicles.filter((v) => v.soc < 0.3).length,
     criticalBatteryCount: vehicles.filter((v) => v.soc < 0.15).length,
-    avgHealthScore: vehicles.length > 0 ? Math.round(vehicles.reduce((sum, v) => sum + v.healthScore, 0) / vehicles.length) : 100,
+    avgHealthScore: withHealth.length > 0 ? Math.round(withHealth.reduce((sum, v) => sum + (v.healthScore ?? 0), 0) / withHealth.length) : null,
   };
 
   // Calculate depot metrics
@@ -267,7 +273,7 @@ FLEET SUMMARY:
 • Average SOC: ${fleetMetrics.avgSoc}%
 • Low Battery (<30%): ${fleetMetrics.lowBatteryCount} vehicles
 • Critical Battery (<15%): ${fleetMetrics.criticalBatteryCount} vehicles
-• Average Health Score: ${fleetMetrics.avgHealthScore}/100
+• Average Battery Health: ${fleetMetrics.avgHealthScore === null ? "not drawn for this run" : `${fleetMetrics.avgHealthScore}%`}
 
 DEPOT OPERATIONS:
 • Total Depots: ${depotMetrics.totalDepots}
@@ -290,6 +296,6 @@ DEPOT DETAILS:
 ${depots.slice(0, 10).map(d => `• ${d.name} (${d.cityName}): ${d.availableChargeStalls}/${d.totalChargeStalls} charge stalls, ${d.activeJobs} active jobs`).join('\n')}
 
 VEHICLE SAMPLES (top 20 by status):
-${vehicles.slice(0, 20).map(v => `• ${v.oem} ${v.plate || v.id.slice(0, 8)} | SOC: ${Math.round(v.soc * 100)}% | Status: ${v.status} | City: ${v.cityName} | Health: ${v.healthScore}%`).join('\n')}
+${vehicles.slice(0, 20).map(v => `• ${v.oem} ${v.plate || v.id.slice(0, 8)} | SOC: ${Math.round(v.soc * 100)}% | Status: ${v.status} | City: ${v.cityName} | Battery health: ${v.healthScore === null ? "n/a" : `${v.healthScore}%`}`).join('\n')}
 `.trim();
 }
