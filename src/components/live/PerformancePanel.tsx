@@ -7,7 +7,7 @@
 import { useMemo } from "react";
 import { useDepotCards, useDialPromotions, useKpiFive } from "@/lib/twin/hooks";
 import { humanize } from "@/lib/twin/model";
-import { dialsInForce, latestDay } from "@/lib/twin/plan";
+import { chargeWaitDetail, dialsInForce, latestDay } from "@/lib/twin/plan";
 import { LiveRunBar, NoLiveRun } from "./LiveRunBar";
 import { Chip, Section, fmt } from "./ui";
 
@@ -16,11 +16,11 @@ const realTimeCt = (iso: string | null | undefined) =>
     ? new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Chicago" }) + " CT"
     : "n/a";
 
-function KpiRow({ n, label, value, unit, detail }: { n: number; label: string; value: string; unit?: string; detail?: string }) {
+function KpiRow({ n, label, value, unit, detail }: { n?: number; label: string; value: string; unit?: string; detail?: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3 border-b border-border/50 py-2 last:border-0">
       <div className="min-w-0">
-        <div className="text-xs"><span className="mr-1.5 font-mono text-muted-foreground">{n}</span>{label}</div>
+        <div className="text-xs">{n != null ? <span className="mr-1.5 font-mono text-muted-foreground">{n}</span> : null}{label}</div>
         {detail ? <div className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{detail}</div> : null}
       </div>
       <div className="whitespace-nowrap font-mono text-sm tabular-nums">
@@ -90,6 +90,13 @@ export function PerformancePanel({ scopeLabel }: { scopeLabel?: string }) {
                   : undefined} />
               <KpiRow n={5} label="Time to service, p95" value={fmt(k.p95_time_to_service_min, 1)} unit="min"
                 detail={`p50 ${fmt(k.p50_time_to_service_min, 1)} min · ${fmt(a?.p95_time_to_service_min?.returns_measured)} returns measured · ${fmt(k.returns_unserved)} unserved`} />
+              {k.charge_wait ? (
+                <div className="mt-2 border-t border-border/50 pt-1">
+                  <div className="pt-1 text-[10px] uppercase tracking-wider text-muted-foreground">Beside the five</div>
+                  <KpiRow label="Wait for a charger, p95" value={fmt(k.charge_wait.p95_wait_floor_min, 1)} unit="min"
+                    detail={chargeWaitDetail(k.charge_wait)} />
+                </div>
+              ) : null}
               <p className="mt-2 text-[11px] text-muted-foreground">
                 Recomputed from this run's own rows every 20 seconds; every figure regenerates from the run ID.
                 {k.run_key?.policy_name ? ` Policy ${k.run_key.policy_name}.` : ""}

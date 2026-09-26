@@ -5,7 +5,8 @@
 //                              (the day plan's ServiceProfile). One row per run, re-published
 //                              every tick, so it is always the plan in force now.
 //   GET /sim_runs/:id/kpis     otto-twin-control: ottoq_kpi_five, recomputed server-side from
-//                              the run's own rows (the twin cockpit's KPI tab reads the same door).
+//                              the run's own rows (the twin cockpit's KPI tab reads the same door),
+//                              and beside it charge_wait (ottoq_kpi_charge_wait, otto-q-core 0501).
 //   ottoq_dial_promotion_ledger  the learning loop's record: every dial value the promoter
 //                              enacted or rolled back, with the evidence cell it was decided on.
 //   ottoq_twin_appointments.inbound  vehicles returning now, with ETA and the stall booked for them.
@@ -138,6 +139,32 @@ export function planSummary(plan: SitePowerPlan | null | undefined): PlanSummary
   };
 }
 
+/**
+ * The wait for a charger (otto-q-core 0501, `ottoq_kpi_charge_wait`, G233), beside the five and not one of them: minutes
+ * from a visit's arrival to its first charging session, over the visits that arrived owing a charge. KPI 5 counts from
+ * recall to the FIRST operation, which on a busy day is a cabin or digital task that starts at once, so it cannot see
+ * the charger queue. A visit still owed at the run's clock is waiting: its minutes so far are a floor, and so is
+ * `p95_wait_floor_min`.
+ */
+export interface ChargeWait {
+  sim_run_id: string;
+  horizon: string | null;
+  visits_owing_a_charge: number;
+  charged: number;
+  waiting_at_horizon: number;
+  closed_without_a_session: number;
+  /** Over the visits that charged. */
+  p50_wait_min: number | null;
+  p95_wait_min: number | null;
+  max_wait_min: number | null;
+  /** Over the visits still waiting, as of the run's clock. */
+  waiting_p50_so_far_min: number | null;
+  waiting_max_so_far_min: number | null;
+  /** Over both, the waiting ones at their floor: a floor on the true p95. */
+  p95_wait_floor_min: number | null;
+  meaning?: string;
+}
+
 // ── The five canonical KPIs (CLAUDE.md 2.9), the same payload the twin cockpit's KPI tab reads ──
 export interface KpiFive {
   sim_run_id: string;
@@ -152,6 +179,8 @@ export interface KpiFive {
   p50_time_to_service_min: number | null;
   returns_unserved: number | null;
   purged: unknown;
+  /** Beside the five, not one of them (otto-q-core 0501, G233). Absent from a twin-control older than 1.9.2. */
+  charge_wait?: ChargeWait | null;
   run_key?: { policy_name?: string; scenario?: string; engine_hash?: string; config_hash?: string } | null;
   audit?: {
     touch_events_per_turn?: { turns?: number; touch_events?: number };
@@ -180,6 +209,23 @@ export function latestDay(
 }
 
 // ── The learning loop's record ──
+const fmtWait = (v: number | null | undefined, digits = 0): string =>
+  typeof v === "number" && Number.isFinite(v)
+    ? v.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits })
+    : "n/a";
+
+/**
+ * The wait for a charger in one line, in the twin cockpit's words. On run 394e1e83 KPI 5 read 0.7 min while about 40
+ * cars waited for a charger. While cars are still waiting, the headline p95 is a floor and the line says so, naming
+ * how many wait and the longest wait so far.
+ */
+export function chargeWaitDetail(cw: ChargeWait): string {
+  if (!cw.visits_owing_a_charge) return "no visit has arrived owing a charge yet";
+  const charged = cw.charged ? `p50 ${fmtWait(cw.p50_wait_min, 1)} min over ${fmtWait(cw.charged)} charged` : "none charged yet";
+  if (!cw.waiting_at_horizon) return `${charged} of ${fmtWait(cw.visits_owing_a_charge)} owing a charge`;
+  return `at least: ${fmtWait(cw.waiting_at_horizon)} still waiting, the longest ${fmtWait(cw.waiting_max_so_far_min, 0)} min so far · ${charged}`;
+}
+
 export interface DialPromotion {
   promotion_id: number;
   /** REAL time: the promoter runs on the wall clock, not inside a run. */
