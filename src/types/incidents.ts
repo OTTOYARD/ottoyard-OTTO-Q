@@ -88,7 +88,7 @@ export const servicePricing: Record<string, number> = {
   "Interior Sanitization": 80,
 };
 
-// Compatibility stubs — components should use useTwinData instead
+// Compatibility stubs. Live vehicle data comes from the shared twin layer (src/lib/twin).
 export const vehicles: any[] = [];
 export const predictiveMaintenanceData: any[] = [];
 export const upcomingMaintenance: any[] = [];

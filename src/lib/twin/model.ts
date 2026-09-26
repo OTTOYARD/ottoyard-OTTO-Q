@@ -6,7 +6,8 @@
 // and the UI must say so. Tested against real captures in __tests__.
 // ============================================================================
 import type { TwinFleetCondition, TwinLayout, TwinSnapshot, TwinVehicleCondition, TwinVisitCard } from "./types";
-import type { ActivityRow, CardVehicle, DepotCardsResponse, DepotReservation } from "./cards";
+import type { ActivityRow, CardDecision, CardVehicle, DepotCardsResponse, DepotReservation } from "./cards";
+import { describeDecision, type DecisionText } from "./decisionText";
 
 // ── vehicle_state enum → stage ───────────────────────────────────────────────
 // VERBATIM from the twin cockpit (ottoyarddepot-sim src/lib/ottoq/channels.ts
@@ -322,26 +323,33 @@ export function chargingNow(rows: FleetRow[]): { dcfc: FleetRow[]; l2: FleetRow[
 }
 
 // ── decisions ────────────────────────────────────────────────────────────────
-/** One plain line per decision: who, what, where, outcome. Straight from the feed's own columns. */
-export function decisionLine(r: ActivityRow): { who: string; what: string; outcome: string; engine: string } {
-  return {
-    who: r.display_name ?? "OTTO-Q",
-    what: [humanize(r.action), r.target ? `→ ${r.target}` : ""].filter(Boolean).join(" "),
-    outcome: r.outcome ?? "",
-    engine: r.engine ?? "",
-  };
+// A decision is worded in ONE place, ./decisionText.ts, which is the twin cockpit's own file carried verbatim, so
+// the three cockpits say the same thing about the same decision. The engine's name ("deterministic_v1") and the
+// action's name ("Task start") are not the verdict and are not shown as one.
+
+/** Who a decision is about: the agent's pass and the site battery are not vehicles. */
+export function decisionActor(d: ActivityRow): string {
+  if (d.action === "orchestrator_agent") return "OTTO-Q agent";
+  if (d.action === "bess_dispatch") return "Site battery";
+  return d.display_name ?? "OTTO-Q";
 }
 
-/** Short "why" from a decision rationale: the named step / need / purpose keys, in that order. */
-export function rationaleText(rat: Record<string, unknown> | null | undefined): string | null {
-  if (!rat || typeof rat !== "object") return null;
-  const parts: string[] = [];
-  for (const k of ["step", "need", "purpose", "mode", "svc", "reason"]) {
-    const v = (rat as Record<string, unknown>)[k];
-    if (typeof v === "string" && v) parts.push(`${k.replace(/_/g, " ")}: ${v.replace(/_/g, " ")}`);
-  }
-  if (typeof (rat as Record<string, unknown>).soc === "number" && typeof (rat as Record<string, unknown>).floor === "number") {
-    parts.push(`SoC ${(rat as Record<string, number>).soc}% vs floor ${(rat as Record<string, number>).floor}%`);
-  }
-  return parts.length ? parts.join(" · ") : null;
+/** A card's last decision in the feed's words. The card carries the verb beside the rationale rather than in it. */
+export function cardDecisionText(dec: CardDecision): DecisionText {
+  return describeDecision({
+    occurred_at: dec.at ?? "",
+    vehicle_id: null,
+    display_name: null,
+    action: dec.action,
+    engine: dec.engine,
+    target: null,
+    outcome: dec.outcome,
+    rationale: { ...(dec.rationale ?? {}), ...(dec.verb ? { verb: dec.verb } : {}) },
+    reason: null,
+    decision_seq: 0,
+    tick_seq: null,
+    held_ticks: null,
+    last_at: null,
+    standing: null,
+  });
 }

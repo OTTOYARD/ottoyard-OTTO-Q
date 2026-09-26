@@ -10,10 +10,11 @@ interface VehicleShowroom3DProps {
   vehicleColor: string;
 }
 
-// TODO: Verify the vehicle-renders bucket exists on gxdrc storage.
-// If not, fall back to the legacy ycsisvozzgmisboumfqc bucket.
+// The model lives in the MVP project's public vehicle-renders bucket. otto-q-core (gxdrc) has no storage buckets, so
+// its URL for this object returns 400 and the showroom never loaded (checked 2026-09-26). Point back here when the
+// asset is copied to core.
 const GLB_URL =
-  "https://gxdrcyphqjzjsuhxuqtg.supabase.co/storage/v1/object/public/vehicle-renders/Tesla/2023_tesla_model_3_performance.glb";
+  "https://ycsisvozzgmisboumfqc.supabase.co/storage/v1/object/public/vehicle-renders/Tesla/2023_tesla_model_3_performance.glb";
 
 const statusColors: Record<string, string> = {
   ready: "#22c55e",

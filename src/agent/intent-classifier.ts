@@ -247,7 +247,7 @@ const intentPatterns: IntentPattern[] = [
     patterns: [
       /what (is|are) (L[345]|autonomy|disengagement|soc|av|autonomous)/i,
       /explain (what |)(is |are |)(L[345]|autonomy|disengagement|charging)/i,
-      /how does (\w+) work/i,
+      /how (does|do) [\w\s-]+ work/i, // a subject of any length: "How does DC fast charging work?"
       /definition of/i,
       /tell me about/i,
     ],

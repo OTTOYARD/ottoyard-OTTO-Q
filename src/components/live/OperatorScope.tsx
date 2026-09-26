@@ -39,8 +39,9 @@ export function OperatorScopePicker({ value, onChange }: { value: string | null;
         className="h-8 rounded-md border border-border bg-card px-2 text-xs"
       >
         <option value="">All owners (depot view)</option>
+        {/* The count is the owner's whole fleet at this depot, on site or deployed. */}
         {ops.map((o) => (
-          <option key={o.id} value={o.id}>{o.name} ({o.count} on site)</option>
+          <option key={o.id} value={o.id}>{o.name} ({o.count} vehicles)</option>
         ))}
       </select>
     </label>
