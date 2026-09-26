@@ -3,9 +3,10 @@
 // its rationale, the decision history, and the twin variables this vehicle was dealt.
 import { ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import type { FleetRow } from "@/lib/twin/model";
-import { STAGE_LABEL, humanize, rationaleText, simTime } from "@/lib/twin/model";
+import { STAGE_LABEL, cardDecisionText, humanize, simTime } from "@/lib/twin/model";
+import { describeDecision, holdText, isPlace } from "@/lib/twin/decisionText";
 import { useActivityFeed } from "@/lib/twin/hooks";
-import { Chip, SocBar, STAGE_TONE, fmt } from "./ui";
+import { Chip, DECISION_TONE, SocBar, STAGE_TONE, fmt } from "./ui";
 
 const LEG_LABELS: Record<string, string> = {
   charge_dcfc: "DC fast charge",
@@ -75,17 +76,22 @@ function History({ runId, vehicleId }: { runId: string; vehicleId: string }) {
   if (!data?.length) return <p className="text-[11px] text-muted-foreground">No OTTO-Q decisions for this vehicle yet this run.</p>;
   return (
     <ol className="space-y-1">
-      {data.map((d) => (
-        <li key={d.decision_seq} className="grid grid-cols-[64px_1fr] gap-2 text-[11px]">
-          <span className="font-mono text-muted-foreground">{simTime(d.occurred_at)}</span>
-          <span>
-            <span className="font-medium">{humanize(d.action)}</span>
-            {d.target ? <span className="font-mono"> → {d.target}</span> : null}
-            <span className="text-muted-foreground"> · {d.outcome}{d.engine ? ` · ${d.engine}` : ""}</span>
-            {rationaleText(d.rationale) ? <span className="block text-muted-foreground">{rationaleText(d.rationale)}</span> : null}
-          </span>
-        </li>
-      ))}
+      {data.map((d) => {
+        const text = describeDecision(d);
+        const verb = typeof d.rationale?.verb === "string" ? d.rationale.verb : "";
+        const place = isPlace(d.target, verb) ? d.target : null;
+        const why = [text.detail, holdText(d, simTime)].filter(Boolean).join(" · ");
+        return (
+          <li key={d.decision_seq} className="grid grid-cols-[64px_1fr] gap-2 text-[11px]" title={d.engine ? `engine: ${d.engine}` : undefined}>
+            <span className="font-mono text-muted-foreground">{simTime(d.occurred_at)}</span>
+            <span>
+              <span className={`font-medium ${DECISION_TONE[text.tone]}`}>{text.title}</span>
+              {place ? <span className="font-mono"> → {place}</span> : null}
+              {why ? <span className="block text-muted-foreground">{why}</span> : null}
+            </span>
+          </li>
+        );
+      })}
     </ol>
   );
 }
@@ -108,6 +114,7 @@ export function VehicleLiveCard({
   const active = row.reservations.filter((r) => r.state === "active");
   const held = row.reservations.filter((r) => r.state !== "active");
   const dec = row.lastDecision;
+  const latest = dec ? cardDecisionText(dec) : null;
   return (
     <div id={`vehicle-${row.id}`} className="rounded-lg border border-border bg-card p-3">
       <button type="button" onClick={onToggle} className="w-full text-left">
@@ -186,11 +193,10 @@ export function VehicleLiveCard({
 
           <div>
             <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">OTTO-Q decisions</div>
-            {dec ? (
+            {latest ? (
               <p className="mb-1 text-[11px]">
-                Latest: <span className="font-medium">{humanize(dec.action)}</span>
-                {dec.verb ? <span className="font-mono"> ({dec.verb})</span> : null}
-                <span className="text-muted-foreground"> · {dec.outcome} · {simTime(dec.at)}</span>
+                Latest: <span className={`font-medium ${DECISION_TONE[latest.tone]}`}>{latest.title}</span>
+                <span className="text-muted-foreground">{latest.detail ? ` · ${latest.detail}` : ""} · {simTime(dec?.at)}</span>
               </p>
             ) : null}
             <History runId={runId} vehicleId={row.id} />
