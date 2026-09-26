@@ -3,7 +3,7 @@
 import { describe, expect, it } from "vitest";
 import fx from "./fixtures/live_capture.json";
 import type { ActivityRow, DepotCardsResponse } from "../cards";
-import { decisionCategory, describeDecision, holdText, isPlace } from "../decisionText";
+import { decisionCategory, describeDecision, holdText, isPlace, modelErrorText } from "../decisionText";
 import { cardDecisionText, decisionActor, simTime } from "../model";
 
 const feed = fx.feed as unknown as ActivityRow[];
@@ -76,5 +76,15 @@ describe("a vehicle card's last decision uses the same words as the feed", () =>
   it("reads the verb the card carries beside its rationale", () => {
     const v = cards.vehicles.find((x) => x.display_name === "Zoox-AV-084");
     expect(cardDecisionText(v!.last_decision!)).toEqual({ title: "Held by the shield", detail: null, tone: "warn" });
+  });
+});
+
+describe("the agent's model error reads as words", () => {
+  it("words a rate limit and never prints a cut-off JSON body (twin run 49c45bd4)", () => {
+    expect(modelErrorText('HTTP 429: {"status":429,"title":"Too Man')).toBe("model rate-limited (HTTP 429)");
+    expect(modelErrorText('HTTP 503: {"error":"upstre')).toBe("HTTP 503");
+    expect(modelErrorText("model timeout after 75000 ms")).toBe("model timed out after 75 s");
+    expect(modelErrorText("HTTP 404: not found")).toBe("HTTP 404: not found");
+    expect(modelErrorText(undefined)).toBeNull();
   });
 });
