@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { ottoQFetch, ottoqInvoke } from "@/lib/otto-q-api";
-import { useIncidentsStore } from "@/stores/incidentsStore";
-import { useDepotCards, useFleetCondition } from "@/lib/twin/hooks";
+import { ottoqInvoke } from "@/lib/otto-q-api";
+import { useDepotCards, useFleetCondition, useLayout, useRunEventFeed, useSnapshot } from "@/lib/twin/hooks";
+import { stallOccupancy, sumTypes, type StallTypeCount } from "@/lib/twin/occupancy";
+import { describeEvent } from "@/lib/twin/eventFeed";
+import { incidentGroups } from "@/lib/twin/incidents";
 
 // Map an otto-q-core vehicle_state to the legacy uppercase status vocab that the
 // fleet metric computations below already key off (IN_SERVICE / AT_DEPOT / IDLE /
@@ -88,17 +90,28 @@ export interface DepotMetrics {
   completedJobsToday: number;
 }
 
+/** From the live run's event feed (warning or worse), split the way the Incidents view splits it. */
 export interface IncidentMetrics {
   totalIncidents: number;
+  /** things that went wrong on one vehicle, charger or the engine */
   activeIncidents: number;
+  /** depot-wide conditions the engine re-reports every tick while they hold */
   pendingIncidents: number;
   closedIncidents: number;
   incidentsByType: Record<string, number>;
 }
 
 export interface FleetContext {
+  /** The live run on the twin depot, or null. With no run every figure below is empty, and the serializer says so. */
+  runId: string | null;
+  simClock: string | null;
   vehicles: VehicleSummary[];
+  /** The twin depot only (OTTOYARD Nashville Flagship, the one site simulated), while a run is live. The
+   *  "available" fields count stalls OPEN by the pointer: no car on it and no live hold. That is not availability,
+   *  which also depends on the stall's calendar and, for a charger, a working charger. OTTO-Q decides that. */
   depots: DepotSummary[];
+  /** The same depot's stall pointers by stall type (lib/twin/occupancy). */
+  occupancy: Record<string, StallTypeCount>;
   jobs: JobSummary[];
   fleetMetrics: FleetMetrics;
   depotMetrics: DepotMetrics;
@@ -109,53 +122,45 @@ export interface FleetContext {
   error: string | null;
 }
 
-export function useFleetContext(): FleetContext {
-  const incidents = useIncidentsStore((state) => state.incidents);
+const CHARGER_TYPES = ["dcfc", "l2"];
 
+/** One row of the `ottoq-jobs-active` edge function's reply, as this hook reads it. */
+interface ActiveJobRow {
+  id: string;
+  vehicle_id: string;
+  stall_id?: string | null;
+  stall_code?: string | null;
+  service?: string | null;
+  status?: string | null;
+  scheduled_start?: string | null;
+}
+
+/**
+ * What the fleet assistant is told about the depot. With `fleetOperatorId`, the owner's projection: their vehicles
+ * and the incidents that name one of them. Stall occupancy and depot-wide conditions stay depot-wide, because the
+ * owner's cars share that depot.
+ */
+export function useFleetContext(fleetOperatorId: string | null = null): FleetContext {
   // Vehicles from the shared twin layer: the depot card feed (the same per-vehicle contract every cockpit panel
-  // reads) and, for battery health, the live run's fleet condition. This used to call a hook with the literal run
-  // id "current_sim_run_id" and the wrong argument names, so the assistant was handed no vehicles at all.
-  const cards = useDepotCards(null);
-  const condition = useFleetCondition(cards.data?.sim_run_id ?? null);
+  // reads) and, for battery health, the live run's fleet condition.
+  const cards = useDepotCards(fleetOperatorId);
+  const runId = cards.data?.sim_run_id ?? null;
+  const condition = useFleetCondition(runId);
   const vehiclesLoading = cards.isLoading;
   const vehiclesError = cards.error ? String((cards.error as Error).message) : null;
 
-  // Fetch depot aggregates from the shared brain fleet summary
-  const { data: depotsData, isLoading: depotsLoading, error: depotsError } = useQuery({
-    queryKey: ["fleetContext", "depots"],
-    queryFn: async () => {
-      const summary = await ottoQFetch<{ depots?: any[] }>("/fleet/summary");
-      const depots = summary?.depots ?? [];
-
-      // /fleet/summary gives per-depot stall + job aggregates already. The legacy
-      // shape distinguished charge / detail / maintenance stalls, which the summary
-      // does not break out — map total/available stalls onto charge stalls (the
-      // primary capacity) and leave detail/maintenance at 0 (no breakdown available).
-      return depots.map((d: any): DepotSummary => ({
-        id: d.id,
-        name: d.name,
-        cityId: d.city || "",
-        cityName: d.city || "Unknown",
-        totalChargeStalls: d.stalls_total ?? 0,
-        availableChargeStalls: d.stalls_available ?? Math.max(0, (d.stalls_total ?? 0) - (d.stalls_occupied ?? 0)),
-        totalDetailStalls: 0,
-        availableDetailStalls: 0,
-        totalMaintenanceBays: 0,
-        availableMaintenanceBays: 0,
-        activeJobs: d.in_service ?? 0,
-        pendingJobs: 0,
-      }));
-    },
-    staleTime: 30000,
-    refetchInterval: 60000,
-  });
+  // The depot, its stalls and its incidents, from the live run. This used to read /fleet/summary, a census of every
+  // depot's stall pointers with every stall type counted as a charger, and a seeded incident store that was empty.
+  const snapshot = useSnapshot(runId);
+  const layout = useLayout();
+  const feed = useRunEventFeed(runId);
 
   // Fetch active jobs from the shared brain
   const { data: jobsData, isLoading: jobsLoading, error: jobsError } = useQuery({
     queryKey: ["fleetContext", "jobs"],
     queryFn: async () => {
-      const resp = await ottoqInvoke<{ jobs?: any[] }>("ottoq-jobs-active", { limit: 100 });
-      return (resp?.jobs ?? []).map((job: any): JobSummary => ({
+      const resp = await ottoqInvoke<{ jobs?: ActiveJobRow[] }>("ottoq-jobs-active", { limit: 100 });
+      return (resp?.jobs ?? []).map((job): JobSummary => ({
         id: job.id,
         vehicleId: job.vehicle_id,
         depotId: job.stall_id ?? "",
@@ -188,16 +193,20 @@ export function useFleetContext(): FleetContext {
   });
   const withHealth = vehicles.filter((v) => v.healthScore !== null);
 
-  // Calculate incident metrics
+  // Incidents on this run: warning or worse, split as the Incidents view splits them
+  const ownNames = fleetOperatorId ? new Set((cards.data?.vehicles ?? []).map((v) => v.display_name)) : null;
+  const groups = incidentGroups(runId ? feed.data : [], ownNames);
+  const incidentsByType: Record<string, number> = {};
+  for (const r of [...groups.attention, ...groups.standing]) {
+    const title = describeEvent(r.event_type, r.payload).title;
+    incidentsByType[title] = (incidentsByType[title] ?? 0) + 1;
+  }
   const incidentMetrics: IncidentMetrics = {
-    totalIncidents: incidents.length,
-    activeIncidents: incidents.filter((i) => i.status === "Dispatched" || i.status === "Secured").length,
-    pendingIncidents: incidents.filter((i) => i.status === "Reported").length,
-    closedIncidents: incidents.filter((i) => i.status === "Closed").length,
-    incidentsByType: incidents.reduce((acc, i) => {
-      acc[i.type] = (acc[i.type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>),
+    totalIncidents: groups.attention.length + groups.standing.length,
+    activeIncidents: groups.attention.length,
+    pendingIncidents: groups.standing.length,
+    closedIncidents: 0,
+    incidentsByType,
   };
 
   // Calculate fleet metrics from twin vehicles
@@ -214,9 +223,30 @@ export function useFleetContext(): FleetContext {
     avgHealthScore: withHealth.length > 0 ? Math.round(withHealth.reduce((sum, v) => sum + (v.healthScore ?? 0), 0) / withHealth.length) : null,
   };
 
-  // Calculate depot metrics
-  const depots = depotsData || [];
+  // The twin depot's stalls by type, while a run is live
+  const occupancy = runId ? stallOccupancy(layout.data, snapshot.data) : {};
+  const chargers = sumTypes(occupancy, CHARGER_TYPES);
+  const wash = sumTypes(occupancy, ["wash_bay"]);
+  const service = sumTypes(occupancy, ["service_bay"]);
   const jobs = jobsData || [];
+  const depot = layout.data?.depot;
+  const depots: DepotSummary[] =
+    runId && depot
+      ? [{
+          id: depot.id,
+          name: depot.name,
+          cityId: "nashville",
+          cityName: "Nashville",
+          totalChargeStalls: chargers.total,
+          availableChargeStalls: chargers.open,
+          totalDetailStalls: wash.total,
+          availableDetailStalls: wash.open,
+          totalMaintenanceBays: service.total,
+          availableMaintenanceBays: service.open,
+          activeJobs: jobs.filter((j) => j.state === "ACTIVE").length,
+          pendingJobs: jobs.filter((j) => ["PENDING", "SCHEDULED"].includes(j.state)).length,
+        }]
+      : [];
   const depotMetrics: DepotMetrics = {
     totalDepots: depots.length,
     totalChargeStalls: depots.reduce((sum, d) => sum + d.totalChargeStalls, 0),
@@ -233,8 +263,8 @@ export function useFleetContext(): FleetContext {
     completedJobsToday: 0, // Would need additional query
   };
 
-  const isLoading = vehiclesLoading || depotsLoading || jobsLoading;
-  const anyError = (vehiclesError || depotsError || jobsError) as unknown;
+  const isLoading = vehiclesLoading || jobsLoading;
+  const anyError = (vehiclesError || jobsError) as unknown;
   const error =
     anyError == null
       ? null
@@ -243,59 +273,18 @@ export function useFleetContext(): FleetContext {
       : (anyError as Error).message ?? "Unknown error";
 
   return {
+    runId,
+    simClock: cards.data?.sim_clock ?? null,
     vehicles,
     depots,
+    occupancy,
     jobs,
     fleetMetrics,
     depotMetrics,
     incidentMetrics,
-    cities: [],
+    cities: runId ? [{ id: "nashville", name: "Nashville", tz: "America/Chicago" }] : [],
     timestamp: new Date().toISOString(),
     isLoading,
     error,
   };
-}
-
-// Helper function to serialize fleet context for AI
-export function serializeFleetContext(context: FleetContext): string {
-  const { fleetMetrics, depotMetrics, incidentMetrics, vehicles, depots, cities, timestamp } = context;
-
-  return `
-=== REAL-TIME FLEET DATA (as of ${new Date(timestamp).toLocaleString()}) ===
-
-FLEET SUMMARY:
-• Total Vehicles: ${fleetMetrics.totalVehicles}
-• Active/In Service: ${fleetMetrics.activeVehicles}
-• At Depot/Charging: ${fleetMetrics.chargingVehicles}
-• Idle: ${fleetMetrics.idleVehicles}
-• En Route to Depot: ${fleetMetrics.enRouteVehicles}
-• In Maintenance: ${fleetMetrics.maintenanceVehicles}
-• Average SOC: ${fleetMetrics.avgSoc}%
-• Low Battery (<30%): ${fleetMetrics.lowBatteryCount} vehicles
-• Critical Battery (<15%): ${fleetMetrics.criticalBatteryCount} vehicles
-• Average Battery Health: ${fleetMetrics.avgHealthScore === null ? "not drawn for this run" : `${fleetMetrics.avgHealthScore}%`}
-
-DEPOT OPERATIONS:
-• Total Depots: ${depotMetrics.totalDepots}
-• Charge Stalls: ${depotMetrics.availableChargeStalls}/${depotMetrics.totalChargeStalls} available (${100 - depotMetrics.chargeStallUtilization}% free)
-• Detail Stalls: ${depotMetrics.availableDetailStalls}/${depotMetrics.totalDetailStalls} available
-• Maintenance Bays: ${depotMetrics.availableMaintenanceBays}/${depotMetrics.totalMaintenanceBays} available
-• Active Jobs: ${depotMetrics.activeJobs}
-• Pending/Scheduled Jobs: ${depotMetrics.pendingJobs}
-
-INCIDENT STATUS:
-• Total Incidents: ${incidentMetrics.totalIncidents}
-• Active: ${incidentMetrics.activeIncidents}
-• Pending: ${incidentMetrics.pendingIncidents}
-• Closed: ${incidentMetrics.closedIncidents}
-${Object.entries(incidentMetrics.incidentsByType).map(([type, count]) => `• ${type}: ${count}`).join('\n')}
-
-CITIES: ${cities.map(c => c.name).join(', ')}
-
-DEPOT DETAILS:
-${depots.slice(0, 10).map(d => `• ${d.name} (${d.cityName}): ${d.availableChargeStalls}/${d.totalChargeStalls} charge stalls, ${d.activeJobs} active jobs`).join('\n')}
-
-VEHICLE SAMPLES (top 20 by status):
-${vehicles.slice(0, 20).map(v => `• ${v.oem} ${v.plate || v.id.slice(0, 8)} | SOC: ${Math.round(v.soc * 100)}% | Status: ${v.status} | City: ${v.cityName} | Battery health: ${v.healthScore === null ? "n/a" : `${v.healthScore}%`}`).join('\n')}
-`.trim();
 }

@@ -265,7 +265,7 @@ const Index = () => {
         <TrackVehiclePopup open={trackVehicleOpen} onOpenChange={setTrackVehicleOpen} vehicle={popupVehicle} />
         <VehicleDetailsPopup open={vehicleDetailsOpen} onOpenChange={setVehicleDetailsOpen} vehicle={popupVehicle} />
         <MaintenancePopup open={maintenanceOpen} onOpenChange={setMaintenanceOpen} vehicle={popupVehicle} depots={depots} onAddToCart={handleAddToCart} />
-          <OttoCommandPanel open={aiAgentOpen} onOpenChange={setAiAgentOpen} currentCity={currentCity} vehicles={vehicles} depots={depots} />
+          <OttoCommandPanel open={aiAgentOpen} onOpenChange={setAiAgentOpen} currentCity={currentCity} vehicles={vehicles} depots={depots} fleetOperatorId={fleetOperatorId} />
 
         {/* Due Soon Summary Dialog */}
         <Dialog open={showDueSoonSummary} onOpenChange={setShowDueSoonSummary}>
