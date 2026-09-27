@@ -5,17 +5,7 @@ import { describe, expect, it } from "vitest";
 import fx from "./fixtures/live_capture.json";
 import type { DepotCardsResponse } from "../cards";
 import type { TwinFleetCondition, TwinLayout, TwinSnapshot } from "../types";
-import {
-  allReservations,
-  chargingNow,
-  countByStage,
-  doubleBooked,
-  energyView,
-  joinFleet,
-  operatorsOf,
-  stageOf,
-  stallBoard,
-} from "../model";
+import { allReservations, chargingNow, countByStage, doubleBooked, energyView, joinFleet, operatorsOf, stageOf, overdueText, stallBoard, stepAtomLabel, overPlanText } from "../model";
 
 const cards = fx.cards as unknown as DepotCardsResponse;
 const snapshot = fx.snapshot as unknown as TwinSnapshot;
@@ -157,5 +147,35 @@ describe("helpers", () => {
   it("an unmapped enum value is reported as unknown, never re-filed", () => {
     expect(stageOf("teleporting")).toBe("unknown");
     expect(stageOf(null)).toBe("unknown");
+  });
+});
+
+describe("card steps (ottoq_depot_cards 1.2, otto-q-core 0506)", () => {
+  it("names an inspect step by the task it was planned for", () => {
+    expect(stepAtomLabel({ leg_type: "inspect", atom: "readiness_check" })).toBe("Readiness check");
+    expect(stepAtomLabel({ leg_type: "inspect", atom: "interior_inspection" })).toBe("Interior inspection");
+    expect(stepAtomLabel({ leg_type: "inspect", atom: "some_new_check" })).toBe("Some new check");
+  });
+  it("leaves every other step, and an untagged inspect, to its leg type", () => {
+    expect(stepAtomLabel({ leg_type: "inspect", atom: null })).toBeNull();
+    expect(stepAtomLabel({ leg_type: "inspect" })).toBeNull();
+    expect(stepAtomLabel({ leg_type: "detail", atom: "interior_deep_clean" })).toBeNull();
+    expect(stepAtomLabel({ leg_type: "charge_l2", atom: null })).toBeNull();
+  });
+  it("says how long ago an overdue step was planned, and nothing for one still ahead", () => {
+    expect(overdueText({ overdue_min: null })).toBeNull();
+    expect(overdueText({})).toBeNull();
+    expect(overdueText({ overdue_min: 0 })).toBeNull();
+    expect(overdueText({ overdue_min: 15 })).toBe("15 min ago");
+    expect(overdueText({ overdue_min: 60 })).toBe("1 h ago");
+    expect(overdueText({ overdue_min: 63 })).toBe("1 h 3 min ago");
+  });
+  it("says how far a current step has run past its plan (1.3, otto-q-core 0509), and nothing before it has", () => {
+    expect(overPlanText({})).toBeNull();
+    expect(overPlanText({ over_plan_min: null })).toBeNull();
+    expect(overPlanText({ over_plan_min: 0 })).toBeNull();
+    expect(overPlanText({ over_plan_min: Number.NaN })).toBeNull();
+    expect(overPlanText({ over_plan_min: 18 })).toBe("18 min past plan");
+    expect(overPlanText({ over_plan_min: 125 })).toBe("2 h 5 min past plan");
   });
 });

@@ -4,9 +4,10 @@
 import { useMemo } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useActivityFeed, useLiveDepot } from "@/lib/twin/hooks";
-import { STAGE_LABEL, STAGE_ORDER, countByStage, doubleBooked, energyView, humanize, joinFleet, simTime, stallBoard } from "@/lib/twin/model";
+import { STAGE_LABEL, STAGE_ORDER, countByStage, decisionActor, doubleBooked, energyView, humanize, joinFleet, simTime, stallBoard } from "@/lib/twin/model";
+import { DEFAULT_CATEGORIES, decisionCategory, describeDecision, isPlace } from "@/lib/twin/decisionText";
 import { LiveRunBar, NoLiveRun } from "./LiveRunBar";
-import { Chip, Section, Stat, STAGE_TONE, fmt } from "./ui";
+import { Chip, DECISION_TONE, Section, Stat, STAGE_TONE, fmt } from "./ui";
 
 export function LiveOverview({ fleetOperatorId = null, scopeLabel, onOpen }: {
   fleetOperatorId?: string | null;
@@ -15,7 +16,7 @@ export function LiveOverview({ fleetOperatorId = null, scopeLabel, onOpen }: {
   onOpen?: (tab: "fleet" | "depot" | "energy" | "decisions") => void;
 }) {
   const { cards, snapshot, condition, layout, runId, runStatus, simClock } = useLiveDepot(fleetOperatorId);
-  const feed = useActivityFeed(runId, { limit: 12, changesOnly: true });
+  const feed = useActivityFeed(runId, { limit: 30, changesOnly: true });
   const rows = useMemo(() => joinFleet(cards.data, snapshot.data, condition.data), [cards.data, snapshot.data, condition.data]);
   const counts = countByStage(rows);
   const board = useMemo(() => stallBoard(layout.data, snapshot.data, rows), [layout.data, snapshot.data, rows]);
@@ -23,7 +24,11 @@ export function LiveOverview({ fleetOperatorId = null, scopeLabel, onOpen }: {
   const doubles = doubleBooked(rows);
   const oos = rows.filter((r) => r.stage === "out_of_service");
   const ids = new Set(rows.map((r) => r.id));
-  const decisions = (feed.data ?? []).filter((d) => !fleetOperatorId || (d.vehicle_id && ids.has(d.vehicle_id))).slice(0, 8);
+  // Plan re-timings are the loudest decisions and start hidden, as in the feed and the twin.
+  const decisions = (feed.data ?? [])
+    .filter((d) => DEFAULT_CATEGORIES.has(decisionCategory(d.action)))
+    .filter((d) => !fleetOperatorId || (d.vehicle_id && ids.has(d.vehicle_id)))
+    .slice(0, 8);
   const ledger = cards.data?.reservation_ledger ?? {};
   const link = (tab: "fleet" | "depot" | "energy" | "decisions", label: string) =>
     onOpen ? <button type="button" onClick={() => onOpen(tab)} className="text-[11px] text-primary hover:underline">{label}</button> : null;
@@ -95,16 +100,22 @@ export function LiveOverview({ fleetOperatorId = null, scopeLabel, onOpen }: {
               <p className="text-xs text-muted-foreground">No decisions in the current window.</p>
             ) : (
               <ol className="space-y-1">
-                {decisions.map((d) => (
-                  <li key={d.decision_seq} className="grid grid-cols-[64px_1fr] gap-2 text-[12px]">
-                    <span className="font-mono text-muted-foreground">{simTime(d.occurred_at)}</span>
-                    <span className="truncate">
-                      <span className="font-mono font-semibold">{d.display_name ?? "OTTO-Q"}</span> {humanize(d.action)}
-                      {d.target ? <span className="font-mono text-sky-300"> → {d.target}</span> : null}
-                      <span className="text-muted-foreground"> · {d.outcome}</span>
-                    </span>
-                  </li>
-                ))}
+                {decisions.map((d) => {
+                  const text = describeDecision(d);
+                  const verb = typeof d.rationale?.verb === "string" ? d.rationale.verb : "";
+                  const place = isPlace(d.target, verb) ? d.target : null;
+                  return (
+                    <li key={d.decision_seq} className="grid grid-cols-[64px_1fr] gap-2 text-[12px]" title={d.engine ? `engine: ${d.engine}` : undefined}>
+                      <span className="font-mono text-muted-foreground">{simTime(d.occurred_at)}</span>
+                      <span className="truncate">
+                        <span className="font-mono font-semibold">{decisionActor(d)}</span>
+                        {place ? <span className="font-mono text-sky-300"> → {place}</span> : null}{" "}
+                        <span className={DECISION_TONE[text.tone]}>{text.title}</span>
+                        {text.detail ? <span className="text-muted-foreground"> · {text.detail}</span> : null}
+                      </span>
+                    </li>
+                  );
+                })}
               </ol>
             )}
           </Section>

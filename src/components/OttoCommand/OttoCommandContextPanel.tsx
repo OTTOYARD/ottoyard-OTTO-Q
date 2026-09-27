@@ -33,7 +33,7 @@ interface FleetContextData {
     avgSoc: number;
     lowBatteryCount: number;
     criticalBatteryCount: number;
-    avgHealthScore: number;
+    avgHealthScore: number | null;
   };
   depotMetrics?: {
     totalDepots: number;
@@ -146,7 +146,7 @@ const FleetContextView: React.FC<{
 
   const socStatus = fleet.avgSoc >= 60 ? "good" : fleet.avgSoc >= 35 ? "warning" : "critical";
   const healthStatus =
-    fleet.avgHealthScore >= 90 ? "good" : fleet.avgHealthScore >= 75 ? "warning" : "critical";
+    fleet.avgHealthScore === null ? "warning" : fleet.avgHealthScore >= 90 ? "good" : fleet.avgHealthScore >= 75 ? "warning" : "critical";
 
   return (
     <div className="space-y-3">
@@ -186,7 +186,7 @@ const FleetContextView: React.FC<{
         <div className="px-2">
           <Progress value={fleet.avgSoc} className="h-1.5" />
         </div>
-        <MetricRow icon={Activity} label="Health Score" value={`${fleet.avgHealthScore}/100`} status={healthStatus} />
+        <MetricRow icon={Activity} label="Battery Health" value={fleet.avgHealthScore === null ? "n/a" : `${fleet.avgHealthScore}%`} status={healthStatus} />
         <MetricRow
           icon={AlertTriangle}
           label="Low Battery"
@@ -226,9 +226,9 @@ const FleetContextView: React.FC<{
           </p>
           <MetricRow
             icon={MapPin}
-            label="Stall Utilization"
+            label="Chargers in use"
             value={`${depot.chargeStallUtilization}%`}
-            subValue={`${depot.availableChargeStalls}/${depot.totalChargeStalls} avail`}
+            subValue={`${depot.availableChargeStalls}/${depot.totalChargeStalls} open`}
             status={
               depot.chargeStallUtilization > 85
                 ? "critical"
@@ -237,7 +237,7 @@ const FleetContextView: React.FC<{
                 : "good"
             }
             onClick={
-              onPrompt ? () => onPrompt("Show depot resource availability across all locations") : undefined
+              onPrompt ? () => onPrompt("How are the depot's chargers and bays being used right now?") : undefined
             }
           />
           <MetricRow icon={Activity} label="Active Jobs" value={depot.activeJobs} />
@@ -257,7 +257,7 @@ const FleetContextView: React.FC<{
               icon={AlertTriangle}
               label="Active"
               value={incidents.activeIncidents}
-              subValue={`${incidents.pendingIncidents} pending`}
+              subValue={`${incidents.pendingIncidents} depot-wide`}
               status={incidents.activeIncidents > 0 ? "warning" : "good"}
               onClick={
                 incidents.activeIncidents > 0 && onPrompt

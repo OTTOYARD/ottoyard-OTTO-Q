@@ -9,6 +9,8 @@
 import { OTTOQ_ANON_KEY, OTTOQ_URL } from "./config";
 import type { TwinEventsWindow, TwinFleetCondition, TwinLayout, TwinSnapshot, TwinWearWindow } from "./types";
 import type { ActivityRow, AppointmentsResponse, DepotCardsResponse } from "./cards";
+import type { DialPromotion, KpiFive, SitePowerPlan } from "./plan";
+import type { RunEventRow } from "./eventFeed";
 
 const TWIN = `${OTTOQ_URL}/functions/v1/otto-twin-control`;
 const HEADERS = {
@@ -36,6 +38,13 @@ export async function ottoqRpc<T>(fn: string, args: Record<string, unknown>): Pr
   return (await r.json()) as T;
 }
 
+/** A read of a table the anon key is granted SELECT on (PostgREST query string, no leading slash). */
+async function ottoqRead<T>(query: string): Promise<T> {
+  const r = await fetch(`${OTTOQ_URL}/rest/v1/${query}`, { headers: HEADERS });
+  if (!r.ok) throw new Error(`read ${query.split("?")[0]}: ${r.status} ${await r.text()}`);
+  return (await r.json()) as T;
+}
+
 export const twinApi = {
   snapshot: (simRunId: string) => twinGet<TwinSnapshot>(`/sim_runs/${simRunId}/snapshot`),
   layout: (depotId: string) => twinGet<TwinLayout>(`/depot/${depotId}/layout`),
@@ -55,4 +64,25 @@ export const twinApi = {
   eventsWindow: (simRunId: string) => ottoqRpc<TwinEventsWindow>("ottoq_twin_events_window", { p_sim_run_id: simRunId }),
   wearWindow: (simRunId: string) => ottoqRpc<TwinWearWindow>("ottoq_twin_wear_window", { p_sim_run_id: simRunId }),
   appointments: (simRunId: string) => ottoqRpc<AppointmentsResponse>("ottoq_twin_appointments", { p_sim_run_id: simRunId }),
+  /** ottoq_kpi_five for one run, through the control door exactly as the twin cockpit's KPI tab reads it. */
+  kpis: (simRunId: string) => twinGet<KpiFive>(`/sim_runs/${simRunId}/kpis`),
+  /** The run's site power plan (ServiceProfile, 0442): the forward schedule in force now. */
+  sitePowerPlan: async (simRunId: string) =>
+    (
+      await ottoqRead<SitePowerPlan[]>(
+        `service_profiles?sim_run_id=eq.${simRunId}&resource_kind=eq.site_power` +
+          "&select=sim_run_id,published_at,window_start,window_end,profile_state,periods&order=published_at.desc&limit=1",
+      )
+    )[0] ?? null,
+  /** The run's events in sim time (otto-q-core 0462): no row-diff audit trail, no rule evaluations, a per-tick
+   *  summary collapsed into one standing row. The twin cockpit's Events tab reads the same function. */
+  eventFeed: (simRunId: string, limit = 200, windowMin = 600) =>
+    ottoqRpc<RunEventRow[]>("ottoq_run_event_feed", { p_sim_run_id: simRunId, p_limit: limit, p_window_min: windowMin }),
+  /** The learning loop's ledger for the depot, newest first. */
+  dialPromotions: (depotId: string, limit = 20) =>
+    ottoqRead<DialPromotion[]>(
+      `ottoq_dial_promotion_ledger?depot_id=eq.${depotId}` +
+        "&select=promotion_id,decided_at,param_key,from_value,to_value,outcome,reason,scenario,cell_runs,cell_seeds,rolled_back_of,experiment_id" +
+        `&order=promotion_id.desc&limit=${limit}`,
+    ),
 };

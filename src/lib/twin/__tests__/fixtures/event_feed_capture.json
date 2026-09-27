@@ -1,0 +1,560 @@
+{
+ "_meta": {
+  "run": "461c79fa-6f85-467f-b90a-92b33d40728d",
+  "captured_at": "2026-09-26T15:41:52.702439+00:00",
+  "what": "27 rows of ottoq_run_event_feed(run, 200, 600) for run 461c79fa at its end: the 30 newest warning-or-worse rows and a few info rows. Long payload notes and ids the wording does not read are trimmed; every value kept is the feed's own."
+ },
+ "rows": [
+  {
+   "row_key": "g:21571312",
+   "sim_at": "2026-09-26T15:54:57.770336+00:00",
+   "first_sim_at": "2026-09-26T13:01:28.073352+00:00",
+   "occurred_at": "2026-09-26T14:10:44.668432+00:00",
+   "event_type": "ottoq.arrival_forecast",
+   "severity": "info",
+   "entity_type": "depot",
+   "entity_id": "11111111-1111-1111-1111-111111111111",
+   "entity_name": null,
+   "payload": {
+    "horizon_min": 60,
+    "incoming_count": 5,
+    "charge_needed_count": 4,
+    "predicted_charge_kw": 175,
+    "predicted_charge_kwh": 52
+   },
+   "repeats": 459,
+   "standing": true,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21575528",
+   "sim_at": "2026-09-26T15:54:57.770336+00:00",
+   "first_sim_at": "2026-09-26T13:43:46.8268+00:00",
+   "occurred_at": "2026-09-26T14:10:39.174334+00:00",
+   "event_type": "twin.staging_overflow",
+   "severity": "warning",
+   "entity_type": "depot",
+   "entity_id": "11111111-1111-1111-1111-111111111111",
+   "entity_name": null,
+   "payload": {
+    "svc_cap": 2,
+    "overflow": 41,
+    "wash_cap": 3,
+    "escalated": 10,
+    "gate_held": 3,
+    "deploy_cap": 20,
+    "patience_min": 10.0
+   },
+   "repeats": 234,
+   "standing": true,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21576649",
+   "sim_at": "2026-09-26T15:54:57.770336+00:00",
+   "first_sim_at": "2026-09-26T13:59:24.00968+00:00",
+   "occurred_at": "2026-09-26T14:10:39.174334+00:00",
+   "event_type": "twin.recharge_stranded",
+   "severity": "warning",
+   "entity_type": "depot",
+   "entity_id": "11111111-1111-1111-1111-111111111111",
+   "entity_name": null,
+   "payload": {
+    "floor": 80,
+    "recharged": 29
+   },
+   "repeats": 204,
+   "standing": true,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21576873",
+   "sim_at": "2026-09-26T15:54:57.770336+00:00",
+   "first_sim_at": "2026-09-26T14:01:37.61+00:00",
+   "occurred_at": "2026-09-26T14:10:39.174334+00:00",
+   "event_type": "ottoq.bay_reservation_activated_early",
+   "severity": "info",
+   "entity_type": "depot",
+   "entity_id": "11111111-1111-1111-1111-111111111111",
+   "entity_name": null,
+   "payload": {
+    "seated_early": 0,
+    "seated_total": 0,
+    "declined_would_displace": 1
+   },
+   "repeats": 98,
+   "standing": true,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21578525",
+   "sim_at": "2026-09-26T15:54:57.770336+00:00",
+   "first_sim_at": "2026-09-26T14:18:42.101104+00:00",
+   "occurred_at": "2026-09-26T14:10:39.174334+00:00",
+   "event_type": "twin.deploy_gate_summary",
+   "severity": "warning",
+   "entity_type": "depot",
+   "entity_id": "11111111-1111-1111-1111-111111111111",
+   "entity_name": null,
+   "payload": {
+    "held": 3,
+    "floor": 80,
+    "released": 0,
+    "escalated": 2,
+    "candidates": 3,
+    "overridden": 0,
+    "gate_enabled": true,
+    "hard_cap_min": 240,
+    "patience_min": 45
+   },
+   "repeats": 167,
+   "standing": true,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21581852",
+   "sim_at": "2026-09-26T15:54:57.770336+00:00",
+   "first_sim_at": "2026-09-26T15:01:29.020256+00:00",
+   "occurred_at": "2026-09-26T14:10:39.174334+00:00",
+   "event_type": "twin.weather_anomaly",
+   "severity": "warning",
+   "entity_type": "depot",
+   "entity_id": "11111111-1111-1111-1111-111111111111",
+   "entity_name": null,
+   "payload": {
+    "label": "clear",
+    "temp_c": 39.040102,
+    "wind_kmh": 0,
+    "cloud_pct": 0,
+    "precip_mm_hr": 0
+   },
+   "repeats": 93,
+   "standing": true,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21586038",
+   "sim_at": "2026-09-26T15:54:57.770336+00:00",
+   "first_sim_at": "2026-09-26T15:54:57.770336+00:00",
+   "occurred_at": "2026-09-26T14:10:39.174334+00:00",
+   "event_type": "arm.demate_started",
+   "severity": "info",
+   "entity_type": "vehicle",
+   "entity_id": "a0ef8ae7-a873-4ec3-a040-1adb3e30b3d4",
+   "entity_name": "Waymo-AV-024",
+   "payload": {
+    "phase": "unlatch",
+    "window_s": 11.5
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21586040",
+   "sim_at": "2026-09-26T15:54:57.770336+00:00",
+   "first_sim_at": "2026-09-26T15:54:57.770336+00:00",
+   "occurred_at": "2026-09-26T14:10:39.174334+00:00",
+   "event_type": "charge.session_completed",
+   "severity": "info",
+   "entity_type": "ocpp_session",
+   "entity_id": "a013b812-646c-44bb-8f72-b203a16ff005",
+   "entity_name": "Waymo-AV-024",
+   "payload": {
+    "reason": "completed",
+    "soc_end": 90,
+    "soc_start": 45,
+    "duration_s": 6027.408464,
+    "energy_kwh": 40.054,
+    "avg_power_kw": 23.92,
+    "auto_rerouted": false
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21586050",
+   "sim_at": "2026-09-26T15:54:57.770336+00:00",
+   "first_sim_at": "2026-09-26T15:54:57.770336+00:00",
+   "occurred_at": "2026-09-26T14:10:39.174334+00:00",
+   "event_type": "fleet.arrival_delayed",
+   "severity": "warning",
+   "entity_type": "vehicle",
+   "entity_id": "b73b5763-07e4-48e3-9e8c-3158301af418",
+   "entity_name": "Tesla-AV-050",
+   "payload": {
+    "cause": "heavy_traffic",
+    "new_eta": "2026-09-26T16:28:46.771321+00:00",
+    "delay_min": 30
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21586576",
+   "sim_at": "2026-09-26T15:54:57.770336+00:00",
+   "first_sim_at": "2026-09-26T15:54:57.770336+00:00",
+   "occurred_at": "2026-09-26T14:10:44.697791+00:00",
+   "event_type": "twin.sim_stopped_and_reset",
+   "severity": "info",
+   "entity_type": "sim_run",
+   "entity_id": "461c79fa-6f85-467f-b90a-92b33d40728d",
+   "entity_name": null,
+   "payload": {
+    "reason": "operator_stop",
+    "release_mode": "world_reset",
+    "sessions_ended": 33,
+    "vehicles_reset": 116
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21586000",
+   "sim_at": "2026-09-26T15:54:32.256304+00:00",
+   "first_sim_at": "2026-09-26T15:54:32.256304+00:00",
+   "occurred_at": "2026-09-26T14:10:35.973953+00:00",
+   "event_type": "charge.session_started",
+   "severity": "info",
+   "entity_type": "ocpp_session",
+   "entity_id": "1fd8d983-1147-4a8d-be58-ad32b67f0b00",
+   "entity_name": "Zoox-AV-072",
+   "payload": {
+    "charger": "NASH-L2-12",
+    "soc_start": 47,
+    "soc_target": 90,
+    "charge_kind": "l2",
+    "initial_rate_kw": 13.1
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21585787",
+   "sim_at": "2026-09-26T15:53:01.170632+00:00",
+   "first_sim_at": "2026-09-26T15:51:59.28232+00:00",
+   "occurred_at": "2026-09-26T14:10:24.600094+00:00",
+   "event_type": "ottoq.refusal_escalated",
+   "severity": "warning",
+   "entity_type": "vehicle",
+   "entity_id": "6ef374e7-4d63-4d9e-a14b-8976ef9c9786",
+   "entity_name": "Zoox-AV-072",
+   "payload": {
+    "reason_code": "no_capacity",
+    "candidates_seen": 0,
+    "original_refusal": "target_occupied",
+    "stall_type_source": "payload",
+    "wanted_stall_type": "l2"
+   },
+   "repeats": 2,
+   "standing": true,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21585402",
+   "sim_at": "2026-09-26T15:51:59.28232+00:00",
+   "first_sim_at": "2026-09-26T15:48:01.800456+00:00",
+   "occurred_at": "2026-09-26T14:10:16.864934+00:00",
+   "event_type": "ottoq.bay_reservation_replanned",
+   "severity": "warning",
+   "entity_type": "depot",
+   "entity_id": "11111111-1111-1111-1111-111111111111",
+   "entity_name": null,
+   "payload": {
+    "deferred": 0,
+    "released": 1,
+    "relocated": 0,
+    "left_for_early_activation": 0
+   },
+   "repeats": 2,
+   "standing": true,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21585560",
+   "sim_at": "2026-09-26T15:50:00.108368+00:00",
+   "first_sim_at": "2026-09-26T15:50:00.108368+00:00",
+   "occurred_at": "2026-09-26T14:10:01.969026+00:00",
+   "event_type": "ottoq.refusal_escalated",
+   "severity": "warning",
+   "entity_type": "vehicle",
+   "entity_id": "8ef51846-f36e-47a8-8082-016079ed724c",
+   "entity_name": "Waymo-AV-028",
+   "payload": {
+    "reason_code": "no_capacity",
+    "candidates_seen": 0,
+    "original_refusal": "target_occupied",
+    "wanted_stall_type": "l2"
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21585276",
+   "sim_at": "2026-09-26T15:46:34.789232+00:00",
+   "first_sim_at": "2026-09-26T15:46:34.789232+00:00",
+   "occurred_at": "2026-09-26T14:09:36.31257+00:00",
+   "event_type": "ottoq.visit_reopened",
+   "severity": "warning",
+   "entity_type": "vehicle",
+   "entity_id": "f5c7d2a9-f6b6-46bb-8e61-5da2ec54b7db",
+   "entity_name": "Waymo-AV-039",
+   "payload": {
+    "attempts": 1,
+    "max_attempts": 3,
+    "reopen_reason": "vehicle_fault_eviction_deferred_resumed"
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21585277",
+   "sim_at": "2026-09-26T15:46:34.789232+00:00",
+   "first_sim_at": "2026-09-26T15:46:34.789232+00:00",
+   "occurred_at": "2026-09-26T14:09:36.31257+00:00",
+   "event_type": "ottoq.booking_interrupted",
+   "severity": "warning",
+   "entity_type": "vehicle",
+   "entity_id": "f5c7d2a9-f6b6-46bb-8e61-5da2ec54b7db",
+   "entity_name": "Waymo-AV-039",
+   "payload": {
+    "purpose": "charge_l2",
+    "actual_min": 142.84,
+    "planned_min": 171.0,
+    "release_reason": "vehicle_fault_eviction_deferred_resumed",
+    "minutes_remaining": 28.16
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21585278",
+   "sim_at": "2026-09-26T15:46:34.789232+00:00",
+   "first_sim_at": "2026-09-26T15:46:34.789232+00:00",
+   "occurred_at": "2026-09-26T14:09:36.31257+00:00",
+   "event_type": "ottoq.rebook_demanded",
+   "severity": "warning",
+   "entity_type": "vehicle",
+   "entity_id": "f5c7d2a9-f6b6-46bb-8e61-5da2ec54b7db",
+   "entity_name": "Waymo-AV-039",
+   "payload": {
+    "reason": "vehicle_fault_eviction_deferred_resumed",
+    "purpose": "charge_l2",
+    "min_lost": 28.16,
+    "from_state": "charging_l2",
+    "atoms_outstanding": 3
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21585283",
+   "sim_at": "2026-09-26T15:46:34.789232+00:00",
+   "first_sim_at": "2026-09-26T15:46:34.789232+00:00",
+   "occurred_at": "2026-09-26T14:09:36.31257+00:00",
+   "event_type": "ottoq.bay_eviction",
+   "severity": "warning",
+   "entity_type": "vehicle",
+   "entity_id": "f5c7d2a9-f6b6-46bb-8e61-5da2ec54b7db",
+   "entity_name": "Waymo-AV-039",
+   "payload": {
+    "cause": "vehicle_fault_deferred_resumed",
+    "severity": "critical",
+    "stall_code": "NASH-L2-STALL-18",
+    "fault_class": "compute_stack_fault",
+    "immobilizing": false
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21585028",
+   "sim_at": "2026-09-26T15:43:33.451472+00:00",
+   "first_sim_at": "2026-09-26T15:43:33.451472+00:00",
+   "occurred_at": "2026-09-26T14:09:13.646758+00:00",
+   "event_type": "arm.emergency_release",
+   "severity": "critical",
+   "entity_type": "vehicle",
+   "entity_id": "12cb06f0-cf74-436f-a37a-e660a52dc7e6",
+   "entity_name": "Waymo-AV-016",
+   "payload": {
+    "reason": "charger fault: Calibrated fault injection per ChargerHelp mix: fault.thermal_emergency",
+    "tether_phase": "charging",
+    "vehicle_state": "charging_dcfc",
+    "awaiting_disposition": true
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21585037",
+   "sim_at": "2026-09-26T15:43:33.451472+00:00",
+   "first_sim_at": "2026-09-26T15:43:33.451472+00:00",
+   "occurred_at": "2026-09-26T14:09:13.646758+00:00",
+   "event_type": "charge.session_faulted",
+   "severity": "warning",
+   "entity_type": "ocpp_session",
+   "entity_id": "3f5983f8-80e8-46bd-8163-bf62b8a7d837",
+   "entity_name": "Waymo-AV-016",
+   "payload": {
+    "reason": "fault.thermal_emergency",
+    "soc_end": 50,
+    "soc_start": 34,
+    "energy_kwh": 14.631,
+    "auto_rerouted": true,
+    "repair_minutes": 17
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21584728",
+   "sim_at": "2026-09-26T15:38:38.989728+00:00",
+   "first_sim_at": "2026-09-26T15:38:38.989728+00:00",
+   "occurred_at": "2026-09-26T14:08:36.848937+00:00",
+   "event_type": "twin.bay_credit_none",
+   "severity": "warning",
+   "entity_type": "depot",
+   "entity_id": "11111111-1111-1111-1111-111111111111",
+   "entity_name": null,
+   "payload": {
+    "services_credited": 0,
+    "services_suppressed": 2,
+    "exits_crediting_nothing": 1
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21584679",
+   "sim_at": "2026-09-26T15:38:03.16844+00:00",
+   "first_sim_at": "2026-09-26T15:38:03.16844+00:00",
+   "occurred_at": "2026-09-26T14:08:32.387622+00:00",
+   "event_type": "ottoq.bay_reservation_replanned",
+   "severity": "warning",
+   "entity_type": "depot",
+   "entity_id": "11111111-1111-1111-1111-111111111111",
+   "entity_name": null,
+   "payload": {
+    "deferred": 1,
+    "released": 1,
+    "relocated": 1,
+    "left_for_early_activation": 0
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21584510",
+   "sim_at": "2026-09-26T15:36:02.64692+00:00",
+   "first_sim_at": "2026-09-26T15:36:02.64692+00:00",
+   "occurred_at": "2026-09-26T14:08:17.323203+00:00",
+   "event_type": "ottoq.bay_eviction_deferred",
+   "severity": "warning",
+   "entity_type": "vehicle",
+   "entity_id": "f5c7d2a9-f6b6-46bb-8e61-5da2ec54b7db",
+   "entity_name": "Waymo-AV-039",
+   "payload": {
+    "severity": "critical",
+    "gate_mode": "deferred_awaiting_tech",
+    "from_state": "charging_l2",
+    "defer_class": "critical_not_immobilizing",
+    "disposition": "work_protected_eviction_deferred",
+    "fault_class": "compute_stack_fault",
+    "min_remaining": 38.7
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21583805",
+   "sim_at": "2026-09-26T15:25:59.831176+00:00",
+   "first_sim_at": "2026-09-26T15:25:59.831176+00:00",
+   "occurred_at": "2026-09-26T14:07:01.988775+00:00",
+   "event_type": "ottoq.refusal_escalated",
+   "severity": "warning",
+   "entity_type": "vehicle",
+   "entity_id": "2cd2cbf3-9de8-48c0-9bd8-935aedb744d7",
+   "entity_name": "Waymo-AV-004",
+   "payload": {
+    "reason_code": "no_capacity",
+    "original_refusal": "target_occupied",
+    "wanted_stall_type": "l2"
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21583334",
+   "sim_at": "2026-09-26T15:21:35.214528+00:00",
+   "first_sim_at": "2026-09-26T15:19:32.575944+00:00",
+   "occurred_at": "2026-09-26T14:06:28.914797+00:00",
+   "event_type": "ottoq.refusal_escalated",
+   "severity": "warning",
+   "entity_type": "vehicle",
+   "entity_id": "4b179b26-a48b-4f65-aad1-74ce3179a85d",
+   "entity_name": "Zoox-AV-088",
+   "payload": {
+    "reason_code": "no_capacity",
+    "original_refusal": "target_occupied",
+    "wanted_stall_type": "l2"
+   },
+   "repeats": 2,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21583183",
+   "sim_at": "2026-09-26T15:17:29.426296+00:00",
+   "first_sim_at": "2026-09-26T15:17:29.426296+00:00",
+   "occurred_at": "2026-09-26T14:06:01.77474+00:00",
+   "event_type": "sim_tick_failed",
+   "severity": "error",
+   "entity_type": "sim_run",
+   "entity_id": "461c79fa-6f85-467f-b90a-92b33d40728d",
+   "entity_name": null,
+   "payload": {
+    "half": "world",
+    "error": "deadlock detected",
+    "sqlstate": "40P01"
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  },
+  {
+   "row_key": "g:21581547",
+   "sim_at": "2026-09-26T14:56:04.905672+00:00",
+   "first_sim_at": "2026-09-26T14:56:04.905672+00:00",
+   "occurred_at": "2026-09-26T14:03:17.647423+00:00",
+   "event_type": "fleet.arrival_delayed",
+   "severity": "warning",
+   "entity_type": "vehicle",
+   "entity_id": "814c9bc7-cf99-4028-93ba-1896279b574a",
+   "entity_name": "Tesla-AV-047",
+   "payload": {
+    "cause": "heavy_traffic",
+    "new_eta": "2026-09-26T15:30:38.347285+00:00",
+    "delay_min": 32
+   },
+   "repeats": 1,
+   "standing": false,
+   "clipped": false
+  }
+ ]
+}

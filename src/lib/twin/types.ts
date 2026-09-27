@@ -135,7 +135,8 @@ export interface TwinLegsMeta {
 export interface TwinSnapshot {
   run: {
     sim_run_id: string; scenario: string; status: string;
-    sim_clock: string; tick_count: number; time_scale: number; seed: number;
+    /** text from engine 0497 on: a 64-bit seed is not exact as a JS number */
+    sim_clock: string; tick_count: number; time_scale: number; seed: number | string;
     /** PLAYBACK CONTRACT (backend `ottoq_set_playback`).
      *  'live'  = 1 real second advances the sim clock by speed_x sim seconds (1:1 at 1x)
      *  'fixed' = historical tick_interval_seconds * time_scale (certs/benchmarks) */
@@ -358,7 +359,7 @@ export interface TwinRunContext {
   depot_name: string | null;
   scenario: string;
   status: string;
-  seed: number | null;
+  seed: number | string | null;
   stall_count: number;
   fleet_count: number;
   /** what the run was CONFIGURED to use — a setting, not evidence */
@@ -570,7 +571,7 @@ export interface TwinRunSummary {
   sim_run_id: string; scenario: string; status: string;
   started_at: string | null; ended_at: string | null;
   sim_clock_start: string | null; sim_clock_current: string | null;
-  tick_count: number; time_scale: number; seed: number; sim_minutes: number;
+  tick_count: number; time_scale: number; seed: number | string; sim_minutes: number;
   counters: TwinRunCounters;
   variability: { spread_mult: number; rate_mult: number; tuned_knobs: number; notes: string | null } | null;
 }
