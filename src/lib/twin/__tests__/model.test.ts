@@ -5,19 +5,7 @@ import { describe, expect, it } from "vitest";
 import fx from "./fixtures/live_capture.json";
 import type { DepotCardsResponse } from "../cards";
 import type { TwinFleetCondition, TwinLayout, TwinSnapshot } from "../types";
-import {
-  allReservations,
-  chargingNow,
-  countByStage,
-  doubleBooked,
-  energyView,
-  joinFleet,
-  operatorsOf,
-  stageOf,
-  overdueText,
-  stallBoard,
-  stepAtomLabel,
-} from "../model";
+import { allReservations, chargingNow, countByStage, doubleBooked, energyView, joinFleet, operatorsOf, stageOf, overdueText, stallBoard, stepAtomLabel, overPlanText } from "../model";
 
 const cards = fx.cards as unknown as DepotCardsResponse;
 const snapshot = fx.snapshot as unknown as TwinSnapshot;
@@ -181,5 +169,13 @@ describe("card steps (ottoq_depot_cards 1.2, otto-q-core 0506)", () => {
     expect(overdueText({ overdue_min: 15 })).toBe("15 min ago");
     expect(overdueText({ overdue_min: 60 })).toBe("1 h ago");
     expect(overdueText({ overdue_min: 63 })).toBe("1 h 3 min ago");
+  });
+  it("says how far a current step has run past its plan (1.3, otto-q-core 0509), and nothing before it has", () => {
+    expect(overPlanText({})).toBeNull();
+    expect(overPlanText({ over_plan_min: null })).toBeNull();
+    expect(overPlanText({ over_plan_min: 0 })).toBeNull();
+    expect(overPlanText({ over_plan_min: Number.NaN })).toBeNull();
+    expect(overPlanText({ over_plan_min: 18 })).toBe("18 min past plan");
+    expect(overPlanText({ over_plan_min: 125 })).toBe("2 h 5 min past plan");
   });
 });

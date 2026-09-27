@@ -78,14 +78,23 @@ export function stepAtomLabel(step: { leg_type: string; atom?: string | null }):
   if (step.leg_type !== "inspect" || !step.atom) return null;
   return STEP_ATOM_LABELS[step.atom] ?? humanize(step.atom);
 }
-/** "15 min ago" for an upcoming step whose planned start is behind the run clock (1.2 overdue_min), else null. */
-export function overdueText(step: { overdue_min?: number | null }): string | null {
-  const m = step.overdue_min;
+/** Whole minutes as "15 min", "1 h", "1 h 3 min"; null for a missing, non-finite or sub-minute value. */
+function minutesText(m: number | null | undefined): string | null {
   if (typeof m !== "number" || !Number.isFinite(m) || m < 1) return null;
-  if (m < 60) return `${m} min ago`;
+  if (m < 60) return `${m} min`;
   const h = Math.floor(m / 60);
   const r = m % 60;
-  return r ? `${h} h ${r} min ago` : `${h} h ago`;
+  return r ? `${h} h ${r} min` : `${h} h`;
+}
+/** "15 min ago" for an upcoming step whose planned start is behind the run clock (1.2 overdue_min), else null. */
+export function overdueText(step: { overdue_min?: number | null }): string | null {
+  const t = minutesText(step.overdue_min);
+  return t ? `${t} ago` : null;
+}
+/** "18 min past plan" for a current step running longer than its planned duration (1.3 over_plan_min), else null. */
+export function overPlanText(step: { over_plan_min?: number | null }): string | null {
+  const t = minutesText(step.over_plan_min);
+  return t ? `${t} past plan` : null;
 }
 
 // ── clocks ───────────────────────────────────────────────────────────────────

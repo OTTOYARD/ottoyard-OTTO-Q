@@ -4,7 +4,7 @@
 import { ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import type { CardStep } from "@/lib/twin/cards";
 import type { FleetRow } from "@/lib/twin/model";
-import { STAGE_LABEL, cardDecisionText, humanize, overdueText, simTime, stepAtomLabel } from "@/lib/twin/model";
+import { STAGE_LABEL, cardDecisionText, humanize, overPlanText, overdueText, simTime, stepAtomLabel } from "@/lib/twin/model";
 import { describeDecision, holdText, isPlace } from "@/lib/twin/decisionText";
 import { useActivityFeed } from "@/lib/twin/hooks";
 import { Chip, DECISION_TONE, SocBar, STAGE_TONE, fmt } from "./ui";
@@ -152,8 +152,17 @@ export function VehicleLiveCard({
           <div className="mt-2">
             <div className="flex justify-between text-[11px]">
               <span>Now: <span className="font-medium">{stepName(cur)}</span></span>
-              <span className="font-mono text-muted-foreground">until {simTime(cur.expected_end ?? cur.planned_end)}</span>
+              <span className="font-mono text-muted-foreground">
+                {cur.eta_source === "charge_physics" ? (
+                  <span title="from the charge curve at the car's state of charge now">until ~{simTime(cur.expected_end ?? cur.planned_end)}</span>
+                ) : (
+                  <>until {simTime(cur.expected_end ?? cur.planned_end)}</>
+                )}
+              </span>
             </div>
+            {overPlanText(cur) ? (
+              <div className="text-[10px] text-amber-300" title="running longer than its planned duration">{overPlanText(cur)}</div>
+            ) : null}
             {typeof cur.progress_pct === "number" ? (
               <div className="mt-1 h-1 overflow-hidden rounded-full bg-secondary">
                 <div className="h-full bg-sky-500" style={{ width: `${Math.max(0, Math.min(100, cur.progress_pct))}%` }} />
