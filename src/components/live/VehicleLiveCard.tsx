@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import type { CardStep } from "@/lib/twin/cards";
 import type { FleetRow } from "@/lib/twin/model";
 import { STAGE_LABEL, cardDecisionText, humanize, needNote, overPlanText, overdueText, simTime, stepAtomLabel } from "@/lib/twin/model";
-import { describeDecision, holdText, isPlace } from "@/lib/twin/decisionText";
+import { decisionKey, decisionPlace, describeDecision, holdText } from "@/lib/twin/decisionText";
 import { useActivityFeed } from "@/lib/twin/hooks";
 import { Chip, DECISION_TONE, SocBar, STAGE_TONE, fmt } from "./ui";
 
@@ -87,11 +87,10 @@ function History({ runId, vehicleId }: { runId: string; vehicleId: string }) {
     <ol className="space-y-1">
       {data.map((d) => {
         const text = describeDecision(d);
-        const verb = typeof d.rationale?.verb === "string" ? d.rationale.verb : "";
-        const place = isPlace(d.target, verb) ? d.target : null;
+        const place = decisionPlace(d);
         const why = [text.detail, holdText(d, simTime)].filter(Boolean).join(" · ");
         return (
-          <li key={d.decision_seq} className="grid grid-cols-[64px_1fr] gap-2 text-[11px]" title={d.engine ? `engine: ${d.engine}` : undefined}>
+          <li key={decisionKey(d)} className="grid grid-cols-[64px_1fr] gap-2 text-[11px]" title={d.engine ? `engine: ${d.engine}` : undefined}>
             <span className="font-mono text-muted-foreground">{simTime(d.occurred_at)}</span>
             <span>
               <span className={`font-medium ${DECISION_TONE[text.tone]}`}>{text.title}</span>

@@ -11,6 +11,7 @@ import type { TwinEventsWindow, TwinFleetCondition, TwinLayout, TwinSnapshot, Tw
 import type { ActivityRow, AppointmentsResponse, DepotCardsResponse } from "./cards";
 import type { DialPromotion, KpiFive, SitePowerPlan } from "./plan";
 import type { RunEventRow } from "./eventFeed";
+import type { ChallengerBoard, LearningBoard } from "./secondLoop";
 
 const TWIN = `${OTTOQ_URL}/functions/v1/otto-twin-control`;
 const HEADERS = {
@@ -53,13 +54,22 @@ export const twinApi = {
       p_depot_id: depotId,
       ...(fleetOperatorId ? { p_fleet_operator_id: fleetOperatorId } : {}),
     }),
-  activityFeed: (simRunId: string, opts: { limit?: number; vehicleId?: string | null; changesOnly?: boolean } = {}) =>
-    ottoqRpc<ActivityRow[]>("ottoq_activity_feed", {
+  /** The decision stream. v2 (otto-q-core 0536) is the same rows with the challenger's questions and grades beside
+   *  them; a database without 0536 answers 404 / PGRST202, and the cockpit falls back to the decisions alone. */
+  activityFeed: async (simRunId: string, opts: { limit?: number; vehicleId?: string | null; changesOnly?: boolean } = {}) => {
+    const args = {
       p_sim_run_id: simRunId,
       p_limit: opts.limit ?? 60,
       p_vehicle_id: opts.vehicleId ?? null,
       p_changes_only: opts.changesOnly ?? true,
-    }),
+    };
+    try {
+      return await ottoqRpc<ActivityRow[]>("ottoq_activity_feed_v2", args);
+    } catch (e) {
+      if (e instanceof Error && /PGRST202|: 404 /.test(e.message)) return ottoqRpc<ActivityRow[]>("ottoq_activity_feed", args);
+      throw e;
+    }
+  },
   fleetCondition: (simRunId: string) => ottoqRpc<TwinFleetCondition>("ottoq_twin_fleet_condition", { p_sim_run_id: simRunId }),
   eventsWindow: (simRunId: string) => ottoqRpc<TwinEventsWindow>("ottoq_twin_events_window", { p_sim_run_id: simRunId }),
   wearWindow: (simRunId: string) => ottoqRpc<TwinWearWindow>("ottoq_twin_wear_window", { p_sim_run_id: simRunId }),
@@ -85,4 +95,9 @@ export const twinApi = {
         "&select=promotion_id,decided_at,param_key,from_value,to_value,outcome,reason,scenario,cell_runs,cell_seeds,rolled_back_of,experiment_id" +
         `&order=promotion_id.desc&limit=${limit}`,
     ),
+  /** OTTO-Q's second loop (otto-q-core 0536). The challenger's questions about a run's choices, graded in hindsight;
+   *  with no run, its record across runs. Read-only: the challenger never changes the engine. */
+  challengerBoard: (simRunId: string | null) => ottoqRpc<ChallengerBoard>("ottoq_challenger_board", { p_sim_run_id: simRunId }),
+  /** The learner's paired dial experiments, the night window and the last promotions. Not run-scoped. */
+  learningBoard: () => ottoqRpc<LearningBoard>("ottoq_learning_board", {}),
 };

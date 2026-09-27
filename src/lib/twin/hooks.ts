@@ -123,6 +123,25 @@ export function useDialPromotions(depotId: string = FLAGSHIP_DEPOT_ID) {
   });
 }
 
+/** The challenger's board (otto-q-core 0536): it scans a live run once a sim minute; the twin cockpit reads it every 10 s too.
+ *  With no run it still answers, with each question's record across runs. */
+export function useChallengerBoard(simRunId: string | null | undefined) {
+  return useQuery({
+    queryKey: ["twin", "challenger-board", simRunId ?? null],
+    queryFn: () => twinApi.challengerBoard(simRunId ?? null),
+    refetchInterval: LIVE_POLL_MS * 2,
+  });
+}
+
+/** The learner's board: its experiments run overnight on the wall clock, so a minute is plenty. */
+export function useLearningBoard() {
+  return useQuery({
+    queryKey: ["twin", "learning-board"],
+    queryFn: () => twinApi.learningBoard(),
+    refetchInterval: 60_000,
+  });
+}
+
 /**
  * The whole live picture for one cockpit projection. PULSE passes null (every
  * owner); OrchestrAV passes the signed-in owner's operator id.

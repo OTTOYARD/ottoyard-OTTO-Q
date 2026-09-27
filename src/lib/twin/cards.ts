@@ -120,7 +120,8 @@ export interface ActivityRow {
   outcome: string | null;
   rationale: Record<string, unknown> | null;
   reason: string | null;
-  decision_seq: number;
+  /** The decision's ledger identity; null on a challenger row (otto-q-core 0536), which is no decision. */
+  decision_seq: number | null;
   tick_seq: number | null;
   held_ticks: number | null;
   last_at: string | null;

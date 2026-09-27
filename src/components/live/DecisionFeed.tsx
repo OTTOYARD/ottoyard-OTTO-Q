@@ -8,9 +8,10 @@ import {
   CATEGORY_LABEL,
   DEFAULT_CATEGORIES,
   decisionCategory,
+  decisionKey,
+  decisionPlace,
   describeDecision,
   holdText,
-  isPlace,
   type DecisionCategory,
 } from "@/lib/twin/decisionText";
 import type { ActivityRow } from "@/lib/twin/cards";
@@ -39,7 +40,7 @@ export function DecisionFeed({ vehicleIds, limit = 60, scopeLabel }: { vehicleId
     [feed.data, vehicleIds],
   );
   const counts = useMemo(() => {
-    const c: Record<DecisionCategory, number> = { agent: 0, dispatch: 0, energy: 0, plans: 0 };
+    const c: Record<DecisionCategory, number> = { agent: 0, dispatch: 0, energy: 0, plans: 0, challenger: 0 };
     for (const r of rows) c[decisionCategory(r.action)] += 1;
     return c;
   }, [rows]);
@@ -91,12 +92,11 @@ export function DecisionFeed({ vehicleIds, limit = 60, scopeLabel }: { vehicleId
             <ol className="max-h-[560px] divide-y divide-border overflow-auto">
               {visible.map((d) => {
                 const text = describeDecision(d);
-                const verb = typeof d.rationale?.verb === "string" ? d.rationale.verb : "";
-                const place = isPlace(d.target, verb) ? d.target : null;
+                const place = decisionPlace(d);
                 const hold = holdText(d, simTime);
                 const directive = agentDirective(d);
                 return (
-                  <li key={d.decision_seq} className="grid grid-cols-[70px_1fr] gap-2 px-3 py-2 text-[12px]" title={d.engine ? `engine: ${d.engine}` : undefined}>
+                  <li key={decisionKey(d)} className="grid grid-cols-[70px_1fr] gap-2 px-3 py-2 text-[12px]" title={d.engine ? `engine: ${d.engine}` : undefined}>
                     <span className="font-mono text-muted-foreground">{simTime(d.occurred_at)}</span>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-1.5">
