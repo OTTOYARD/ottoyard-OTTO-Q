@@ -103,8 +103,8 @@ function generateFleetAlerts(
   if (depot && (depot.chargeStallUtilization ?? 0) > 85) {
     alerts.push({
       severity: "high",
-      title: "Charge stall capacity near limit",
-      message: `${depot.chargeStallUtilization}% utilization — only ${depot.availableChargeStalls} of ${depot.totalChargeStalls} stalls available.`,
+      title: "Chargers nearly all taken",
+      message: `${depot.chargeStallUtilization}% of chargers have a car or a hold; ${depot.availableChargeStalls} of ${depot.totalChargeStalls} are open.`,
       suggestedAction: "View depot demand forecast",
       suggestedPrompt: "Predict depot demand for the next 8 hours and recommend load balancing",
       source: "depot",
@@ -116,7 +116,7 @@ function generateFleetAlerts(
     alerts.push({
       severity: (incidents.activeIncidents ?? 0) >= 3 ? "high" : "medium",
       title: `${incidents.activeIncidents} active incident${(incidents.activeIncidents ?? 0) > 1 ? "s" : ""}`,
-      message: `${incidents.pendingIncidents ?? 0} pending triage. Review and prioritize response.`,
+      message: `${incidents.pendingIncidents ?? 0} depot-wide condition${(incidents.pendingIncidents ?? 0) === 1 ? "" : "s"} holding. Review them in Incidents.`,
       suggestedAction: "Triage incidents",
       suggestedPrompt: "Triage all active incidents and show priority ranking with recommended actions",
       source: "incident",

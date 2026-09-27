@@ -50,6 +50,22 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+## The dashboard's tabs (live from OTTO-TWIN)
+
+Every tab reads the run that is live on the twin depot (OTTOYARD Nashville Flagship) through the shared twin
+layer in `src/lib/twin` and the panels in `src/components/live`, the same files OTTO-PULSE carries. With no live
+run, each tab says so; nothing falls back to seeded or remembered data. "Viewing as" scopes every panel to one
+owner's vehicles.
+
+| Tab | What it shows | Source |
+|---|---|---|
+| Overview | fleet by stage, the latest decisions | `ottoq_depot_cards`, `ottoq_activity_feed` |
+| Fleet | each vehicle, its work card, OTTO-Q's decisions about it | `ottoq_depot_cards`, twin snapshot |
+| Depots | stall occupancy and the reservation board | `ottoq_depot_cards`, depot layout |
+| Energy | site power balance, battery, tariff, charging now | twin snapshot, `ottoq_twin_events_window` |
+| Incidents | what went wrong this run, and standing depot conditions | `ottoq_run_event_feed` (the twin's Events wording) |
+| Performance | the five KPIs, the learning loop's dial ledger, who is coming back, the site power plan | `/sim_runs/:id/kpis`, `ottoq_dial_promotion_ledger`, `ottoq_twin_appointments`, `service_profiles` |
+
 ## What technologies are used for this project?
 
 This project is built with:

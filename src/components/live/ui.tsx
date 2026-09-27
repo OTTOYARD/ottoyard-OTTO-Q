@@ -2,6 +2,7 @@
 // Plain Tailwind + shadcn tokens only, so the same file renders in PULSE and OrchestrAV.
 import type { ReactNode } from "react";
 import type { Stage } from "@/lib/twin/model";
+import type { DecisionTone } from "@/lib/twin/decisionText";
 
 export const STAGE_TONE: Record<Stage, string> = {
   inbound: "bg-sky-500/15 text-sky-300 border-sky-500/30",
@@ -14,6 +15,14 @@ export const STAGE_TONE: Record<Stage, string> = {
   off_site: "bg-zinc-700/30 text-zinc-400 border-zinc-600/40",
   out_of_service: "bg-red-500/15 text-red-300 border-red-500/30",
   unknown: "bg-red-500/15 text-red-300 border-red-500/30",
+};
+
+/** Text colour of a decision verdict (decisionText.ts's tone), the same four the twin cockpit uses. */
+export const DECISION_TONE: Record<DecisionTone, string> = {
+  enacted: "text-emerald-300",
+  held: "text-amber-300",
+  warn: "text-red-300",
+  idle: "text-muted-foreground",
 };
 
 export function Chip({ children, tone = "", title }: { children: ReactNode; tone?: string; title?: string }) {

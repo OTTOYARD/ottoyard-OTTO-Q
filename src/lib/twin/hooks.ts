@@ -84,6 +84,45 @@ export function useAppointments(simRunId: string | null | undefined) {
   });
 }
 
+/** The five KPIs over the whole run: a measurement, not a frame, so a 20-second refresh is plenty. */
+export function useKpiFive(simRunId: string | null | undefined) {
+  return useQuery({
+    queryKey: ["twin", "kpi-five", simRunId],
+    queryFn: () => twinApi.kpis(simRunId as string),
+    enabled: !!simRunId,
+    refetchInterval: 20_000,
+  });
+}
+
+/** The site power plan in force: re-published every tick, so it polls with the live panels. */
+export function useSitePowerPlan(simRunId: string | null | undefined) {
+  return useQuery({
+    queryKey: ["twin", "site-power-plan", simRunId],
+    queryFn: () => twinApi.sitePowerPlan(simRunId as string),
+    enabled: !!simRunId,
+    refetchInterval: LIVE_POLL_MS * 2,
+  });
+}
+
+/** The run's event feed, newest first. Polls with the live panels. */
+export function useRunEventFeed(simRunId: string | null | undefined, limit = 200, windowMin = 600) {
+  return useQuery({
+    queryKey: ["twin", "event-feed", simRunId, limit, windowMin],
+    queryFn: () => twinApi.eventFeed(simRunId as string, limit, windowMin),
+    enabled: !!simRunId,
+    refetchInterval: LIVE_POLL_MS,
+  });
+}
+
+/** The dial promotion ledger. Not run-scoped: promotions are decided between runs, on the wall clock. */
+export function useDialPromotions(depotId: string = FLAGSHIP_DEPOT_ID) {
+  return useQuery({
+    queryKey: ["twin", "dial-promotions", depotId],
+    queryFn: () => twinApi.dialPromotions(depotId),
+    refetchInterval: 60_000,
+  });
+}
+
 /**
  * The whole live picture for one cockpit projection. PULSE passes null (every
  * owner); OrchestrAV passes the signed-in owner's operator id.

@@ -1,7 +1,7 @@
 // ============================================================================
 // Read contracts the twin cockpit does not type itself.
 //
-//   ottoq_depot_cards 1.1   otto-q-core db/migrations/0460_*  (the ONE per-vehicle
+//   ottoq_depot_cards 1.3   otto-q-core db/migrations/0460_*, 0506_*, 0507_*, 0509_*  (the ONE per-vehicle
 //                           read contract both cockpits project; the operator
 //                           filter is the only difference between them)
 //   ottoq_activity_feed     otto-q-core (0079 + 0452..0457): "vehicle -> target, why"
@@ -24,6 +24,17 @@ export interface CardStep {
   actual_start?: string | null;
   actual_end?: string | null;
   progress_pct?: number | null;
+  /** 1.2 (0506): the task the leg was planned for (tells an interior inspection from a readiness check). */
+  atom?: string | null;
+  /** 1.2 (0506): for an upcoming step, whole minutes its planned start is behind the run clock; else null. */
+  overdue_min?: number | null;
+  /** 1.2 (0507): for the current step, when it will end. 1.3 (0509): for a running charge, from the charge physics at
+   *  the car's SoC now; otherwise its actual start plus its planned duration. `eta_source` says which. */
+  expected_end?: string | null;
+  /** 1.3 (0509): 'charge_physics' or 'plan', for the current step's expected_end. */
+  eta_source?: "charge_physics" | "plan" | null;
+  /** 1.3 (0509): for the current step, whole minutes it has run past its planned duration; null until it has. */
+  over_plan_min?: number | null;
 }
 
 export interface VehicleWorkCard {

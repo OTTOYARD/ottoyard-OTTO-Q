@@ -26,7 +26,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MessageRenderer } from "@/components/MessageRenderer";
 import { useIncidentsStore } from "@/stores/incidentsStore";
-import { useFleetContext, serializeFleetContext } from "@/hooks/useFleetContext";
+import { useFleetContext } from "@/hooks/useFleetContext";
 import { ottoqInvoke } from "@/lib/otto-q-api";
 import { useOttoResponseBridge } from "@/hooks/useOttoResponseBridge";
 import { useOttoCommandStore } from "@/stores/ottoCommandStore";
@@ -54,6 +54,8 @@ import {
 interface OttoCommandPanelProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** The owner scope the page is showing (OperatorScope); null is every owner. */
+  fleetOperatorId?: string | null;
   mode?: "av" | "ev";
   evContext?: {
     subscriber: any;
@@ -204,9 +206,10 @@ export const OttoCommandPanel: React.FC<OttoCommandPanelProps> = ({
   currentCity,
   vehicles = [],
   depots = [],
+  fleetOperatorId = null,
 }) => {
-  // Fleet context (real-time from Supabase)
-  const fleetContext = useFleetContext();
+  // Fleet context from the live twin run (the owner's projection when a scope is set)
+  const fleetContext = useFleetContext(fleetOperatorId);
   const incidents = useIncidentsStore((state) => state.incidents);
   const bridge = useOttoResponseBridge();
 
@@ -265,7 +268,6 @@ export const OttoCommandPanel: React.FC<OttoCommandPanelProps> = ({
       const startTime = Date.now();
 
       try {
-        const fleetDataContext = serializeFleetContext(fleetContext);
         const conversationHistory = store
           .getConversationHistory(10)
           .map((m) => ({ role: m.role, content: m.content }));

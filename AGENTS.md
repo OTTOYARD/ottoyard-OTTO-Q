@@ -28,8 +28,9 @@ that pattern; do not build a parallel read surface.
   **Poll instead.** Removing or repointing it is on the backlog.
 - **The Fleet tab already reads real `gxdrc` vehicle UUIDs** via `ottoqInvoke("ottoq-fleet-vehicles")`,
   and that edge function **already accepts a `fleet_operator_id` filter** — no ID mapping needed.
-- **The per-vehicle sequence card already ships** (merged PR #12); the inline JSX lives in
-  `src/components/OTTOQFleetView.tsx`. Sequence-render precedent: `VisitReportCard.tsx`.
+- **The per-vehicle card is `src/components/live/VehicleLiveCard.tsx`**, on the shared twin layer
+  (`src/lib/twin/`, kept file-for-file identical with OTTO-PULSE). The older `OTTOQFleetView.tsx` and
+  `VisitReportCard.tsx` were removed on 2026-09-26 with 57 other files nothing imported.
 - ⚠️ **The user → fleet-operator binding is client-side only** (anon key, no JWT) and is
   **spoofable**. Fine for the demo; real tenancy is a known security gate. **Do not build anything
   that assumes it is trustworthy.**
