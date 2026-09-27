@@ -96,6 +96,15 @@ export function overPlanText(step: { over_plan_min?: number | null }): string | 
   const t = minutesText(step.over_plan_min);
   return t ? `${t} past plan` : null;
 }
+/** What a need's chip says beside its name, and its hover text (otto-q-core 0512, G236). An interior inspection, or a
+ *  triage that judges only the cabin, done by the charger's own sensors during the charge takes no technician; an
+ *  uncertain cleaning need waits on the triage check's verdict (confirm, clear or escalate) before anyone does it. */
+export function needNote(a: { must_do: boolean; performed_by?: string | null; awaiting_triage?: boolean }): { note: string | null; title: string } {
+  const base = a.must_do ? "must do before dispatch" : "deferrable";
+  if (a.performed_by === "charger_sensors") return { note: "charger sensors", title: `${base}; done by the charger's sensors during the charge, no technician` };
+  if (a.awaiting_triage) return { note: "awaiting triage", title: `${base}; waiting on the triage check's verdict (confirm, clear or escalate)` };
+  return { note: null, title: base };
+}
 
 // ── clocks ───────────────────────────────────────────────────────────────────
 /** The depot is in Nashville. Sim timestamps are shown on the depot's own clock. */

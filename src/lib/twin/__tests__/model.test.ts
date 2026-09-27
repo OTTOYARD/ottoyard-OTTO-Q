@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import fx from "./fixtures/live_capture.json";
 import type { DepotCardsResponse } from "../cards";
 import type { TwinFleetCondition, TwinLayout, TwinSnapshot } from "../types";
-import { allReservations, chargingNow, countByStage, doubleBooked, energyView, joinFleet, operatorsOf, stageOf, overdueText, stallBoard, stepAtomLabel, overPlanText } from "../model";
+import { allReservations, chargingNow, countByStage, doubleBooked, energyView, joinFleet, needNote, operatorsOf, stageOf, overdueText, stallBoard, stepAtomLabel, overPlanText } from "../model";
 
 const cards = fx.cards as unknown as DepotCardsResponse;
 const snapshot = fx.snapshot as unknown as TwinSnapshot;
@@ -177,5 +177,23 @@ describe("card steps (ottoq_depot_cards 1.2, otto-q-core 0506)", () => {
     expect(overPlanText({ over_plan_min: Number.NaN })).toBeNull();
     expect(overPlanText({ over_plan_min: 18 })).toBe("18 min past plan");
     expect(overPlanText({ over_plan_min: 125 })).toBe("2 h 5 min past plan");
+  });
+});
+
+describe("a need says who does it (otto-q-core 0512, G236)", () => {
+  it("names the charger's sensors, then a need waiting on the triage, and otherwise nothing", () => {
+    expect(needNote({ must_do: true, performed_by: "charger_sensors" })).toEqual({
+      note: "charger sensors",
+      title: "must do before dispatch; done by the charger's sensors during the charge, no technician",
+    });
+    expect(needNote({ must_do: true, performed_by: null, awaiting_triage: true })).toEqual({
+      note: "awaiting triage",
+      title: "must do before dispatch; waiting on the triage check's verdict (confirm, clear or escalate)",
+    });
+    expect(needNote({ must_do: false })).toEqual({ note: null, title: "deferrable" });
+    expect(needNote({ must_do: true, awaiting_triage: false })).toEqual({ note: null, title: "must do before dispatch" });
+  });
+  it("reads a snapshot atom from before 0512, which carries neither key, as a technician's", () => {
+    expect(needNote({ must_do: true })).toEqual({ note: null, title: "must do before dispatch" });
   });
 });
