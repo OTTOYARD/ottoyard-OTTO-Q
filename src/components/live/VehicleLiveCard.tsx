@@ -4,8 +4,8 @@
 import { ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import type { CardStep } from "@/lib/twin/cards";
 import type { FleetRow } from "@/lib/twin/model";
-import { STAGE_LABEL, cardDecisionText, humanize, overPlanText, overdueText, simTime, stepAtomLabel } from "@/lib/twin/model";
-import { describeDecision, holdText, isPlace } from "@/lib/twin/decisionText";
+import { STAGE_LABEL, cardDecisionText, humanize, needNote, overPlanText, overdueText, simTime, stepAtomLabel } from "@/lib/twin/model";
+import { decisionKey, decisionPlace, describeDecision, holdText } from "@/lib/twin/decisionText";
 import { useActivityFeed } from "@/lib/twin/hooks";
 import { Chip, DECISION_TONE, SocBar, STAGE_TONE, fmt } from "./ui";
 
@@ -28,21 +28,28 @@ const stepName = (s: CardStep) => stepAtomLabel(s) ?? leg(s.leg_type);
 function Needs({ row }: { row: FleetRow }) {
   // The twin's visit atoms carry est minutes + must_do; the card's needs are the same atoms
   // from ottoq_visit_needs. Prefer the snapshot visit (it is the open visit), else the card.
-  const atoms = row.visit?.atoms ?? row.card?.needs?.map((n) => ({ svc: n.svc, status: n.status, must_do: !!n.must_do, est_min: null })) ?? [];
+  const atoms = row.visit?.atoms ?? row.card?.needs?.map((n) => ({
+    svc: n.svc, status: n.status, must_do: !!n.must_do, est_min: null,
+    performed_by: n.performed_by ?? null, awaiting_triage: !!n.awaiting_triage, triage_verdict: n.triage_verdict ?? null,
+  })) ?? [];
   const open = atoms.filter((a) => a.status !== "done" && a.status !== "skipped" && a.status !== "cancelled");
   if (!open.length) return null;
   return (
     <div className="flex flex-wrap gap-1">
-      {open.map((a, i) => (
-        <Chip
-          key={`${a.svc}-${i}`}
-          tone={a.must_do ? "border-amber-500/40 bg-amber-500/10 text-amber-200" : undefined}
-          title={a.must_do ? "must do before dispatch" : "deferrable"}
-        >
-          {humanize(a.svc)}
-          {a.est_min ? <span className="font-mono text-muted-foreground">{a.est_min}m</span> : null}
-        </Chip>
-      ))}
+      {open.map((a, i) => {
+        const { note, title } = needNote(a);
+        return (
+          <Chip
+            key={`${a.svc}-${i}`}
+            tone={a.must_do ? "border-amber-500/40 bg-amber-500/10 text-amber-200" : undefined}
+            title={title}
+          >
+            {humanize(a.svc)}
+            {a.est_min ? <span className="font-mono text-muted-foreground">{a.est_min}m</span> : null}
+            {note ? <span className={a.performed_by === "charger_sensors" ? "text-sky-300" : "text-muted-foreground"}>· {note}</span> : null}
+          </Chip>
+        );
+      })}
     </div>
   );
 }
@@ -80,11 +87,10 @@ function History({ runId, vehicleId }: { runId: string; vehicleId: string }) {
     <ol className="space-y-1">
       {data.map((d) => {
         const text = describeDecision(d);
-        const verb = typeof d.rationale?.verb === "string" ? d.rationale.verb : "";
-        const place = isPlace(d.target, verb) ? d.target : null;
+        const place = decisionPlace(d);
         const why = [text.detail, holdText(d, simTime)].filter(Boolean).join(" · ");
         return (
-          <li key={d.decision_seq} className="grid grid-cols-[64px_1fr] gap-2 text-[11px]" title={d.engine ? `engine: ${d.engine}` : undefined}>
+          <li key={decisionKey(d)} className="grid grid-cols-[64px_1fr] gap-2 text-[11px]" title={d.engine ? `engine: ${d.engine}` : undefined}>
             <span className="font-mono text-muted-foreground">{simTime(d.occurred_at)}</span>
             <span>
               <span className={`font-medium ${DECISION_TONE[text.tone]}`}>{text.title}</span>

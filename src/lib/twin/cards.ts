@@ -1,7 +1,7 @@
 // ============================================================================
 // Read contracts the twin cockpit does not type itself.
 //
-//   ottoq_depot_cards 1.3   otto-q-core db/migrations/0460_*, 0506_*, 0507_*, 0509_*  (the ONE per-vehicle
+//   ottoq_depot_cards 1.4   otto-q-core db/migrations/0460_*, 0506_*, 0507_*, 0509_*, 0512_*  (the ONE per-vehicle
 //                           read contract both cockpits project; the operator
 //                           filter is the only difference between them)
 //   ottoq_activity_feed     otto-q-core (0079 + 0452..0457): "vehicle -> target, why"
@@ -13,6 +13,12 @@ export interface CardNeed {
   status: string;
   done_at?: string;
   must_do?: boolean;
+  /** 1.4 (0512): 'charger_sensors' when the charger's sensors did it; absent for a technician. */
+  performed_by?: string;
+  /** 1.4 (0512): true while the need waits on the triage check's verdict; absent otherwise. */
+  awaiting_triage?: boolean;
+  /** 1.4 (0512): the triage check's verdict: 'confirm' | 'clear' | 'escalate'. */
+  triage_verdict?: string;
 }
 
 export interface CardStep {
@@ -114,7 +120,8 @@ export interface ActivityRow {
   outcome: string | null;
   rationale: Record<string, unknown> | null;
   reason: string | null;
-  decision_seq: number;
+  /** The decision's ledger identity; null on a challenger row (otto-q-core 0536), which is no decision. */
+  decision_seq: number | null;
   tick_seq: number | null;
   held_ticks: number | null;
   last_at: string | null;

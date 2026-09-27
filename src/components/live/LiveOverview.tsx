@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useActivityFeed, useLiveDepot } from "@/lib/twin/hooks";
 import { STAGE_LABEL, STAGE_ORDER, countByStage, decisionActor, doubleBooked, energyView, humanize, joinFleet, simTime, stallBoard } from "@/lib/twin/model";
-import { DEFAULT_CATEGORIES, decisionCategory, describeDecision, isPlace } from "@/lib/twin/decisionText";
+import { DEFAULT_CATEGORIES, decisionCategory, decisionKey, decisionPlace, describeDecision } from "@/lib/twin/decisionText";
 import { LiveRunBar, NoLiveRun } from "./LiveRunBar";
 import { Chip, DECISION_TONE, Section, Stat, STAGE_TONE, fmt } from "./ui";
 
@@ -102,10 +102,9 @@ export function LiveOverview({ fleetOperatorId = null, scopeLabel, onOpen }: {
               <ol className="space-y-1">
                 {decisions.map((d) => {
                   const text = describeDecision(d);
-                  const verb = typeof d.rationale?.verb === "string" ? d.rationale.verb : "";
-                  const place = isPlace(d.target, verb) ? d.target : null;
+                  const place = decisionPlace(d);
                   return (
-                    <li key={d.decision_seq} className="grid grid-cols-[64px_1fr] gap-2 text-[12px]" title={d.engine ? `engine: ${d.engine}` : undefined}>
+                    <li key={decisionKey(d)} className="grid grid-cols-[64px_1fr] gap-2 text-[12px]" title={d.engine ? `engine: ${d.engine}` : undefined}>
                       <span className="font-mono text-muted-foreground">{simTime(d.occurred_at)}</span>
                       <span className="truncate">
                         <span className="font-mono font-semibold">{decisionActor(d)}</span>
