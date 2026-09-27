@@ -6,6 +6,7 @@
 // In this cockpit the feed row is the shared twin layer's ActivityRow (./cards); the rest of this file is the
 // twin's src/lib/decisionText.ts, verbatim.
 import type { ActivityRow as ActivityFeedRow } from "./cards";
+import { confirmedText, isLocalGrade } from "./secondLoop";
 
 /** Every clock in the cockpit reads Nashville time (the TopBar says "CT"). */
 export const DEPOT_TZ = "America/Chicago";
@@ -192,10 +193,11 @@ export function describeDecision(r: ActivityFeedRow): DecisionText {
   return { title: fallback.charAt(0).toUpperCase() + fallback.slice(1), detail: decisionReasonText(r), tone: overridden ? "warn" : noop ? "idle" : "enacted" };
 }
 
-// ── the challenger (otto-q-core 0532, 0536) ─────────────────────────────────
+// ── the challenger (otto-q-core 0532, 0536, 0538) ───────────────────────────
 // Every minute of a live run the challenger asks whether the depot could do better right now, and grades each question
 // in hindsight when it closes. Its rows are not decisions: the engine never acted on them, so the words say what was
-// QUESTIONED and what hindsight made of it, never what was done.
+// QUESTIONED and what hindsight made of it, never what was done. A confirmed Q1 is LOCAL (0538, G264): the car charged
+// on while the next car waited, which says nothing of the day, so it is worded as held locally and does not warn.
 export const CHALLENGER_QUESTION: Record<string, string> = {
   charging_above_floor_while_cars_wait: "charging past the deploy floor while cars wait",
   charger_offerable_while_cars_wait: "a free charger while a car waits",
@@ -219,11 +221,20 @@ export function challengerText(r: ActivityFeedRow): DecisionText {
         ? "the next car was still waiting"
         : mins(rz.beneficiary_waited_after_min) ? `the next car waited ${mins(rz.beneficiary_waited_after_min)} more` : null,
     ].filter(Boolean);
-    const verdict = grade === "confirmed" ? "right: a gain was missed" : grade === "refuted" ? "wrong: the engine's choice held" : "inconclusive";
+    const code = String(v.question ?? "");
+    const local = isLocalGrade(code);
+    const verdict =
+      grade === "confirmed"
+        ? local
+          ? confirmedText(code) ?? "held locally, not a verdict on the day"
+          : `right: ${confirmedText(code) ?? "a gain was missed"}`
+        : grade === "refuted"
+          ? "wrong: the engine's choice held"
+          : "inconclusive";
     return {
       title: `${label} graded: ${verdict}`,
       detail: [question, ...facts].join(" · ") || null,
-      tone: grade === "confirmed" ? "warn" : "idle",
+      tone: grade === "confirmed" && !local ? "warn" : "idle",
     };
   }
   const soc = num(v.car_soc);
