@@ -66,6 +66,28 @@ export function humanize(s: string | null | undefined): string {
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
+// ── card steps ───────────────────────────────────────────────────────────────
+// An `inspect` leg is either the interior inspection or the end-of-visit readiness check; the
+// cards say which since ottoq_depot_cards 1.2 (otto-q-core 0506), and the card names the step by it.
+const STEP_ATOM_LABELS: Record<string, string> = {
+  interior_inspection: "Interior inspection",
+  readiness_check: "Readiness check",
+};
+/** The task an `inspect` step was planned for, or null (the caller falls back to the leg type). */
+export function stepAtomLabel(step: { leg_type: string; atom?: string | null }): string | null {
+  if (step.leg_type !== "inspect" || !step.atom) return null;
+  return STEP_ATOM_LABELS[step.atom] ?? humanize(step.atom);
+}
+/** "15 min ago" for an upcoming step whose planned start is behind the run clock (1.2 overdue_min), else null. */
+export function overdueText(step: { overdue_min?: number | null }): string | null {
+  const m = step.overdue_min;
+  if (typeof m !== "number" || !Number.isFinite(m) || m < 1) return null;
+  if (m < 60) return `${m} min ago`;
+  const h = Math.floor(m / 60);
+  const r = m % 60;
+  return r ? `${h} h ${r} min ago` : `${h} h ago`;
+}
+
 // ── clocks ───────────────────────────────────────────────────────────────────
 /** The depot is in Nashville. Sim timestamps are shown on the depot's own clock. */
 export function simTime(iso: string | null | undefined): string {

@@ -2,8 +2,9 @@
 // next step, open needs. Expanded: reservations with OTTO-Q's reason, the last decision and
 // its rationale, the decision history, and the twin variables this vehicle was dealt.
 import { ChevronDown, ChevronUp, MapPin } from "lucide-react";
+import type { CardStep } from "@/lib/twin/cards";
 import type { FleetRow } from "@/lib/twin/model";
-import { STAGE_LABEL, cardDecisionText, humanize, simTime } from "@/lib/twin/model";
+import { STAGE_LABEL, cardDecisionText, humanize, overdueText, simTime, stepAtomLabel } from "@/lib/twin/model";
 import { describeDecision, holdText, isPlace } from "@/lib/twin/decisionText";
 import { useActivityFeed } from "@/lib/twin/hooks";
 import { Chip, DECISION_TONE, SocBar, STAGE_TONE, fmt } from "./ui";
@@ -22,6 +23,7 @@ const LEG_LABELS: Record<string, string> = {
   arrive: "Arrive at depot",
 };
 const leg = (s: string | null | undefined) => (s ? LEG_LABELS[s] ?? humanize(s) : "");
+const stepName = (s: CardStep) => stepAtomLabel(s) ?? leg(s.leg_type);
 
 function Needs({ row }: { row: FleetRow }) {
   // The twin's visit atoms carry est minutes + must_do; the card's needs are the same atoms
@@ -149,8 +151,8 @@ export function VehicleLiveCard({
         {cur ? (
           <div className="mt-2">
             <div className="flex justify-between text-[11px]">
-              <span>Now: <span className="font-medium">{leg(cur.leg_type)}</span></span>
-              <span className="font-mono text-muted-foreground">until {simTime(cur.planned_end)}</span>
+              <span>Now: <span className="font-medium">{stepName(cur)}</span></span>
+              <span className="font-mono text-muted-foreground">until {simTime(cur.expected_end ?? cur.planned_end)}</span>
             </div>
             {typeof cur.progress_pct === "number" ? (
               <div className="mt-1 h-1 overflow-hidden rounded-full bg-secondary">
@@ -161,7 +163,15 @@ export function VehicleLiveCard({
         ) : null}
         {next ? (
           <div className="mt-1 text-[11px] text-muted-foreground">
-            Next: <span className="text-foreground">{leg(next.leg_type)}</span> at <span className="font-mono">{simTime(next.planned_start)}</span>
+            Next: <span className="text-foreground">{stepName(next)}</span>
+            {overdueText(next) ? (
+              <>
+                {" "}planned <span className="font-mono">{simTime(next.planned_start)}</span>,{" "}
+                <span className="text-amber-300" title="its planned start is behind the run clock">{overdueText(next)}</span>
+              </>
+            ) : (
+              <> at <span className="font-mono">{simTime(next.planned_start)}</span></>
+            )}
           </div>
         ) : null}
 
