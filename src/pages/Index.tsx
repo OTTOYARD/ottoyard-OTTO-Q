@@ -2,6 +2,11 @@ import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LiveOverview } from "@/components/live/LiveOverview";
+import { FleetPanel } from "@/components/live/FleetPanel";
+import { DepotPanel } from "@/components/live/DepotPanel";
+import { EnergyPanel } from "@/components/live/EnergyPanel";
+import { OperatorScopePicker, ScopedDecisionFeed, useOperatorScope } from "@/components/live/OperatorScope";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -230,6 +235,7 @@ const IncidentsTabContent = () => {
 const Index = () => {
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState("overview");
+  const [fleetOperatorId, setFleetOperatorId] = useOperatorScope();
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
   const [selectedDepot, setSelectedDepot] = useState<string | null>(null);
   const [overviewView, setOverviewView] = useState<'main' | 'vehicles' | 'energy' | 'grid' | 'efficiency'>('main');
@@ -472,12 +478,17 @@ const Index = () => {
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="fleet">Fleet</TabsTrigger>
               <TabsTrigger value="depots">Depots</TabsTrigger>
+              <TabsTrigger value="energy">Energy</TabsTrigger>
               <TabsTrigger value="incidents">Incidents</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
           </div>
+          <div className="flex justify-end">
+            <OperatorScopePicker value={fleetOperatorId} onChange={setFleetOperatorId} />
+          </div>
 
           <TabsContent value="overview" className="space-y-6">
+            {overviewView === 'main' && <LiveOverview fleetOperatorId={fleetOperatorId} scopeLabel={fleetOperatorId ? "your fleet" : "all owners"} onOpen={(t) => setSelectedTab(t === "decisions" ? "fleet" : t === "depot" ? "depots" : t)} />}
             {overviewView === 'main' && <>
                 {/* Fleet Map */}
                 <Card className="futuristic-card hover-neon glow-medium">
@@ -1209,13 +1220,20 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="fleet" className="space-y-6">
+            <FleetPanel fleetOperatorId={fleetOperatorId} showOperatorFilter={!fleetOperatorId} scopeLabel={fleetOperatorId ? "your fleet" : "all owners"} />
+            <ScopedDecisionFeed fleetOperatorId={fleetOperatorId} />
             <PendingOemGatesBanner />
             <FleetSchedulingTile />
             <OTTOQFleetView selectedCityName={selectedCityForOTTOQ} highlightedVehicleId={highlightedVehicleId} onAddToCart={handleAddToCart} />
           </TabsContent>
 
           <TabsContent value="depots" className="space-y-6">
+            <DepotPanel fleetOperatorId={fleetOperatorId} scopeLabel={fleetOperatorId ? "your reservations; stall use is depot-wide" : "all owners"} />
             <OTTOQDepotView selectedCityName={selectedCityForOTTOQ} highlightedDepotId={highlightedDepotId} />
+          </TabsContent>
+
+          <TabsContent value="energy" className="space-y-6">
+            <EnergyPanel fleetOperatorId={fleetOperatorId} scopeLabel={fleetOperatorId ? "site power is depot-wide; charging list is yours" : "all owners"} />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
