@@ -1,0 +1,266 @@
+{
+  "_source": "public.ottoq_agent_requests_for_operator (otto-q-core 0550, granted to anon by 0551), called AS anon -- this cockpit's own path -- on 2026-09-28 against tests/fixtures/agent_gateway_stub_engine.sql in a scratch PostgreSQL 16. Real function output: two agents asked through ottoq_agent_call and the depot's yard supervisor decided some through ottoq_agent_request_decide, so the engine replies are the real recall door's.",
+  "waymo": {
+    "ok": true,
+    "items": [
+      {
+        "body": null,
+        "kind": "adjustment",
+        "title": "Cap Waymo-AV-002 at 90% tonight",
+        "lapsed": false,
+        "status": "pending",
+        "payload": {
+          "value": 90,
+          "adjustment": "charge_target"
+        },
+        "vehicle": {
+          "id": "ee000000-0000-0000-0000-0000000000a2",
+          "soc": 77,
+          "label": "Waymo-AV-002",
+          "state": "charging_dcfc"
+        },
+        "decision": null,
+        "priority": "normal",
+        "principal": {
+          "kind": "fleet_operator",
+          "name": "waymo-fleet-agent"
+        },
+        "sim_clock": "2026-09-27T12:00:00+00:00",
+        "applied_at": null,
+        "created_at": "2026-09-28T06:01:37.353518+00:00",
+        "decided_at": null,
+        "decided_by": null,
+        "expires_at": "2026-09-28T08:01:37.353518+00:00",
+        "request_id": "12bac557-daf4-4f92-a850-c93e0b586901",
+        "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+        "engine_door": null,
+        "engine_reply": null,
+        "closed_reason": null,
+        "decision_note": null,
+        "fleet_operator": {
+          "id": "22222222-2222-2222-2222-222222222222",
+          "name": "Waymo Nashville"
+        },
+        "recorded_status": "pending"
+      },
+      {
+        "body": null,
+        "kind": "recall_vehicle",
+        "title": "Bring Waymo-AV-001 home: tire pressure warning",
+        "lapsed": false,
+        "status": "pending",
+        "payload": {},
+        "vehicle": {
+          "id": "ee000000-0000-0000-0000-0000000000a1",
+          "soc": 41,
+          "label": "Waymo-AV-001",
+          "state": "deployed"
+        },
+        "decision": null,
+        "priority": "high",
+        "principal": {
+          "kind": "fleet_operator",
+          "name": "waymo-fleet-agent"
+        },
+        "sim_clock": "2026-09-27T12:00:00+00:00",
+        "applied_at": null,
+        "created_at": "2026-09-28T06:01:37.348087+00:00",
+        "decided_at": null,
+        "decided_by": null,
+        "expires_at": "2026-09-28T08:01:37.348087+00:00",
+        "request_id": "f5a60e2d-953a-453b-a6bb-0867cb2edddc",
+        "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+        "engine_door": null,
+        "engine_reply": null,
+        "closed_reason": null,
+        "decision_note": null,
+        "fleet_operator": {
+          "id": "22222222-2222-2222-2222-222222222222",
+          "name": "Waymo Nashville"
+        },
+        "recorded_status": "pending"
+      },
+      {
+        "body": null,
+        "kind": "recall_vehicle",
+        "title": "Bring Waymo-AV-002 home",
+        "lapsed": false,
+        "status": "refused_by_engine",
+        "payload": {},
+        "vehicle": {
+          "id": "ee000000-0000-0000-0000-0000000000a2",
+          "soc": 77,
+          "label": "Waymo-AV-002",
+          "state": "charging_dcfc"
+        },
+        "decision": "approved",
+        "priority": "normal",
+        "principal": {
+          "kind": "fleet_operator",
+          "name": "waymo-fleet-agent"
+        },
+        "sim_clock": "2026-09-27T12:00:00+00:00",
+        "applied_at": "2026-09-28T06:01:37.368723+00:00",
+        "created_at": "2026-09-28T06:01:37.361175+00:00",
+        "decided_at": "2026-09-28T06:01:37.368723+00:00",
+        "decided_by": {
+          "kind": "crew"
+        },
+        "expires_at": "2026-09-28T08:01:37.361175+00:00",
+        "request_id": "54165b45-848d-4d3c-8faa-8798a42fa5ac",
+        "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+        "engine_door": "ottoq_hw_recall_vehicle",
+        "engine_reply": {
+          "ok": false,
+          "error": "already_returning_or_home",
+          "state": "charging_dcfc"
+        },
+        "closed_reason": null,
+        "decision_note": null,
+        "fleet_operator": {
+          "id": "22222222-2222-2222-2222-222222222222",
+          "name": "Waymo Nashville"
+        },
+        "recorded_status": "refused_by_engine"
+      }
+    ],
+    "counts": {
+      "open": 2,
+      "total": 3
+    },
+    "depot_id": "11111111-1111-1111-1111-111111111111",
+    "can_decide": false,
+    "decide_note": "Deciding from OrchestrAV needs a sign-in on the engine bound to this fleet (fleet_operators.auth_user_id). Until then the depot crew decides these in OTTO-PULSE.",
+    "fleet_operator": {
+      "id": "22222222-2222-2222-2222-222222222222",
+      "name": "Waymo Nashville"
+    }
+  },
+  "tesla": {
+    "ok": true,
+    "items": [
+      {
+        "body": null,
+        "kind": "adjustment",
+        "title": "Hold Tesla-AV-001 until 6 AM",
+        "lapsed": false,
+        "status": "approved_no_engine_door",
+        "payload": {
+          "value": "06:00",
+          "adjustment": "hold_until"
+        },
+        "vehicle": {
+          "id": "ee000000-0000-0000-0000-0000000000b1",
+          "soc": 35,
+          "label": "Tesla-AV-001",
+          "state": "deployed"
+        },
+        "decision": "approved",
+        "priority": "normal",
+        "principal": {
+          "kind": "personal",
+          "name": "hermes"
+        },
+        "sim_clock": "2026-09-27T12:00:00+00:00",
+        "applied_at": null,
+        "created_at": "2026-09-28T06:01:37.362997+00:00",
+        "decided_at": "2026-09-28T06:01:37.369758+00:00",
+        "decided_by": {
+          "kind": "crew"
+        },
+        "expires_at": "2026-09-28T08:01:37.362997+00:00",
+        "request_id": "d814c623-9133-45a2-b2f3-228a3020e657",
+        "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+        "engine_door": null,
+        "engine_reply": {
+          "door": null,
+          "reason": "OTTO-Q has no door for this adjustment yet. The approval is recorded so a person can act on it; nothing in the engine changed."
+        },
+        "closed_reason": null,
+        "decision_note": "I will set the hold by hand.",
+        "fleet_operator": {
+          "id": "33333333-3333-3333-3333-333333333333",
+          "name": "Tesla Robotaxi TN"
+        },
+        "recorded_status": "approved_no_engine_door"
+      }
+    ],
+    "counts": {
+      "open": 0,
+      "total": 1
+    },
+    "depot_id": "11111111-1111-1111-1111-111111111111",
+    "can_decide": false,
+    "decide_note": "Deciding from OrchestrAV needs a sign-in on the engine bound to this fleet (fleet_operators.auth_user_id). Until then the depot crew decides these in OTTO-PULSE.",
+    "fleet_operator": {
+      "id": "33333333-3333-3333-3333-333333333333",
+      "name": "Tesla Robotaxi TN"
+    }
+  },
+  "zoox": {
+    "ok": true,
+    "items": [
+      {
+        "body": null,
+        "kind": "recall_vehicle",
+        "title": "Recall Zoox-AV-001 for an inspection",
+        "lapsed": false,
+        "status": "applied",
+        "payload": {},
+        "vehicle": {
+          "id": "ee000000-0000-0000-0000-0000000000c1",
+          "soc": 64,
+          "label": "Zoox-AV-001",
+          "state": "staged_awaiting_service"
+        },
+        "decision": "approved",
+        "priority": "normal",
+        "principal": {
+          "kind": "personal",
+          "name": "hermes"
+        },
+        "sim_clock": "2026-09-27T12:00:00+00:00",
+        "applied_at": "2026-09-28T06:01:37.365805+00:00",
+        "created_at": "2026-09-28T06:01:37.355399+00:00",
+        "decided_at": "2026-09-28T06:01:37.365805+00:00",
+        "decided_by": {
+          "kind": "crew"
+        },
+        "expires_at": "2026-09-28T08:01:37.355399+00:00",
+        "request_id": "883a6a85-3b3e-4bdb-aaef-805982501082",
+        "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+        "engine_door": "ottoq_hw_recall_vehicle",
+        "engine_reply": {
+          "ok": true,
+          "note": "queued",
+          "vehicle": "Zoox-AV-001",
+          "live_run": "5e5e5e5e-0000-0000-0000-000000000001",
+          "command_id": "5fb91708-1488-428a-9f3d-d823cafc07e7"
+        },
+        "closed_reason": null,
+        "decision_note": "Go ahead.",
+        "fleet_operator": {
+          "id": "44444444-4444-4444-4444-444444444444",
+          "name": "Zoox Southeast"
+        },
+        "recorded_status": "applied"
+      }
+    ],
+    "counts": {
+      "open": 0,
+      "total": 1
+    },
+    "depot_id": "11111111-1111-1111-1111-111111111111",
+    "can_decide": false,
+    "decide_note": "Deciding from OrchestrAV needs a sign-in on the engine bound to this fleet (fleet_operators.auth_user_id). Until then the depot crew decides these in OTTO-PULSE.",
+    "fleet_operator": {
+      "id": "44444444-4444-4444-4444-444444444444",
+      "name": "Zoox Southeast"
+    }
+  },
+  "no_operator": {
+    "ok": false,
+    "error": "fleet_operator_required",
+    "message": "Name the fleet operator whose requests to read."
+  }
+}
