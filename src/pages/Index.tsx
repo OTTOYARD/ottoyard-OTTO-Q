@@ -9,6 +9,7 @@ import { IncidentsPanel } from "@/components/live/IncidentsPanel";
 import { PerformancePanel } from "@/components/live/PerformancePanel";
 import { PlanPanel } from "@/components/live/PlanPanel";
 import { OperatorScopePicker, ScopedDecisionFeed, useOperatorScope } from "@/components/live/OperatorScope";
+import { AgentRequestsPanel } from "@/components/agents/AgentRequestsPanel";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -238,6 +239,7 @@ const Index = () => {
           <TabsContent value="fleet" className="space-y-6">
             <FleetPanel fleetOperatorId={fleetOperatorId} showOperatorFilter={!fleetOperatorId} scopeLabel={fleetOperatorId ? "your fleet" : "all owners"} />
             <ScopedDecisionFeed fleetOperatorId={fleetOperatorId} />
+            <AgentRequestsPanel fleetOperatorId={fleetOperatorId} />
             <PendingOemGatesBanner />
           </TabsContent>
 
