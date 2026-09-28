@@ -63,7 +63,7 @@ owner's vehicles.
 | Fleet | each vehicle, its work card, OTTO-Q's decisions about it | `ottoq_depot_cards`, twin snapshot |
 | Depots | stall occupancy and the reservation board | `ottoq_depot_cards`, depot layout |
 | Energy | site power balance, battery, tariff, charging now | twin snapshot, `ottoq_twin_events_window` |
-| Incidents | what went wrong this run, and standing depot conditions | `ottoq_run_event_feed` (the twin's Events wording) |
+| Incidents | what went wrong this run, and standing depot conditions, including a car kept from leaving unfinished and a car held past the readiness gate's limit for a person (vehicle first: no car leaves with a service still needed) | `ottoq_run_event_feed` (the twin's Events wording) |
 | Performance | the five KPIs, the learning loop's dial ledger, who is coming back, the site power plan | `/sim_runs/:id/kpis`, `ottoq_dial_promotion_ledger`, `ottoq_twin_appointments`, `service_profiles` |
 
 ## What technologies are used for this project?
