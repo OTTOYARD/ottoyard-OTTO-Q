@@ -2,13 +2,19 @@
 import { Radio } from "lucide-react";
 import type { TwinSnapshot } from "@/lib/twin/types";
 import { simTime } from "@/lib/twin/model";
+import { shortRun, twinLink } from "@/lib/twin/twinLink";
 
 export function NoLiveRun({ what = "live data" }: { what?: string }) {
+  // Opened from the twin, this view is pinned to the twin's run: when that run is not the live one,
+  // say so (the banner above says why) rather than claim the depot is idle.
+  const link = twinLink();
   return (
     <div className="rounded-lg border border-dashed border-border bg-card/50 p-8 text-center">
-      <p className="text-sm font-medium">No live run</p>
+      <p className="text-sm font-medium">{link ? `The twin's run ${shortRun(link.run)} is not live` : "No live run"}</p>
       <p className="mt-1 text-xs text-muted-foreground">
-        Start a run in OTTO-TWIN to see {what} here, live, within 5 seconds. Nothing is shown until the twin is running.
+        {link
+          ? `This view shows only the run the twin opened it on, so ${what} for any other run stays hidden.`
+          : `Start a run in OTTO-TWIN to see ${what} here, live, within 5 seconds. Nothing is shown until the twin is running.`}
       </p>
     </div>
   );
@@ -28,9 +34,10 @@ export function LiveRunBar({
   scopeLabel?: string;
 }) {
   if (!runId) {
+    const link = twinLink();
     return (
       <div className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
-        <span className="h-2 w-2 rounded-full bg-zinc-500" /> No live run on the depot
+        <span className="h-2 w-2 rounded-full bg-zinc-500" /> {link ? `The twin's run ${shortRun(link.run)} is not live` : "No live run on the depot"}
       </div>
     );
   }

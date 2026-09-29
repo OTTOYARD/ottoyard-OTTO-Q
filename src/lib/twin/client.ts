@@ -12,6 +12,7 @@ import type { ActivityRow, AppointmentsResponse, DepotCardsResponse } from "./ca
 import type { DialPromotion, KpiFive, SitePowerPlan } from "./plan";
 import type { RunEventRow } from "./eventFeed";
 import type { ChallengerBoard, LearningBoard } from "./secondLoop";
+import type { TwinRunContext } from "./twinLink";
 
 const TWIN = `${OTTOQ_URL}/functions/v1/otto-twin-control`;
 const HEADERS = {
@@ -71,6 +72,9 @@ export const twinApi = {
     }
   },
   fleetCondition: (simRunId: string) => ottoqRpc<TwinFleetCondition>("ottoq_twin_fleet_condition", { p_sim_run_id: simRunId }),
+  /** One run's status and depot, or `error: 'sim_run not found'`: how a cockpit pinned to a twin run tells an ended
+   *  run from one that never existed. The twin cockpit reads the same function. */
+  runContext: (simRunId: string) => ottoqRpc<TwinRunContext>("ottoq_twin_run_context", { p_sim_run_id: simRunId }),
   eventsWindow: (simRunId: string) => ottoqRpc<TwinEventsWindow>("ottoq_twin_events_window", { p_sim_run_id: simRunId }),
   wearWindow: (simRunId: string) => ottoqRpc<TwinWearWindow>("ottoq_twin_wear_window", { p_sim_run_id: simRunId }),
   appointments: (simRunId: string) => ottoqRpc<AppointmentsResponse>("ottoq_twin_appointments", { p_sim_run_id: simRunId }),
