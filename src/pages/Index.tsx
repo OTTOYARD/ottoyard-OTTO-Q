@@ -23,6 +23,8 @@ import { CartItem } from "@/components/CartButton";
 import { PendingOemGatesBanner } from "@/components/PendingOemGatesBanner";
 import { OttoResponsePanel } from "@/components/OttoResponse";
 import { AppHeader } from "@/components/shared/AppHeader";
+import { TwinLinkBanner } from "@/components/live/TwinLinkBanner";
+import { twinLink } from "@/lib/twin/twinLink";
 
 import { ottoQFetch, ottoqInvoke } from "@/lib/otto-q-api";
 
@@ -207,16 +209,20 @@ const Index = () => {
 
   
 
+  // Framed beside the depot in the twin (?embed=1): the twin's panel is the frame, so the app header stays out.
+  const embed = twinLink()?.embed ?? false;
+
   return <div className="min-h-screen bg-background">
+      <TwinLinkBanner />
       {/* Header - Shared AppHeader with Interface Toggle */}
-      <AppHeader
+      {!embed && <AppHeader
         appName="OrchestraAV1"
         currentCity={currentCity}
         onOpenAI={() => setAiAgentOpen(true)}
-      />
+      />}
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
+      <main className={embed ? "px-3 py-3" : "container mx-auto px-4 py-6"}>
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
           <div className="flex justify-center overflow-x-auto">
             <TabsList className="w-auto flex-shrink-0 max-w-xl">
@@ -331,7 +337,7 @@ const Index = () => {
       </main>
       
       {/* OTTO-RESPONSE Panel */}
-      <OttoResponsePanel vehicles={vehicles} depots={depots} />
+      {!embed && <OttoResponsePanel vehicles={vehicles} depots={depots} />}
     </div>;
 };
 export default Index;

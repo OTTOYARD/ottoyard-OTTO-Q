@@ -3,18 +3,52 @@
 // the depot card feed names the live run (running | paused on the flagship
 // depot), and every other feed keys off that id. When it is null, every panel
 // says "No live run". Nothing falls back to old or invented data.
+//
+// Opened from the twin (twinLink.ts), the selector is PINNED: the feed names
+// the twin's run or no run at all, so no panel can show another run's cars.
 // ============================================================================
+import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { twinApi } from "./client";
 import { FLAGSHIP_DEPOT_ID, LIVE_POLL_MS } from "./config";
+import type { DepotCardsResponse } from "./cards";
+import { pinCards, pinStateOf, twinLink } from "./twinLink";
 
 export function useDepotCards(fleetOperatorId: string | null = null, depotId: string = FLAGSHIP_DEPOT_ID) {
+  const pinnedRun = twinLink()?.run ?? null;
+  const pin = useCallback((d: DepotCardsResponse) => pinCards(d, pinnedRun as string), [pinnedRun]);
   return useQuery({
     queryKey: ["twin", "depot-cards", depotId, fleetOperatorId],
     queryFn: () => twinApi.depotCards(depotId, fleetOperatorId),
+    select: pinnedRun ? pin : undefined,
     refetchInterval: LIVE_POLL_MS,
     staleTime: LIVE_POLL_MS / 2,
   });
+}
+
+/**
+ * Where the twin's run stands, for the banner. Null when the cockpit was not opened from the twin.
+ * Reads the depot feed UNPINNED (same cache entry as useDepotCards(null)), and asks for the run's
+ * own status only when the feed names another run.
+ */
+export function useTwinPin() {
+  const link = twinLink();
+  const cards = useQuery({
+    queryKey: ["twin", "depot-cards", FLAGSHIP_DEPOT_ID, null],
+    queryFn: () => twinApi.depotCards(FLAGSHIP_DEPOT_ID, null),
+    enabled: !!link,
+    refetchInterval: LIVE_POLL_MS,
+    staleTime: LIVE_POLL_MS / 2,
+  });
+  const elsewhere = !!link && !!cards.data && cards.data.sim_run_id !== link.run;
+  const ctx = useQuery({
+    queryKey: ["twin", "run-context", link?.run ?? null],
+    queryFn: () => twinApi.runContext(link?.run as string),
+    enabled: elsewhere,
+    refetchInterval: LIVE_POLL_MS * 2,
+  });
+  if (!link) return null;
+  return { link, state: pinStateOf(link.run, cards.data, ctx.data, ctx.isError && !ctx.data) };
 }
 
 export function useSnapshot(simRunId: string | null | undefined) {
