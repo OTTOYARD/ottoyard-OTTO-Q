@@ -32,10 +32,10 @@ describe("every decision in the capture reads as a verdict in words", () => {
     }
   });
 
-  it("names the rule behind a shield hold, and says how long it has stood", () => {
+  it("names the rule behind a safety hold by what it protects, and says how long it has stood", () => {
     const held = feed.find((r) => r.display_name === "Tesla-AV-063" && r.action === "redeployment");
     expect(held).toBeDefined();
-    expect(describeDecision(held!)).toEqual({ title: "Deploy held", detail: "SLA.004.required_services_complete", tone: "warn" });
+    expect(describeDecision(held!)).toEqual({ title: "Deploy held", detail: "required services are done", tone: "warn" });
     expect(holdText(held!, simTime)).toBe("since 5:42 AM, still in force");
   });
 
@@ -75,7 +75,7 @@ describe("a vehicle card's last decision uses the same words as the feed", () =>
 
   it("reads the verb the card carries beside its rationale", () => {
     const v = cards.vehicles.find((x) => x.display_name === "Zoox-AV-084");
-    expect(cardDecisionText(v!.last_decision!)).toEqual({ title: "Held by the shield", detail: null, tone: "warn" });
+    expect(cardDecisionText(v!.last_decision!)).toEqual({ title: "Held by a safety check", detail: null, tone: "warn" });
   });
 });
 
