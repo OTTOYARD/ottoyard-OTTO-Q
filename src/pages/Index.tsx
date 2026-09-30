@@ -224,14 +224,19 @@ const Index = () => {
       {/* Main Content */}
       <main className={embed ? "px-3 py-3" : "container mx-auto px-4 py-6"}>
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <div className="flex justify-center overflow-x-auto">
-            <TabsList className="w-auto flex-shrink-0 max-w-xl">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="fleet">Fleet</TabsTrigger>
-              <TabsTrigger value="depots">Depots</TabsTrigger>
-              <TabsTrigger value="energy">Energy</TabsTrigger>
-              <TabsTrigger value="incidents">Incidents</TabsTrigger>
-              <TabsTrigger value="analytics">Performance</TabsTrigger>
+          {/* Touch screens get finger-sized tabs (they were 23 px tall on a phone). Below 640 px the row
+              starts at the left: centred, a row wider than a small phone would clip its first tab. */}
+          <div className="flex justify-start sm:justify-center overflow-x-auto">
+            <TabsList className="w-auto flex-shrink-0 max-w-xl [@media(pointer:coarse)]:h-10">
+              {([
+                ["overview", "Overview"], ["fleet", "Fleet"], ["depots", "Depots"],
+                ["energy", "Energy"], ["incidents", "Incidents"], ["analytics", "Performance"],
+              ] as const).map(([value, label]) => (
+                <TabsTrigger key={value} value={value}
+                  className="[@media(pointer:coarse)]:h-9 [@media(pointer:coarse)]:px-1.5 [@media(pointer:coarse)]:text-[11px]">
+                  {label}
+                </TabsTrigger>
+              ))}
             </TabsList>
           </div>
           <div className="flex justify-end">

@@ -31,7 +31,8 @@ export function LiveOverview({ fleetOperatorId = null, scopeLabel, onOpen }: {
     .slice(0, 8);
   const ledger = cards.data?.reservation_ledger ?? {};
   const link = (tab: "fleet" | "depot" | "energy" | "decisions", label: string) =>
-    onOpen ? <button type="button" onClick={() => onOpen(tab)} className="text-[11px] text-primary hover:underline">{label}</button> : null;
+    // on a touch screen the link keeps its look but gets a finger-sized hit area (it was 17 px tall)
+    onOpen ? <button type="button" onClick={() => onOpen(tab)} className="text-[11px] text-primary hover:underline [@media(pointer:coarse)]:-my-2 [@media(pointer:coarse)]:py-2 [@media(pointer:coarse)]:px-1">{label}</button> : null;
 
   if (cards.isLoading) return <p className="text-sm text-muted-foreground">Connecting to the twin…</p>;
   if (cards.error) return <p className="text-sm text-red-300">Could not read the twin: {String((cards.error as Error).message)}</p>;
@@ -106,7 +107,9 @@ export function LiveOverview({ fleetOperatorId = null, scopeLabel, onOpen }: {
                   return (
                     <li key={decisionKey(d)} className="grid grid-cols-[64px_1fr] gap-2 text-[12px]" title={d.engine ? `engine: ${d.engine}` : undefined}>
                       <span className="font-mono text-muted-foreground">{simTime(d.occurred_at)}</span>
-                      <span className="truncate">
+                      {/* min-w-0: a grid track is at least as wide as its content, so without it a long
+                          line widens the whole page (to ~620 px on a phone) instead of truncating */}
+                      <span className="truncate min-w-0">
                         <span className="font-mono font-semibold">{decisionActor(d)}</span>
                         {place ? <span className="font-mono text-sky-300"> → {place}</span> : null}{" "}
                         <span className={DECISION_TONE[text.tone]}>{text.title}</span>

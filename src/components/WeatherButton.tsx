@@ -50,7 +50,7 @@ export const WeatherButton: React.FC<WeatherButtonProps> = ({ city }) => {
         variant="ghost"
         size="sm"
         onClick={() => setDialogOpen(true)}
-        className="bg-background/50 backdrop-blur-sm border border-border/50 hover:bg-background/80 px-1.5 py-0.5 h-6 gap-1 text-xs"
+        className="bg-background/50 backdrop-blur-sm border border-border/50 hover:bg-background/80 px-1.5 py-0.5 h-6 [@media(pointer:coarse)]:h-8 gap-1 text-xs"
       >
         <span className="text-xs text-muted-foreground">{city.name}</span>
         <span className={`text-xs font-semibold ${tempColor}`}>

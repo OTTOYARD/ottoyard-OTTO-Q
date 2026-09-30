@@ -74,7 +74,7 @@ export function DecisionFeed({ vehicleIds, limit = 60, scopeLabel }: { vehicleId
                     type="button"
                     aria-pressed={on}
                     onClick={() => toggle(c)}
-                    className={`rounded-full border px-2 py-0.5 text-[11px] transition-colors ${
+                    className={`rounded-full border px-2 py-0.5 [@media(pointer:coarse)]:py-2 text-[11px] transition-colors ${
                       on ? "border-sky-500/40 bg-sky-500/10 text-foreground" : "border-border text-muted-foreground hover:text-foreground"
                     }`}
                   >

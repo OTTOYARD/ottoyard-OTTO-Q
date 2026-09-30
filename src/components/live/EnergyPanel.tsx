@@ -43,7 +43,7 @@ export function EnergyPanel({ fleetOperatorId = null, scopeLabel }: { fleetOpera
           <div className="grid gap-3 lg:grid-cols-3">
             <Section title="Battery (BESS)">
               <SocBar soc={e.bessSocPct} target={null} />
-              <div className="mt-2 grid grid-cols-3 gap-2">
+              <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <Stat label="State" value={e.bessState ? humanize(e.bessState) : "n/a"} />
                 <Stat label="Power" value={fmt(e.bessPowerKw)} unit="kW" />
                 <Stat label="Cell temp" value={fmt(e.bessTempC, 1)} unit="°C" />
