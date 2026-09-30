@@ -40,11 +40,12 @@ export function FleetPanel({ fleetOperatorId = null, showOperatorFilter = true, 
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-1.5">
-            <button type="button" onClick={() => setStage("all")}>
+            {/* touch screens: the chip keeps its look, the button around it grows to a finger-sized target */}
+            <button type="button" onClick={() => setStage("all")} className="[@media(pointer:coarse)]:py-1">
               <Chip tone={stage === "all" ? "border-primary bg-primary/15 text-foreground" : undefined}>All {rows.length}</Chip>
             </button>
             {STAGE_ORDER.filter((s) => counts[s] > 0).map((s) => (
-              <button type="button" key={s} onClick={() => setStage(s)}>
+              <button type="button" key={s} onClick={() => setStage(s)} className="[@media(pointer:coarse)]:py-1">
                 <Chip tone={stage === s ? STAGE_TONE[s] + " ring-1 ring-current" : STAGE_TONE[s]}>
                   {STAGE_LABEL[s]} <span className="font-mono">{counts[s]}</span>
                 </Chip>

@@ -42,7 +42,8 @@ export function TwinLinkBanner() {
           </button>
         ) : null}
         {!link.embed ? (
-          <a href={twinBackUrl(link.run)} className="inline-flex items-center gap-0.5 font-semibold text-primary hover:underline">
+          // the way back to the twin from a phone: a finger-sized hit area on touch screens, same look
+          <a href={twinBackUrl(link.run)} className="inline-flex items-center gap-0.5 font-semibold text-primary hover:underline [@media(pointer:coarse)]:-my-2 [@media(pointer:coarse)]:py-2">
             Back to the twin <ArrowUpRight className="h-3.5 w-3.5" />
           </a>
         ) : null}

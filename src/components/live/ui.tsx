@@ -47,9 +47,10 @@ export function Section({ title, right, children }: { title: ReactNode; right?: 
 
 export function Stat({ label, value, unit, sub }: { label: string; value: ReactNode; unit?: string; sub?: ReactNode }) {
   return (
-    <div className="rounded-md border border-border bg-secondary/40 px-3 py-2">
+    // min-w-0 + wrap: a value never widens its grid cell (a phone's three-up row is ~110 px a cell)
+    <div className="min-w-0 rounded-md border border-border bg-secondary/40 px-3 py-2">
       <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="font-mono text-lg font-semibold leading-7">
+      <div className="font-mono text-lg font-semibold leading-7 [overflow-wrap:anywhere]">
         {value}
         {unit ? <span className="ml-1 text-xs font-normal text-muted-foreground">{unit}</span> : null}
       </div>

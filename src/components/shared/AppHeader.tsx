@@ -100,7 +100,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 px-1.5 gap-1 glass-button rounded-xl"
+                  className="h-8 px-1.5 gap-1 glass-button rounded-xl [@media(pointer:coarse)]:h-9 [@media(pointer:coarse)]:min-w-9"
                 >
                   <Settings className="h-4 w-4" />
                   {cartItems.length > 0 && (
@@ -115,7 +115,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             {/* Premium OttoCommand button */}
             <Button
               size="sm"
-              className="h-7 md:h-8 px-2 md:px-3 py-1.5 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-semibold shadow-[0_4px_12px_hsl(var(--primary)/0.25)] hover:shadow-[0_6px_16px_hsl(var(--primary)/0.35)] transition-all duration-200 hover:-translate-y-0.5"
+              className="h-7 md:h-8 [@media(pointer:coarse)]:h-9 px-2 md:px-3 py-1.5 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-semibold shadow-[0_4px_12px_hsl(var(--primary)/0.25)] hover:shadow-[0_6px_16px_hsl(var(--primary)/0.35)] transition-all duration-200 hover:-translate-y-0.5"
               onClick={onOpenAI}
             >
               <span className="text-[10px] md:text-xs font-semibold">OttoCommand</span>
