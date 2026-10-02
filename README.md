@@ -59,12 +59,22 @@ owner's vehicles.
 
 | Tab | What it shows | Source |
 |---|---|---|
-| Overview | fleet by stage, the latest decisions | `ottoq_depot_cards`, `ottoq_activity_feed` |
+| Overview | the live depot in 3D (OTTO-TWIN's own scene, framed), fleet by stage, the latest decisions | OTTO-TWIN `/view.html`, `ottoq_depot_cards`, `ottoq_activity_feed` |
 | Fleet | each vehicle, its work card, OTTO-Q's decisions about it; with an owner picked, what outside agents asked about that owner's vehicles and what became of each ask (read-only; the depot crew decides in OTTO-PULSE) | `ottoq_depot_cards`, twin snapshot, `ottoq_agent_requests_for_operator` (otto-q-core 0550, readable here once 0551 is applied; until then the panel says agent access is built but not enabled) |
 | Depots | stall occupancy and the reservation board | `ottoq_depot_cards`, depot layout |
 | Energy | site power balance, battery, tariff, charging now | twin snapshot, `ottoq_twin_events_window` |
 | Incidents | what went wrong this run, and standing depot conditions, including a car kept from leaving unfinished and a car held past the readiness gate's limit for a person (vehicle first: no car leaves with a service still needed) | `ottoq_run_event_feed` (the twin's Events wording) |
 | Performance | the five KPIs, the learning loop's dial ledger, who is coming back, the site power plan | `/sim_runs/:id/kpis`, `ottoq_dial_promotion_ledger`, `ottoq_twin_appointments`, `service_profiles` |
+
+## The live 3D depot on the Overview tab
+
+The Overview tab opens on the twin depot in 3D: OTTO-TWIN's own scene, motion and snapshots, framed from
+`<twin>/view.html` (`src/components/live/TwinDepotView.tsx`, contract in `src/lib/twin/twinView.ts`, the twin's side
+in ottoyarddepot-sim `docs/LIVE-VIEW.md`). Before a run starts it shows the empty depot; once one is live the cars
+move as they do in the twin. Opened from the twin (`?source=twin&run=`), it shows that run, like every other panel.
+It can be turned from any corner or a pole at the middle of the lot, followed car by car, and made full screen.
+It stops drawing while it is scrolled out of view. `VITE_TWIN_URL` points it at another twin (a preview, or
+`http://localhost:8080` in development).
 
 ## What technologies are used for this project?
 
