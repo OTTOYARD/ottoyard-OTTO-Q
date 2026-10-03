@@ -7,6 +7,8 @@ import { useActivityFeed, useLiveDepot } from "@/lib/twin/hooks";
 import { STAGE_LABEL, STAGE_ORDER, countByStage, decisionActor, doubleBooked, energyView, humanize, joinFleet, simTime, stallBoard } from "@/lib/twin/model";
 import { DEFAULT_CATEGORIES, decisionCategory, decisionKey, decisionPlace, describeDecision } from "@/lib/twin/decisionText";
 import { LiveRunBar, NoLiveRun } from "./LiveRunBar";
+import { TwinDepotView } from "./TwinDepotView";
+import { twinLink } from "@/lib/twin/twinLink";
 import { Chip, DECISION_TONE, Section, Stat, STAGE_TONE, fmt } from "./ui";
 
 export function LiveOverview({ fleetOperatorId = null, scopeLabel, onOpen }: {
@@ -40,6 +42,14 @@ export function LiveOverview({ fleetOperatorId = null, scopeLabel, onOpen }: {
   return (
     <div className="space-y-3">
       <LiveRunBar runId={runId} status={runStatus} simClock={simClock} snapshot={snapshot.data} scopeLabel={scopeLabel ?? `${rows.length} vehicles`} />
+      {/* The depot itself, live and in 3D: OTTO-TWIN's own scene. On the twin link's run when the tab is pinned to one,
+          else the run the rest of this tab shows, else following the live run (an empty depot until one starts).
+          Framed beside the depot inside the twin (embed=1), the twin's own 3D view is already on screen, so this one is
+          not drawn a second time. */}
+      {twinLink()?.embed ? null : (
+        <TwinDepotView run={twinLink()?.run ?? runId ?? null}
+          scopeNote={fleetOperatorId ? "The whole depot, every owner's cars, as the twin draws it" : null} />
+      )}
       {!runId ? (
         <NoLiveRun what="the fleet, stalls, energy and OTTO-Q's decisions" />
       ) : (
