@@ -37,15 +37,15 @@ describe("the panel's honest states", () => {
     expect(t).toMatch(/never all of them at once/);
   });
 
-  it("says agent access is built but not enabled -- whether 0550 or only 0551 is missing -- and shows nothing else", () => {
+  it("says agent access is built but not enabled -- whether 0559 or only 0560 is missing -- and shows nothing else", () => {
     state.q = failed("not_enabled", "OTTO-Q rpc ottoq_agent_requests_for_operator 404: PGRST202");
     let t = render(WAYMO).text;
     expect(t).toMatch(/Agent access is built but not enabled yet/);
-    expect(t).toMatch(/\(otto-q-core 0550\) is not installed yet/);
+    expect(t).toMatch(/\(otto-q-core 0559\) is not installed yet/);
     state.q = failed("not_granted", "OTTO-Q rpc ottoq_agent_requests_for_operator 401: 42501");
     t = render(WAYMO).text;
     expect(t).toMatch(/Agent access is built but not enabled yet/);
-    expect(t).toMatch(/has not been given its read \(otto-q-core 0551\)/);
+    expect(t).toMatch(/has not been given its read \(otto-q-core 0560\)/);
     expect(t).not.toMatch(/Waymo-AV/);
   });
 

@@ -10,6 +10,10 @@ import { PerformancePanel } from "@/components/live/PerformancePanel";
 import { PlanPanel } from "@/components/live/PlanPanel";
 import { OperatorScopePicker, ScopedDecisionFeed, useOperatorScope } from "@/components/live/OperatorScope";
 import { AgentRequestsPanel } from "@/components/agents/AgentRequestsPanel";
+import { AgentReceiptBanner, OwnerSettingsPanel } from "@/components/agents/OwnerAgent";
+import { useAgentReceipt, useOwnerBoard } from "@/hooks/use-owner-board";
+import { agentLink } from "@/lib/agentLink";
+import { commandVehicleIds, isBoard } from "@/lib/owner-board";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,8 +34,14 @@ import { ottoQFetch, ottoqInvoke } from "@/lib/otto-q-api";
 
 const Index = () => {
   const navigate = useNavigate();
-  const [selectedTab, setSelectedTab] = useState("overview");
+  // Opened from an owner's agent's receipt, the cockpit opens on the tab the receipt names (the fleet).
+  const [selectedTab, setSelectedTab] = useState<string>(() => agentLink()?.tab ?? "overview");
   const [fleetOperatorId, setFleetOperatorId] = useOperatorScope();
+  // What the picked owner's agent has set (otto-q-core 0606), and the command a receipt link names.
+  const [receiptCommand, dismissReceipt] = useAgentReceipt(fleetOperatorId);
+  const ownerBoard = useOwnerBoard(fleetOperatorId, receiptCommand);
+  const board = isBoard(ownerBoard.data) ? ownerBoard.data : null;
+  const receiptCars = receiptCommand && board?.highlight ? commandVehicleIds(board.highlight) : null;
   const [currentCity, setCurrentCity] = useState<City>({
     name: "Nashville",
     coordinates: [-86.7816, 36.1627],
@@ -242,13 +252,16 @@ const Index = () => {
           <div className="flex justify-end">
             <OperatorScopePicker value={fleetOperatorId} onChange={setFleetOperatorId} />
           </div>
+          {receiptCommand ? <AgentReceiptBanner query={ownerBoard} onDismiss={dismissReceipt} /> : null}
 
           <TabsContent value="overview" className="space-y-6">
             <LiveOverview fleetOperatorId={fleetOperatorId} scopeLabel={fleetOperatorId ? "your fleet" : "all owners"} onOpen={(t) => setSelectedTab(t === "decisions" ? "fleet" : t === "depot" ? "depots" : t)} />
           </TabsContent>
 
           <TabsContent value="fleet" className="space-y-6">
-            <FleetPanel fleetOperatorId={fleetOperatorId} showOperatorFilter={!fleetOperatorId} scopeLabel={fleetOperatorId ? "your fleet" : "all owners"} />
+            <FleetPanel fleetOperatorId={fleetOperatorId} showOperatorFilter={!fleetOperatorId} scopeLabel={fleetOperatorId ? "your fleet" : "all owners"}
+              ownerSettings={board?.by_vehicle ?? null} highlightIds={receiptCars} />
+            <OwnerSettingsPanel fleetOperatorId={fleetOperatorId} query={ownerBoard} />
             <ScopedDecisionFeed fleetOperatorId={fleetOperatorId} />
             <AgentRequestsPanel fleetOperatorId={fleetOperatorId} />
             <PendingOemGatesBanner />

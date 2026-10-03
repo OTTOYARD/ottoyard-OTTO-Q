@@ -4,13 +4,18 @@ import { AlertTriangle, Search } from "lucide-react";
 import { useLiveDepot } from "@/lib/twin/hooks";
 import { STAGE_LABEL, STAGE_ORDER, countByStage, doubleBooked, joinFleet, operatorsOf, type Stage } from "@/lib/twin/model";
 import { LiveRunBar, NoLiveRun } from "./LiveRunBar";
+import type { OwnerCarSettings } from "@/lib/owner-board";
 import { VehicleLiveCard } from "./VehicleLiveCard";
 import { Chip, STAGE_TONE } from "./ui";
 
-export function FleetPanel({ fleetOperatorId = null, showOperatorFilter = true, scopeLabel }: {
+export function FleetPanel({ fleetOperatorId = null, showOperatorFilter = true, scopeLabel, ownerSettings, highlightIds }: {
   fleetOperatorId?: string | null;
   showOperatorFilter?: boolean;
   scopeLabel?: string;
+  /** What the owner's agent set, per vehicle id (otto-q-core 0606). */
+  ownerSettings?: Record<string, OwnerCarSettings> | null;
+  /** The cars an agent's receipt names: marked, and listed first. */
+  highlightIds?: ReadonlySet<string> | null;
 }) {
   const { cards, snapshot, condition, runId, runStatus, simClock } = useLiveDepot(fleetOperatorId);
   const [stage, setStage] = useState<Stage | "all">("all");
@@ -28,6 +33,10 @@ export function FleetPanel({ fleetOperatorId = null, showOperatorFilter = true, 
       (op === "all" || r.operatorId === op) &&
       (!q || r.name.toLowerCase().includes(q.toLowerCase()) || (r.stallCode ?? "").toLowerCase().includes(q.toLowerCase())),
   );
+  // The cars an agent's receipt names are marked and read first, in the feed's own order (a stable sort) -- when it
+  // named some of them. A command on every car marks nothing: a ring on every card says nothing.
+  const marked = highlightIds?.size && rows.some((r) => !highlightIds.has(r.id)) ? highlightIds : null;
+  if (marked) shown.sort((a, b) => Number(marked.has(b.id)) - Number(marked.has(a.id)));
 
   if (cards.isLoading) return <p className="text-sm text-muted-foreground">Connecting to the twin…</p>;
   if (cards.error) return <p className="text-sm text-red-300">Could not read the fleet feed: {String((cards.error as Error).message)}</p>;
@@ -83,7 +92,8 @@ export function FleetPanel({ fleetOperatorId = null, showOperatorFilter = true, 
           ) : (
             <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
               {shown.map((r) => (
-                <VehicleLiveCard key={r.id} row={r} runId={runId} expanded={open === r.id} onToggle={() => setOpen(open === r.id ? null : r.id)} showOperator={showOperatorFilter} />
+                <VehicleLiveCard key={r.id} row={r} runId={runId} expanded={open === r.id} onToggle={() => setOpen(open === r.id ? null : r.id)} showOperator={showOperatorFilter}
+                  ownerSettings={ownerSettings?.[r.id] ?? null} highlighted={!!marked?.has(r.id)} />
               ))}
             </div>
           )}
