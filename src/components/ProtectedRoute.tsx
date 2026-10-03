@@ -2,12 +2,18 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { LOGIN_REQUIRED } from "@/lib/openDemo";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+/** The open demo lets everyone through (src/lib/openDemo.ts); with VITE_REQUIRE_LOGIN=1 a page needs a session. */
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+  return LOGIN_REQUIRED ? <SignedInOnly>{children}</SignedInOnly> : <>{children}</>;
+}
+
+function SignedInOnly({ children }: ProtectedRouteProps) {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
 

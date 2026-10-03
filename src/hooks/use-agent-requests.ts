@@ -17,7 +17,7 @@ export class AgentRequestsError extends Error {
 }
 
 /**
- * The picked owner's agent requests at the twin depot (otto-q-core 0550; readable here once 0551 is applied).
+ * The picked owner's agent requests at the twin depot (otto-q-core 0559; readable here once 0560 is applied).
  * Nothing is asked with no owner picked: the database answers one owner at a time, never everyone. Polls every 10 s
  * while it answers, and stops once the database says the gateway is not installed or not granted to this cockpit.
  */

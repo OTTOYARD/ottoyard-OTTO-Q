@@ -60,7 +60,7 @@ owner's vehicles.
 | Tab | What it shows | Source |
 |---|---|---|
 | Overview | the live depot in 3D (OTTO-TWIN's own scene, framed), fleet by stage, the latest decisions | OTTO-TWIN `/view.html`, `ottoq_depot_cards`, `ottoq_activity_feed` |
-| Fleet | each vehicle, its work card, OTTO-Q's decisions about it; with an owner picked, what outside agents asked about that owner's vehicles and what became of each ask (read-only; the depot crew decides in OTTO-PULSE) | `ottoq_depot_cards`, twin snapshot, `ottoq_agent_requests_for_operator` (otto-q-core 0550, readable here once 0551 is applied; until then the panel says agent access is built but not enabled) |
+| Fleet | each vehicle, its work card, OTTO-Q's decisions about it; with an owner picked, what the owner's own agent set on its cars (charge limit, holds, service orders: on each card and in "Set by your agent"), and what outside agents asked about that owner's vehicles and what became of each ask (all read-only; the depot crew decides requests in OTTO-PULSE) | `ottoq_depot_cards`, twin snapshot, `ottoq_owner_board` (otto-q-core 0605/0606), `ottoq_agent_requests_for_operator` (otto-q-core 0559, readable here once 0560 is applied; until then each panel says it is built but not switched on) |
 | Depots | stall occupancy and the reservation board | `ottoq_depot_cards`, depot layout |
 | Energy | site power balance, battery, tariff, charging now | twin snapshot, `ottoq_twin_events_window` |
 | Incidents | what went wrong this run, and standing depot conditions, including a car kept from leaving unfinished and a car held past the readiness gate's limit for a person (vehicle first: no car leaves with a service still needed) | `ottoq_run_event_feed` (the twin's Events wording) |
@@ -75,6 +75,20 @@ move as they do in the twin. Opened from the twin (`?source=twin&run=`), it show
 It can be turned from any corner or a pole at the middle of the lot, followed car by car, and made full screen.
 It stops drawing while it is scrolled out of view. `VITE_TWIN_URL` points it at another twin (a preview, or
 `http://localhost:8080` in development).
+
+## Opened from an owner's agent's receipt
+
+An owner's personal agent (Chase's Hermes, first) can set what its own cars need through OTTO-Q's agent gateway: how
+full they charge, services, holds (otto-q-core 0605, `PERSONAL_AGENT.md` there). Every receipt it gets back ends with a
+link here:
+
+    ?source=agent&run=<sim_run_id>&owner=<fleet_operator_id>&tab=fleet&command=<command_id>
+
+Opened, OrchestrAV opens as that owner on the Fleet tab, with the command's receipt on top in OTTO-Q's own words and
+where it stands now (in force, undone, refused, or lifted when its run ended); the cars it touched are ringed and
+listed first when it touched some of them (`src/lib/agentLink.ts`, `src/components/agents/OwnerAgent.tsx`). It does
+not pin the run as a twin link does: a stop or reset of the twin lifts everything an agent set, and the receipt says
+so. Read-only: the agent changes these, never this cockpit. Screenshots: `docs/screenshots/2026-10-03-owner-agent/`.
 
 ## What technologies are used for this project?
 

@@ -1,7 +1,7 @@
 // A fleet owner's agent requests: what outside agents (the owner's own fleet agent, or a personal agent such as
 // Chase's Hermes bot) have asked OTTO-Q about this owner's vehicles, and what became of each ask.
-// otto-q-core 0550 builds the read, public.ottoq_agent_requests_for_operator(fleet_operator_id, depot_id, limit);
-// 0551 is the separate, optional grant that lets this cockpit's anon key call it.
+// otto-q-core 0559 builds the read, public.ottoq_agent_requests_for_operator(fleet_operator_id, depot_id, limit);
+// 0560 is the separate, optional grant that lets this cockpit's anon key call it.
 //
 // Scoping is the DATABASE's: it returns one operator's requests and never all operators at once. The operator is
 // picked on this device (OperatorScope), which is the known gap this cockpit carries -- so this panel is READ-ONLY by
@@ -66,8 +66,8 @@ export function fetchOperatorAgentRequests(fleetOperatorId: string, depotId: str
 export type RequestsProblem = "not_enabled" | "not_granted" | "error";
 
 /**
- * ottoqRpc throws "OTTO-Q rpc <fn> <status>: <body>". Tell apart: the function is not in the database (0550 not
- * applied: 404 / PGRST202 / 42883), the function exists but this cockpit's anon key may not call it (0551 not
+ * ottoqRpc throws "OTTO-Q rpc <fn> <status>: <body>". Tell apart: the function is not in the database (0559 not
+ * applied: 404 / PGRST202 / 42883), the function exists but this cockpit's anon key may not call it (0560 not
  * applied: 401 / 403 / 42501), and any other failure. The first two are the expected states before the gateway is
  * switched on; both read as "built but not enabled yet".
  */

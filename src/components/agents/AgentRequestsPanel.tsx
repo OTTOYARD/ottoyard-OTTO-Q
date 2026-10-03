@@ -1,5 +1,5 @@
 // Agent requests, as the fleet owner sees them: what outside agents asked OTTO-Q about this owner's vehicles, and
-// what became of each ask (otto-q-core 0550; readable from this cockpit once 0551 is applied).
+// what became of each ask (otto-q-core 0559; readable from this cockpit once 0560 is applied).
 //
 // READ-ONLY by design. This cockpit reaches the engine with the public anon key and picks its owner on the device,
 // so it cannot prove who is looking; deciding stays with the depot crew in OTTO-PULSE (a yard supervisor or ops
@@ -94,8 +94,8 @@ export function AgentRequestsPanel({ fleetOperatorId }: { fleetOperatorId: strin
           </p>
           <p>
             {q.error.problem === "not_enabled"
-              ? "OTTO-Q's agent gateway (otto-q-core 0550) is not installed yet."
-              : "OTTO-Q's agent gateway is installed, but this cockpit has not been given its read (otto-q-core 0551)."}{" "}
+              ? "OTTO-Q's agent gateway (otto-q-core 0559) is not installed yet."
+              : "OTTO-Q's agent gateway is installed, but this cockpit has not been given its read (otto-q-core 0560)."}{" "}
             Once it is, what your own agents and personal agents ask about your vehicles shows here, with the depot's
             decision and OTTO-Q's reply.
           </p>

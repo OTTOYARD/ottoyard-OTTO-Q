@@ -5,14 +5,15 @@ import { useEffect, useRef, useState } from "react";
 import { useDepotCards } from "@/lib/twin/hooks";
 import { operatorsOf } from "@/lib/twin/model";
 import { setTwinLinkOwner, twinLink } from "@/lib/twin/twinLink";
+import { agentLink } from "@/lib/agentLink";
 import { DecisionFeed } from "./DecisionFeed";
 
 const KEY = "orchestrav.fleetOperatorId";
 
 export function useOperatorScope(): [string | null, (id: string | null) => void] {
-  // Opened from the twin with &owner=, that owner is preselected. It is not remembered on this
-  // device until someone picks it here, so a twin link never changes the owner a plain visit opens as.
-  const linkedOwner = twinLink()?.owner ?? null;
+  // Opened from the twin with &owner=, or from an owner's agent's receipt, that owner is preselected. It is not
+  // remembered on this device until someone picks it here, so a link never changes the owner a plain visit opens as.
+  const linkedOwner = twinLink()?.owner ?? agentLink()?.owner ?? null;
   const fromLink = useRef(!!linkedOwner);
   const [id, setId] = useState<string | null>(() => {
     if (linkedOwner) return linkedOwner;
