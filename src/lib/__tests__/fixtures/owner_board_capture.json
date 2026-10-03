@@ -1,0 +1,575 @@
+{
+  "_source": "public.ottoq_owner_board (otto-q-core 0606) on the scratch cluster's stub engine with 0559/0560/0605/0606 applied, 2026-10-03 (UTC); the depot and fleet ids are the live ones, the cars are the stub's four Teslas",
+  "tesla": {
+    "ok": true,
+    "run": {
+      "demo": true,
+      "status": "running",
+      "sim_clock": "2026-09-27T12:00:00+00:00",
+      "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+      "sim_clock_local": "7:00 AM sim time"
+    },
+    "clocks": "\"sim time\" is SIMULATION time in Nashville local time; CT is real time.",
+    "counts": {
+      "holds": 0,
+      "orders": 5,
+      "charge_limits": 4
+    },
+    "resets": "Everything an agent sets lasts until the demo run ends or the agent undoes it; a stop or reset of the twin puts every car back to baseline.",
+    "commands": [
+      {
+        "cars": 4,
+        "link": "https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=75acdac0-0ff8-40dc-ad1d-6f639d89ccf7",
+        "tool": "request_service",
+        "agent": "chase-hermes",
+        "outcome": "applied",
+        "summary": "Done. All 4 Teslas get exterior wash (in the wash bay, about 10 min) on every visit from now on, this one included.\n- 2 are at the depot and get it on this visit\n- 1 already has it planned on this visit\n- 1 is out and gets it when it comes in\nOTTO-Q decides when and where: work in a bay comes after the charge, work at the car runs during it, and no car leaves with it undone.\nThis lasts until the demo run ends or you undo it.\nSee it in OrchestrAV: https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=75acdac0-0ff8-40dc-ad1d-6f639d89ccf7",
+        "live_run": true,
+        "command_id": "75acdac0-0ff8-40dc-ad1d-6f639d89ccf7",
+        "created_at": "2026-10-03T02:11:54.281269+00:00",
+        "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+        "vehicle_ids": [
+          "ee000000-0000-0000-0000-0000000000b1",
+          "ee000000-0000-0000-0000-0000000000b2",
+          "ee000000-0000-0000-0000-0000000000b3",
+          "ee000000-0000-0000-0000-0000000000b4"
+        ],
+        "sim_clock_local": "7:00 AM sim time",
+        "created_at_local": "9:11 PM CT"
+      },
+      {
+        "cars": 1,
+        "link": "https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=735b00e8-76aa-4411-a7e6-226280cde5cd",
+        "tool": "request_service",
+        "agent": "chase-hermes",
+        "outcome": "applied",
+        "summary": "Done. Tesla-AV-045 gets mechanical PM on this visit (in the service bay, about 40 min); OTTO-Q fits it into the car's plan, and the car does not leave until it is done.\nOTTO-Q decides when and where: work in a bay comes after the charge, work at the car runs during it, and no car leaves with it undone.\nThis lasts until the demo run ends or you undo it.\nSee it in OrchestrAV: https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=735b00e8-76aa-4411-a7e6-226280cde5cd",
+        "live_run": true,
+        "command_id": "735b00e8-76aa-4411-a7e6-226280cde5cd",
+        "created_at": "2026-10-03T02:11:54.20093+00:00",
+        "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+        "vehicle_ids": [
+          "ee000000-0000-0000-0000-0000000000b3"
+        ],
+        "sim_clock_local": "7:00 AM sim time",
+        "created_at_local": "9:11 PM CT"
+      },
+      {
+        "cars": 0,
+        "tool": "request_service",
+        "agent": "chase-hermes",
+        "outcome": "refused",
+        "refusal": {
+          "code": "vehicle_not_found",
+          "message": "No car in your fleet matches \"Tesla 98\". Your cars here: Tesla-AV-001 to Tesla-AV-045 (3 cars); Tesla-RT-003.",
+          "candidates": [
+            "Tesla-AV-045",
+            "Tesla-AV-041",
+            "Tesla-RT-003"
+          ]
+        },
+        "summary": "Not done: No car in your fleet matches \"Tesla 98\". Your cars here: Tesla-AV-001 to Tesla-AV-045 (3 cars); Tesla-RT-003.",
+        "live_run": true,
+        "command_id": "35530a62-d22b-4b81-91f0-23db9da3caf7",
+        "created_at": "2026-10-03T02:11:54.110372+00:00",
+        "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+        "sim_clock_local": "7:00 AM sim time",
+        "created_at_local": "9:11 PM CT"
+      },
+      {
+        "cars": 4,
+        "link": "https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+        "tool": "set_charge_limit",
+        "agent": "chase-hermes",
+        "outcome": "applied",
+        "summary": "Done. All 4 Teslas charge to at most 90% instead of 100%.\n- 1 is charging and will stop at 90%\n- 1 already has enough charge for 90%\n- 1 is out; it charges to 90% when it next comes in\n- 1 is charging past 90%: its charge ends at the next tick\nThis lasts until the demo run ends or you undo it.\nSee it in OrchestrAV: https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+        "live_run": true,
+        "command_id": "3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+        "created_at": "2026-10-03T02:11:54.030688+00:00",
+        "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+        "vehicle_ids": [
+          "ee000000-0000-0000-0000-0000000000b1",
+          "ee000000-0000-0000-0000-0000000000b2",
+          "ee000000-0000-0000-0000-0000000000b3",
+          "ee000000-0000-0000-0000-0000000000b4"
+        ],
+        "sim_clock_local": "7:00 AM sim time",
+        "created_at_local": "9:11 PM CT"
+      }
+    ],
+    "depot_id": "11111111-1111-1111-1111-111111111111",
+    "full_pct": 100,
+    "in_force": [
+      {
+        "kind": "charge_limit",
+        "set_at": "2026-10-03T02:11:54.030688+00:00",
+        "vehicle": "Tesla-AV-001",
+        "command_id": "3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+        "setting_id": "3f8919ed-8bb2-4246-9c71-a773f9a9366b",
+        "vehicle_id": "ee000000-0000-0000-0000-0000000000b1",
+        "set_at_local": "9:11 PM CT",
+        "charge_limit_pct": 90,
+        "waiting_for_tick": true
+      },
+      {
+        "kind": "charge_limit",
+        "set_at": "2026-10-03T02:11:54.030688+00:00",
+        "vehicle": "Tesla-AV-041",
+        "command_id": "3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+        "setting_id": "e1a4f877-1aa2-4ca4-8265-e09a26dcaa1a",
+        "vehicle_id": "ee000000-0000-0000-0000-0000000000b2",
+        "set_at_local": "9:11 PM CT",
+        "charge_limit_pct": 90,
+        "waiting_for_tick": true
+      },
+      {
+        "kind": "charge_limit",
+        "set_at": "2026-10-03T02:11:54.030688+00:00",
+        "vehicle": "Tesla-AV-045",
+        "command_id": "3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+        "setting_id": "08bce736-3679-4fd8-8bf8-7762eb938e15",
+        "vehicle_id": "ee000000-0000-0000-0000-0000000000b3",
+        "set_at_local": "9:11 PM CT",
+        "charge_limit_pct": 90,
+        "waiting_for_tick": true
+      },
+      {
+        "kind": "charge_limit",
+        "set_at": "2026-10-03T02:11:54.030688+00:00",
+        "vehicle": "Tesla-RT-003",
+        "command_id": "3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+        "setting_id": "852e945a-3e26-44e6-a5e3-a7408c136524",
+        "vehicle_id": "ee000000-0000-0000-0000-0000000000b4",
+        "set_at_local": "9:11 PM CT",
+        "charge_limit_pct": 90,
+        "waiting_for_tick": true
+      },
+      {
+        "kind": "service",
+        "when": "every_return",
+        "set_at": "2026-10-03T02:11:54.281269+00:00",
+        "service": "exterior_wash",
+        "vehicle": "Tesla-AV-001",
+        "command_id": "75acdac0-0ff8-40dc-ad1d-6f639d89ccf7",
+        "setting_id": "07e2065d-5039-4a89-810e-24e4b3499ed7",
+        "vehicle_id": "ee000000-0000-0000-0000-0000000000b1",
+        "service_name": "Exterior wash",
+        "set_at_local": "9:11 PM CT",
+        "waiting_for_tick": true
+      },
+      {
+        "kind": "service",
+        "when": "every_return",
+        "set_at": "2026-10-03T02:11:54.281269+00:00",
+        "service": "exterior_wash",
+        "vehicle": "Tesla-AV-041",
+        "command_id": "75acdac0-0ff8-40dc-ad1d-6f639d89ccf7",
+        "setting_id": "dc754ad9-0829-4abe-8a57-df6ec3afceb8",
+        "vehicle_id": "ee000000-0000-0000-0000-0000000000b2",
+        "service_name": "Exterior wash",
+        "set_at_local": "9:11 PM CT",
+        "waiting_for_tick": true
+      },
+      {
+        "kind": "service",
+        "when": "every_return",
+        "set_at": "2026-10-03T02:11:54.281269+00:00",
+        "service": "exterior_wash",
+        "vehicle": "Tesla-AV-045",
+        "command_id": "75acdac0-0ff8-40dc-ad1d-6f639d89ccf7",
+        "setting_id": "c2c25eef-f118-4cb7-8ada-9a4f5bdb399f",
+        "vehicle_id": "ee000000-0000-0000-0000-0000000000b3",
+        "service_name": "Exterior wash",
+        "set_at_local": "9:11 PM CT",
+        "waiting_for_tick": true
+      },
+      {
+        "kind": "service",
+        "when": "now",
+        "set_at": "2026-10-03T02:11:54.20093+00:00",
+        "service": "mechanical_pm",
+        "vehicle": "Tesla-AV-045",
+        "command_id": "735b00e8-76aa-4411-a7e6-226280cde5cd",
+        "setting_id": "376866ca-fd79-4556-a143-25683341a933",
+        "vehicle_id": "ee000000-0000-0000-0000-0000000000b3",
+        "service_name": "Mechanical PM",
+        "set_at_local": "9:11 PM CT",
+        "waiting_for_tick": true
+      },
+      {
+        "kind": "service",
+        "when": "every_return",
+        "set_at": "2026-10-03T02:11:54.281269+00:00",
+        "service": "exterior_wash",
+        "vehicle": "Tesla-RT-003",
+        "command_id": "75acdac0-0ff8-40dc-ad1d-6f639d89ccf7",
+        "setting_id": "fb875587-c59e-4d58-8a30-222746a725ca",
+        "vehicle_id": "ee000000-0000-0000-0000-0000000000b4",
+        "service_name": "Exterior wash",
+        "set_at_local": "9:11 PM CT",
+        "waiting_for_tick": true
+      }
+    ],
+    "highlight": {
+      "args": {
+        "mode": "apply",
+        "percent": 90,
+        "vehicles": "all"
+      },
+      "link": "https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+      "tool": "set_charge_limit",
+      "agent": "chase-hermes",
+      "effects": [
+        {
+          "key": "charge_limit",
+          "now": "Tesla-AV-001 is out on the road; it charges to 90% when it next comes in.",
+          "soc": 35,
+          "after": 90,
+          "group": "out",
+          "state": "deployed",
+          "before": 100,
+          "change": true,
+          "vehicle": "Tesla-AV-001",
+          "group_one": "is out; it charges to 90% when it next comes in",
+          "group_many": "are out; they charge to 90% when they next come in",
+          "vehicle_id": "ee000000-0000-0000-0000-0000000000b1"
+        },
+        {
+          "key": "charge_limit",
+          "now": "Tesla-AV-041 is charging (now 72%) and will stop at 90%.",
+          "soc": 72,
+          "after": 90,
+          "group": "charging",
+          "state": "charging_dcfc",
+          "before": 100,
+          "change": true,
+          "vehicle": "Tesla-AV-041",
+          "group_one": "is charging and will stop at 90%",
+          "group_many": "are charging and will stop at 90%",
+          "vehicle_id": "ee000000-0000-0000-0000-0000000000b2"
+        },
+        {
+          "key": "charge_limit",
+          "now": "Tesla-AV-045 is at 99%, enough for 90%: it needs no more charge to leave.",
+          "soc": 99,
+          "after": 90,
+          "group": "enough",
+          "state": "staged_for_departure",
+          "before": 100,
+          "change": true,
+          "vehicle": "Tesla-AV-045",
+          "group_one": "already has enough charge for 90%",
+          "group_many": "already have enough charge for 90%",
+          "vehicle_id": "ee000000-0000-0000-0000-0000000000b3"
+        },
+        {
+          "key": "charge_limit",
+          "now": "Tesla-RT-003 is charging at 93%, already at or past 90%: its charge ends at the next tick.",
+          "soc": 93,
+          "after": 90,
+          "group": "stops_now",
+          "state": "charging_l2",
+          "before": 100,
+          "change": true,
+          "vehicle": "Tesla-RT-003",
+          "group_one": "is charging past 90%: its charge ends at the next tick",
+          "group_many": "are charging past 90%: their charges end at the next tick",
+          "vehicle_id": "ee000000-0000-0000-0000-0000000000b4"
+        }
+      ],
+      "outcome": "applied",
+      "summary": "Done. All 4 Teslas charge to at most 90% instead of 100%.\n- 1 is charging and will stop at 90%\n- 1 already has enough charge for 90%\n- 1 is out; it charges to 90% when it next comes in\n- 1 is charging past 90%: its charge ends at the next tick\nThis lasts until the demo run ends or you undo it.\nSee it in OrchestrAV: https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+      "live_run": true,
+      "vehicles": [
+        {
+          "id": "ee000000-0000-0000-0000-0000000000b1",
+          "name": "Tesla-AV-001"
+        },
+        {
+          "id": "ee000000-0000-0000-0000-0000000000b2",
+          "name": "Tesla-AV-041"
+        },
+        {
+          "id": "ee000000-0000-0000-0000-0000000000b3",
+          "name": "Tesla-AV-045"
+        },
+        {
+          "id": "ee000000-0000-0000-0000-0000000000b4",
+          "name": "Tesla-RT-003"
+        }
+      ],
+      "command_id": "3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+      "created_at": "2026-10-03T02:11:54.030688+00:00",
+      "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+      "sim_clock_local": "7:00 AM sim time",
+      "created_at_local": "9:11 PM CT"
+    },
+    "by_vehicle": {
+      "ee000000-0000-0000-0000-0000000000b1": {
+        "orders": [
+          {
+            "name": "Exterior wash",
+            "when": "every_return",
+            "service": "exterior_wash"
+          }
+        ],
+        "full_pct": 100,
+        "charge_limit_pct": 90
+      },
+      "ee000000-0000-0000-0000-0000000000b2": {
+        "orders": [
+          {
+            "name": "Exterior wash",
+            "when": "every_return",
+            "service": "exterior_wash"
+          }
+        ],
+        "full_pct": 100,
+        "charge_limit_pct": 90
+      },
+      "ee000000-0000-0000-0000-0000000000b3": {
+        "orders": [
+          {
+            "name": "Exterior wash",
+            "when": "every_return",
+            "service": "exterior_wash"
+          },
+          {
+            "name": "Mechanical PM",
+            "when": "now",
+            "service": "mechanical_pm"
+          }
+        ],
+        "full_pct": 100,
+        "charge_limit_pct": 90
+      },
+      "ee000000-0000-0000-0000-0000000000b4": {
+        "orders": [
+          {
+            "name": "Exterior wash",
+            "when": "every_return",
+            "service": "exterior_wash"
+          }
+        ],
+        "full_pct": 100,
+        "charge_limit_pct": 90
+      }
+    },
+    "fleet_operator": {
+      "id": "33333333-3333-3333-3333-333333333333",
+      "name": "Tesla Robotaxi TN"
+    }
+  },
+  "no_operator": {
+    "ok": false,
+    "error": "fleet_operator_required",
+    "message": "Name the fleet operator whose settings to read."
+  },
+  "unknown_operator": {
+    "ok": false,
+    "error": "unknown_fleet_operator",
+    "message": "No such fleet operator."
+  },
+  "ended": {
+    "ok": true,
+    "run": null,
+    "clocks": "\"sim time\" is SIMULATION time in Nashville local time; CT is real time.",
+    "counts": {
+      "holds": 0,
+      "orders": 0,
+      "charge_limits": 0
+    },
+    "resets": "Everything an agent sets lasts until the demo run ends or the agent undoes it; a stop or reset of the twin puts every car back to baseline.",
+    "commands": [
+      {
+        "cars": 4,
+        "link": "https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=75acdac0-0ff8-40dc-ad1d-6f639d89ccf7",
+        "tool": "request_service",
+        "agent": "chase-hermes",
+        "outcome": "applied",
+        "summary": "Done. All 4 Teslas get exterior wash (in the wash bay, about 10 min) on every visit from now on, this one included.\n- 2 are at the depot and get it on this visit\n- 1 already has it planned on this visit\n- 1 is out and gets it when it comes in\nOTTO-Q decides when and where: work in a bay comes after the charge, work at the car runs during it, and no car leaves with it undone.\nThis lasts until the demo run ends or you undo it.\nSee it in OrchestrAV: https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=75acdac0-0ff8-40dc-ad1d-6f639d89ccf7",
+        "live_run": false,
+        "lifted_at": "2026-10-03T02:18:41.198523+00:00",
+        "command_id": "75acdac0-0ff8-40dc-ad1d-6f639d89ccf7",
+        "created_at": "2026-10-03T02:11:54.281269+00:00",
+        "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+        "vehicle_ids": [
+          "ee000000-0000-0000-0000-0000000000b1",
+          "ee000000-0000-0000-0000-0000000000b2",
+          "ee000000-0000-0000-0000-0000000000b3",
+          "ee000000-0000-0000-0000-0000000000b4"
+        ],
+        "lifted_reason": "the run ended (completed)",
+        "sim_clock_local": "7:00 AM sim time",
+        "created_at_local": "9:11 PM CT"
+      },
+      {
+        "cars": 1,
+        "link": "https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=735b00e8-76aa-4411-a7e6-226280cde5cd",
+        "tool": "request_service",
+        "agent": "chase-hermes",
+        "outcome": "applied",
+        "summary": "Done. Tesla-AV-045 gets mechanical PM on this visit (in the service bay, about 40 min); OTTO-Q fits it into the car's plan, and the car does not leave until it is done.\nOTTO-Q decides when and where: work in a bay comes after the charge, work at the car runs during it, and no car leaves with it undone.\nThis lasts until the demo run ends or you undo it.\nSee it in OrchestrAV: https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=735b00e8-76aa-4411-a7e6-226280cde5cd",
+        "live_run": false,
+        "lifted_at": "2026-10-03T02:18:41.198523+00:00",
+        "command_id": "735b00e8-76aa-4411-a7e6-226280cde5cd",
+        "created_at": "2026-10-03T02:11:54.20093+00:00",
+        "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+        "vehicle_ids": [
+          "ee000000-0000-0000-0000-0000000000b3"
+        ],
+        "lifted_reason": "the run ended (completed)",
+        "sim_clock_local": "7:00 AM sim time",
+        "created_at_local": "9:11 PM CT"
+      },
+      {
+        "cars": 0,
+        "tool": "request_service",
+        "agent": "chase-hermes",
+        "outcome": "refused",
+        "refusal": {
+          "code": "vehicle_not_found",
+          "message": "No car in your fleet matches \"Tesla 98\". Your cars here: Tesla-AV-001 to Tesla-AV-045 (3 cars); Tesla-RT-003.",
+          "candidates": [
+            "Tesla-AV-045",
+            "Tesla-AV-041",
+            "Tesla-RT-003"
+          ]
+        },
+        "summary": "Not done: No car in your fleet matches \"Tesla 98\". Your cars here: Tesla-AV-001 to Tesla-AV-045 (3 cars); Tesla-RT-003.",
+        "live_run": false,
+        "command_id": "35530a62-d22b-4b81-91f0-23db9da3caf7",
+        "created_at": "2026-10-03T02:11:54.110372+00:00",
+        "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+        "sim_clock_local": "7:00 AM sim time",
+        "created_at_local": "9:11 PM CT"
+      },
+      {
+        "cars": 4,
+        "link": "https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+        "tool": "set_charge_limit",
+        "agent": "chase-hermes",
+        "outcome": "applied",
+        "summary": "Done. All 4 Teslas charge to at most 90% instead of 100%.\n- 1 is charging and will stop at 90%\n- 1 already has enough charge for 90%\n- 1 is out; it charges to 90% when it next comes in\n- 1 is charging past 90%: its charge ends at the next tick\nThis lasts until the demo run ends or you undo it.\nSee it in OrchestrAV: https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+        "live_run": false,
+        "lifted_at": "2026-10-03T02:18:41.198523+00:00",
+        "command_id": "3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+        "created_at": "2026-10-03T02:11:54.030688+00:00",
+        "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+        "vehicle_ids": [
+          "ee000000-0000-0000-0000-0000000000b1",
+          "ee000000-0000-0000-0000-0000000000b2",
+          "ee000000-0000-0000-0000-0000000000b3",
+          "ee000000-0000-0000-0000-0000000000b4"
+        ],
+        "lifted_reason": "the run ended (completed)",
+        "sim_clock_local": "7:00 AM sim time",
+        "created_at_local": "9:11 PM CT"
+      }
+    ],
+    "depot_id": "11111111-1111-1111-1111-111111111111",
+    "full_pct": 100,
+    "in_force": [],
+    "highlight": {
+      "args": {
+        "mode": "apply",
+        "percent": 90,
+        "vehicles": "all"
+      },
+      "link": "https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+      "tool": "set_charge_limit",
+      "agent": "chase-hermes",
+      "effects": [
+        {
+          "key": "charge_limit",
+          "now": "Tesla-AV-001 is out on the road; it charges to 90% when it next comes in.",
+          "soc": 35,
+          "after": 90,
+          "group": "out",
+          "state": "deployed",
+          "before": 100,
+          "change": true,
+          "vehicle": "Tesla-AV-001",
+          "group_one": "is out; it charges to 90% when it next comes in",
+          "group_many": "are out; they charge to 90% when they next come in",
+          "vehicle_id": "ee000000-0000-0000-0000-0000000000b1"
+        },
+        {
+          "key": "charge_limit",
+          "now": "Tesla-AV-041 is charging (now 72%) and will stop at 90%.",
+          "soc": 72,
+          "after": 90,
+          "group": "charging",
+          "state": "charging_dcfc",
+          "before": 100,
+          "change": true,
+          "vehicle": "Tesla-AV-041",
+          "group_one": "is charging and will stop at 90%",
+          "group_many": "are charging and will stop at 90%",
+          "vehicle_id": "ee000000-0000-0000-0000-0000000000b2"
+        },
+        {
+          "key": "charge_limit",
+          "now": "Tesla-AV-045 is at 99%, enough for 90%: it needs no more charge to leave.",
+          "soc": 99,
+          "after": 90,
+          "group": "enough",
+          "state": "staged_for_departure",
+          "before": 100,
+          "change": true,
+          "vehicle": "Tesla-AV-045",
+          "group_one": "already has enough charge for 90%",
+          "group_many": "already have enough charge for 90%",
+          "vehicle_id": "ee000000-0000-0000-0000-0000000000b3"
+        },
+        {
+          "key": "charge_limit",
+          "now": "Tesla-RT-003 is charging at 93%, already at or past 90%: its charge ends at the next tick.",
+          "soc": 93,
+          "after": 90,
+          "group": "stops_now",
+          "state": "charging_l2",
+          "before": 100,
+          "change": true,
+          "vehicle": "Tesla-RT-003",
+          "group_one": "is charging past 90%: its charge ends at the next tick",
+          "group_many": "are charging past 90%: their charges end at the next tick",
+          "vehicle_id": "ee000000-0000-0000-0000-0000000000b4"
+        }
+      ],
+      "outcome": "applied",
+      "summary": "Done. All 4 Teslas charge to at most 90% instead of 100%.\n- 1 is charging and will stop at 90%\n- 1 already has enough charge for 90%\n- 1 is out; it charges to 90% when it next comes in\n- 1 is charging past 90%: its charge ends at the next tick\nThis lasts until the demo run ends or you undo it.\nSee it in OrchestrAV: https://ottoyard-orchestra-av.lovable.app/?source=agent&run=5e5e5e5e-0000-0000-0000-000000000001&owner=33333333-3333-3333-3333-333333333333&tab=fleet&command=3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+      "live_run": false,
+      "vehicles": [
+        {
+          "id": "ee000000-0000-0000-0000-0000000000b1",
+          "name": "Tesla-AV-001"
+        },
+        {
+          "id": "ee000000-0000-0000-0000-0000000000b2",
+          "name": "Tesla-AV-041"
+        },
+        {
+          "id": "ee000000-0000-0000-0000-0000000000b3",
+          "name": "Tesla-AV-045"
+        },
+        {
+          "id": "ee000000-0000-0000-0000-0000000000b4",
+          "name": "Tesla-RT-003"
+        }
+      ],
+      "lifted_at": "2026-10-03T02:18:41.198523+00:00",
+      "command_id": "3594a58e-ea8f-4fa8-99ff-43c0b9e9742c",
+      "created_at": "2026-10-03T02:11:54.030688+00:00",
+      "sim_run_id": "5e5e5e5e-0000-0000-0000-000000000001",
+      "lifted_reason": "the run ended (completed)",
+      "sim_clock_local": "7:00 AM sim time",
+      "created_at_local": "9:11 PM CT"
+    },
+    "by_vehicle": {},
+    "fleet_operator": {
+      "id": "33333333-3333-3333-3333-333333333333",
+      "name": "Tesla Robotaxi TN"
+    }
+  }
+}

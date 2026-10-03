@@ -1,4 +1,4 @@
-// A fleet owner's agent requests (otto-q-core 0550/0551), on REAL output of public.ottoq_agent_requests_for_operator
+// A fleet owner's agent requests (otto-q-core 0559/0560), on REAL output of public.ottoq_agent_requests_for_operator
 // called as anon -- this cockpit's own path -- against the migration's stub engine (fixtures/agent_requests_capture.json
 // says how). The read goes through the cockpit's one OTTO-Q client, ottoqRpc; no second client exists for it.
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -44,7 +44,7 @@ describe("before the gateway is on", () => {
     throw new Error("expected the read to fail");
   };
 
-  it("reads 'not installed' (0550 not applied) and 'not granted to this cockpit' (0551 not applied) as such", async () => {
+  it("reads 'not installed' (0559 not applied) and 'not granted to this cockpit' (0560 not applied) as such", async () => {
     await expect(failing(404, '{"code":"PGRST202","message":"Could not find the function public.ottoq_agent_requests_for_operator(p_depot_id, p_fleet_operator_id, p_limit) in the schema cache"}'))
       .resolves.toBe("not_enabled");
     await expect(failing(401, '{"code":"42501","message":"permission denied for function ottoq_agent_requests_for_operator"}'))

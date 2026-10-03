@@ -7,6 +7,8 @@ import type { FleetRow } from "@/lib/twin/model";
 import { STAGE_LABEL, cardDecisionText, humanize, needNote, overPlanText, overdueText, simTime, stepAtomLabel } from "@/lib/twin/model";
 import { decisionKey, decisionPlace, describeDecision, holdText } from "@/lib/twin/decisionText";
 import { useActivityFeed } from "@/lib/twin/hooks";
+import type { OwnerCarSettings } from "@/lib/owner-board";
+import { OwnerSettingChips } from "@/components/agents/OwnerAgent";
 import { Chip, DECISION_TONE, SocBar, STAGE_TONE, fmt } from "./ui";
 
 const LEG_LABELS: Record<string, string> = {
@@ -110,12 +112,18 @@ export function VehicleLiveCard({
   expanded,
   onToggle,
   showOperator = true,
+  ownerSettings = null,
+  highlighted = false,
 }: {
   row: FleetRow;
   runId: string;
   expanded: boolean;
   onToggle: () => void;
   showOperator?: boolean;
+  /** What the car's owner's agent set on it (otto-q-core 0606), shown as chips under its needs. */
+  ownerSettings?: OwnerCarSettings | null;
+  /** One of the cars the agent's receipt (the link this tab was opened with) names. */
+  highlighted?: boolean;
 }) {
   const cur = row.card?.current_step ?? null;
   const next = row.card?.next_step ?? null;
@@ -124,7 +132,8 @@ export function VehicleLiveCard({
   const dec = row.lastDecision;
   const latest = dec ? cardDecisionText(dec) : null;
   return (
-    <div id={`vehicle-${row.id}`} className="rounded-lg border border-border bg-card p-3">
+    <div id={`vehicle-${row.id}`} data-highlighted={highlighted || undefined}
+      className={`rounded-lg border bg-card p-3 ${highlighted ? "border-violet-500/60 ring-1 ring-violet-500/40" : "border-border"}`}>
       <button type="button" onClick={onToggle} className="w-full text-left">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
@@ -191,6 +200,7 @@ export function VehicleLiveCard({
         ) : null}
 
         <div className="mt-2"><Needs row={row} /></div>
+        {ownerSettings ? <div className="mt-1.5"><OwnerSettingChips settings={ownerSettings} /></div> : null}
       </button>
 
       {expanded ? (
