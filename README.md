@@ -90,6 +90,10 @@ listed first when it touched some of them (`src/lib/agentLink.ts`, `src/componen
 not pin the run as a twin link does: a stop or reset of the twin lifts everything an agent set, and the receipt says
 so. Read-only: the agent changes these, never this cockpit. Screenshots: `docs/screenshots/2026-10-03-owner-agent/`.
 
+Any agent can now come in with OTTOYARD's demo passcode instead of an issued key (otto-q-core 0607). Each accepted
+change carries a confirmation code, `OQ-XXXX-XXXX`; the agent relays it with the link, and the receipt here and every
+row of "Set by your agent" show the same code beside it, with the agent's own name ("Grok · passcode") (0608).
+
 ## What technologies are used for this project?
 
 This project is built with:

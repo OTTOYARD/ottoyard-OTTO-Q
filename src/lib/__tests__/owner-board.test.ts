@@ -4,7 +4,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import fx from "./fixtures/owner_board_capture.json";
 import {
-  classifyBoardError, commandState, commandVehicleIds, fetchOwnerBoard, groupInForce, isBoard, receiptText,
+  agentLabel, classifyBoardError, commandState, commandVehicleIds, fetchOwnerBoard, groupInForce, isBoard, receiptText,
   settingChips, toolLabel, whenLabel, type OwnerBoard,
 } from "../owner-board";
 import { TWIN_DEPOT_ID } from "../agent-requests";
@@ -94,6 +94,18 @@ describe("the receipt", () => {
     expect(commandState(refused as never).label).toBe("Refused");
     expect(commandState({ outcome: "applied", live_run: true, undone_at: "2026-10-03T03:00:00Z" }).label).toBe("Undone");
     expect(commandState({ outcome: "no_change", live_run: true }).label).toBe("Nothing to change");
+  });
+
+  it("carries each applied command's confirmation code and its agent's own name (0608)", () => {
+    expect(live.highlight?.confirmation_code).toMatch(/^OQ-[0-9A-F]{4}-[0-9A-F]{4}$/);
+    const byCode = live.commands.filter((c) => c.confirmation_code).map((c) => c.confirmation_code);
+    expect(new Set(byCode).size).toBe(3);
+    expect(live.commands.find((c) => c.outcome === "refused")?.confirmation_code).toBeUndefined();
+    const grok = live.commands.find((c) => c.agent === "Grok");
+    expect(grok?.agent_via).toBe("passcode");
+    expect(agentLabel(grok!)).toBe("Grok · passcode");
+    expect(agentLabel({ agent: "chase-hermes", agent_via: "key" })).toBe("chase-hermes");
+    expect(agentLabel({ agent: "an older board" })).toBe("an older board");
   });
 
   it("labels every owner command and when", () => {

@@ -1,6 +1,6 @@
 // What an owner's agent has set on its own cars, as this cockpit reads it: otto-q-core 0606's
 // public.ottoq_owner_board(fleet_operator_id, depot_id, command_id), an anon-executable, read-only view of 0605's owner
-// settings. Per car: a charge limit, a hold, service orders. As a list: the owner's recent commands with OTTO-Q's
+// settings (0608 adds each command's confirmation code, and the agent's own name and how it got in). Per car: a charge limit, a hold, service orders. As a list: the owner's recent commands with OTTO-Q's
 // plain-English receipts. And, for a receipt link, the one command the link names.
 //
 // READ-ONLY by design, like the agent requests panel: an owner's agent changes these through OTTO-Q's agent gateway,
@@ -65,8 +65,12 @@ export interface OwnerCommand {
   outcome: "applied" | "no_change" | "refused" | string;
   /** OTTO-Q's plain-English receipt, as the agent received it. */
   summary: string;
-  /** The agent's name. Never a token or principal id. */
+  /** The agent's name: the one a passcode agent gave itself ("Grok"), or an issued key's. Never a token or principal id. */
   agent: string;
+  /** 0608: how the agent got in -- OTTOYARD's demo passcode, or a key the depot issued. */
+  agent_via?: "passcode" | "key" | string;
+  /** 0607/0608: an applied command's "OQ-XXXX-XXXX", the same code the agent's receipt carries. */
+  confirmation_code?: string;
   cars?: number;
   vehicle_ids?: string[];
   /** The command a receipt link names carries its cars and per-car effects in full. */
@@ -122,6 +126,11 @@ export function fetchOwnerBoard(fleetOperatorId: string, commandId: string | nul
 
 /** Not installed (0605/0606 not applied), installed but not granted to this cockpit, or a real failure. */
 export const classifyBoardError = (err: unknown): RequestsProblem => classifyRequestsError(err);
+
+/** "Grok · passcode" for an agent that came in with the demo passcode; an issued key's name as it is. */
+export function agentLabel(c: Pick<OwnerCommand, "agent" | "agent_via">): string {
+  return c.agent_via === "passcode" ? `${c.agent} · passcode` : c.agent;
+}
 
 export function whenLabel(when: string | null | undefined): string {
   switch (when) {

@@ -25,7 +25,8 @@ describe("the receipt, opened from the agent's link", () => {
   it("shows the command in OTTO-Q's words, where it stands now, who sent it and when -- not the link back here", () => {
     const { html, text: t } = banner(q({ data: fx.tesla }));
     expect(t).toMatch(/From your agent chase-hermes · Charge limit/);
-    expect(t).toMatch(/In force/);
+    expect(t).toMatch(/In force OQ-C493-5175/);
+    expect(html).toMatch(/title="Confirmation code: the same code your agent&#x27;s receipt carried\."/);
     expect(t).toMatch(/Done\. All 4 Teslas charge to at most 90% instead of 100%\./);
     expect(t).toMatch(/1 is charging and will stop at 90%/);
     expect(t).toMatch(/This lasts until the demo run ends or you undo it\./);
@@ -77,7 +78,12 @@ describe("the Fleet tab's panel", () => {
     expect(t).toMatch(/a stop or reset of the twin puts every car back to baseline\./);
     expect(t).toMatch(/Charge to at most 90% 4 cars: Tesla-AV-001, Tesla-AV-041, Tesla-AV-045, Tesla-RT-003/);
     expect(t).toMatch(/applies at OTTO-Q's next tick/);
-    expect(t).toMatch(/Service ordered In force 4 cars Done\. All 4 Teslas get exterior wash/);
+    expect(t).toMatch(/Service ordered In force OQ-CFBA-2270 4 cars Done\. All 4 Teslas get exterior wash/);
+    // the agent's own name, and how it got in (0608): the demo passcode, or a key
+    expect(t).toMatch(/from Grok · passcode/);
+    expect(t).toMatch(/Charge limit In force OQ-C493-5175 4 cars Done\. All 4 Teslas charge to at most 90%[^]*from chase-hermes/);
+    // a refused command carries no code
+    expect(html.match(/data-testid="confirmation-code"/g)?.length).toBe(3);
     expect(t).toMatch(/Refused No car in your fleet matches "Tesla 98"\./);
     expect(html.match(/data-testid="owner-command"/g)?.length).toBe(fx.tesla.commands.length);
     expect(html).not.toMatch(/<button/);
