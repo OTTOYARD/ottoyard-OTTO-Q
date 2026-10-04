@@ -10,7 +10,7 @@ import type { ReactNode } from "react";
 import { Bot, Clock, PlugZap, RotateCcw, X } from "lucide-react";
 import type { Tone } from "@/lib/agent-requests";
 import {
-  commandState, groupInForce, isBoard, receiptText, settingChips, toolLabel,
+  agentLabel, commandState, groupInForce, isBoard, receiptText, settingChips, toolLabel,
   type OwnerCarSettings, type OwnerCommand,
 } from "@/lib/owner-board";
 import type { OwnerBoardQuery } from "@/hooks/use-owner-board";
@@ -28,6 +28,16 @@ const TONE: Record<Tone, string> = {
 export const AGENT_TONE = "border-violet-500/40 bg-violet-500/10 text-violet-200";
 
 const NOT_ENABLED = "Owner settings are built but not switched on yet";
+
+/** The confirmation code an applied command's receipt carried (0607/0608): the same code the agent relayed. */
+function CodeChip({ code }: { code?: string }) {
+  if (!code) return null;
+  return (
+    <Chip tone={AGENT_TONE} title="Confirmation code: the same code your agent's receipt carried.">
+      <span className="font-mono tracking-wide" data-testid="confirmation-code">{code}</span>
+    </Chip>
+  );
+}
 
 function notEnabledText(problem: string): string {
   return problem === "not_enabled"
@@ -121,12 +131,13 @@ export function AgentReceiptBanner({ query, onDismiss }: { query: OwnerBoardQuer
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
         <Chip tone={AGENT_TONE}><Bot className="h-3 w-3" />From your agent</Chip>
-        <span className="font-medium text-foreground">{c.agent}</span>
+        <span className="font-medium text-foreground">{agentLabel(c)}</span>
         <span className="text-muted-foreground">· {toolLabel(c.tool)}</span>
         <span className="inline-flex items-center gap-1 text-muted-foreground">
           <Clock className="h-3 w-3" />{c.created_at_local}{c.sim_clock_local ? ` (${c.sim_clock_local})` : ""}
         </span>
         <Chip tone={TONE[state.tone]} title={state.explain}>{state.label}</Chip>
+        <CodeChip code={c.confirmation_code} />
       </div>
       <ReceiptBody c={c} />
     </div>,
@@ -141,11 +152,12 @@ function CommandRow({ c }: { c: OwnerCommand }) {
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="font-medium">{toolLabel(c.tool)}</span>
         <Chip tone={TONE[state.tone]} title={state.explain}>{state.label}</Chip>
+        <CodeChip code={c.confirmation_code} />
         {typeof c.cars === "number" && c.cars > 0 ? <span className="text-[11px] text-muted-foreground">{c.cars} car{c.cars === 1 ? "" : "s"}</span> : null}
       </div>
       <p>{c.outcome === "refused" ? (c.refusal?.message ?? r.head) : r.head}</p>
       <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
-        <span>from {c.agent}</span>
+        <span>from {agentLabel(c)}</span>
         <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{c.created_at_local}{c.sim_clock_local ? ` (${c.sim_clock_local})` : ""}</span>
       </div>
     </li>
