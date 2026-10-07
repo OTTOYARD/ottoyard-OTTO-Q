@@ -7,7 +7,7 @@ import {
 
 const RUN = "8A1E12AE-B64B-4B6E-A82D-370F6F58315C";
 const run = RUN.toLowerCase();
-const TWIN = "https://ottoyarddepot-sim.lovable.app";
+const TWIN = "https://otto-twin.lovable.app";
 
 describe("the view's address", () => {
   it("frames the published twin's view, embedded, following the live run by default", () => {
@@ -28,7 +28,8 @@ describe("the view's address", () => {
   it("reads messages only from the twin's own origin", () => {
     expect(fromTwin(TWIN, "")).toBe(true);
     expect(fromTwin("https://evil.example.com", "")).toBe(false);
-    expect(fromTwin("https://ottoyarddepot-sim.lovable.app.evil.com", "")).toBe(false);
+    expect(fromTwin("https://otto-twin.lovable.app.evil.com", "")).toBe(false);
+    expect(fromTwin("https://ottoyarddepot-sim.lovable.app", "")).toBe(false); // the old address, released 2026-10-07
     expect(fromTwin("http://localhost:8080", "http://localhost:8080/")).toBe(true);
   });
 });

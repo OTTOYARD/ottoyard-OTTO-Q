@@ -36,7 +36,8 @@ export interface TwinRunContext {
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const STORE_KEY = "ottoq.twinLink";
-const TWIN_APP_URL = "https://ottoyarddepot-sim.lovable.app";
+// The published twin. Moved from ottoyarddepot-sim.lovable.app on 2026-10-07; the old address answers "Project not found".
+const TWIN_APP_URL = "https://otto-twin.lovable.app";
 
 export function parseTwinLink(search: string): TwinLink | null {
   const q = new URLSearchParams(search);

@@ -171,7 +171,7 @@ describe("words and links", () => {
   });
 
   it("goes back to the twin on the same run", () => {
-    expect(twinBackUrl(RUN, undefined)).toBe(`https://ottoyarddepot-sim.lovable.app/?run=${RUN}`);
+    expect(twinBackUrl(RUN, undefined)).toBe(`https://otto-twin.lovable.app/?run=${RUN}`);
     expect(twinBackUrl(RUN, "http://localhost:8080")).toBe(`http://localhost:8080/?run=${RUN}`);
   });
 });

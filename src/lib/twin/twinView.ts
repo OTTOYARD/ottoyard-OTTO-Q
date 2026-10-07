@@ -18,7 +18,8 @@
 
 export const VIEW_SOURCE = "otto-twin-view";
 export const COCKPIT_SOURCE = "otto-cockpit";
-const TWIN_APP_URL = "https://ottoyarddepot-sim.lovable.app";
+// The published twin. Moved from ottoyarddepot-sim.lovable.app on 2026-10-07; the old address answers "Project not found".
+const TWIN_APP_URL = "https://otto-twin.lovable.app";
 
 export const VIEW_CAMS = ["se", "sw", "ne", "nw", "pole", "top"] as const;
 export type ViewCam = (typeof VIEW_CAMS)[number];
