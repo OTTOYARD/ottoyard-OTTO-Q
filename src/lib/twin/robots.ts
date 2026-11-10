@@ -620,6 +620,9 @@ export function planStages(
   for (const nd of needs ?? []) {
     if (!nd.svc || nd.svc === "charge" || workState(nd.status) !== "active") continue;
     if (kept.some((s) => s.status === "current" && svcOf(s) === nd.svc)) continue;
+    // the two feeds are polled apart: a need that still reads under way while its own leg already reads done (the
+    // same start) is that finished stage, not a second one
+    if (kept.some((s) => s.status === "done" && svcOf(s) === nd.svc && sameInstant(s.actual_start, nd.started_at))) continue;
     if (under.some((u) => u.atom === nd.svc)) continue;
     under.push({
       seq: -1 - under.length, leg_type: SVC_LEG[nd.svc] ?? nd.svc, atom: nd.svc, status: "current",

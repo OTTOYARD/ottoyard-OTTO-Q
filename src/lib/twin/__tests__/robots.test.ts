@@ -451,6 +451,17 @@ describe("planStages: a car's visit, stage by stage", () => {
     expect(stepMachine(washing[0])).toBe("wash_gantry");
   });
 
+  it("does not list a clean twice when its own leg already reads done and the need still reads under way", () => {
+    // the cards and the snapshot are polled apart: for one poll the leg can be done while the atom is still in progress
+    const started = "2026-11-07T15:10:00+00:00";
+    const steps = [step(5, "interior_tidy", "done", { atom: "interior_tidy", to_stall_code: "NASH-DCFC-STALL-05", actual_start: started, actual_end: "2026-11-07T15:15:48+00:00" })];
+    const still = [atom("interior_tidy", "in_progress", { performed_by: "stall_cabin_robot", started_at: started, ends_at: "2026-11-07T15:15:48+00:00" })];
+    expect(planStages(steps, still).map((x) => `${x.status}:${x.seq}`)).toEqual(["done:5"]);
+    // a second tidy on the same visit, started later, is its own stage
+    const again = [atom("interior_tidy", "in_progress", { started_at: "2026-11-07T16:01:00+00:00", ends_at: "2026-11-07T16:05:00+00:00" })];
+    expect(planStages(steps, again).map((x) => x.status)).toEqual(["done", "current"]);
+  });
+
   it("no steps and no needs is no plan", () => {
     expect(planStages(null, null)).toEqual([]);
     expect(planStages([], [])).toEqual([]);
