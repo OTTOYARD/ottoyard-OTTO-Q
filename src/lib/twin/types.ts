@@ -1,10 +1,14 @@
 // ============================================================================
 // OTTO-TWIN wire types, copied VERBATIM from the twin cockpit so the three
 // cockpits read one contract.
-//   source: OTTOYARD/ottoyarddepot-sim  src/lib/ottoTwin.ts  lines 18-583
-//   commit: 2d344c3
-// Do not edit these by hand. If the twin's contract moves, re-copy the block
+//   source: OTTOYARD/ottoyarddepot-sim  src/lib/ottoTwin.ts  lines 18-622 and 681-735
+//   commit: 7607931
+// Do not edit these by hand. If the twin's contract moves, re-copy the blocks
 // and re-run src/lib/twin/__tests__ (the fixtures are real captures).
+//
+// Re-copied 2026-11-09 for the depot's robots: a visit atom's times and the stall whose
+// cleaning arm does it (otto-q-core 0758), a car's seat in a wash bay (0762), a faulted
+// charger's code and repair time (0612), and the KPI board (0609-0611).
 // ============================================================================
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -43,13 +47,26 @@ export interface TwinVisitAtom {
   must_do: boolean;
   /** OTTO-Q's estimate for this atom, minutes. NULL when the atom carried none. */
   est_min: number | null;
-  /** otto-q-core 0512 (G236): who performed it. 'charger_sensors' when the charger's own sensors did the work during
-   *  the charge (an interior inspection, a cabin-only triage); null for a technician. Absent before 0512. */
+  /**
+   * Who performed it (otto-q-core 0512, G236): 'charger_sensors' when the charger's own sensors did the work during
+   * the charge (an interior inspection, a cabin-only triage), 'stall_cabin_robot' when the stall's OTTO-CLEAN ARM did
+   * (0758), null for a technician. Absent before 0512.
+   */
   performed_by?: string | null;
   /** 0512: a pending need that waits on the triage check's verdict (confirm, clear or escalate), not on a technician. */
   awaiting_triage?: boolean;
   /** 0512: the triage check's verdict once given: 'confirm' | 'clear' | 'escalate'. */
   triage_verdict?: string | null;
+  /**
+   * When the work started, ends and was done: the BACKEND's sim clock (ISO), as the
+   * engine wrote them (otto-q-core 0758). Absent from an older backend; null when the
+   * atom carries none.
+   */
+  started_at?: string | null;
+  ends_at?: string | null;
+  done_at?: string | null;
+  /** The twin stall whose OTTO-CLEAN ARM does this work (an interior tidy during a fast charge), or null. */
+  robot_stall_id?: string | null;
 }
 
 /**
@@ -92,6 +109,12 @@ export interface TwinVehicle {
    * opened a visit and put no work on it. That is not the same as `null`.
    */
   visit?: TwinVisitCard | null;
+  /**
+   * The car's seat in a wash, detail or service bay (otto-q-core 0762): when the twin seated it
+   * and when its timer ends the work there, both ISO on the BACKEND's sim clock. Null for a car
+   * in no bay; absent from an older backend. `ends_at` is null when the twin's timer is unset.
+   */
+  bay_seat?: { since: string | null; ends_at: string | null } | null;
 }
 /**
  * One timed leg of a vehicle's itinerary — the twin's T3 RENDER CONTRACT.
@@ -202,6 +225,15 @@ export interface TwinSnapshot {
      *  for, and fell back to choosing a staging stall itself. */
     reserved_by?: string | null;
     reserved_until?: string | null;
+    /** The stall's OCPP charger state (otto-q-core 0612): "Faulted" when the charger is down,
+     *  else "Available", "Charging" and so on. A Faulted charger's stall is listed even while
+     *  the stall itself reads available, with `status` 'faulted'. Absent on an older backend,
+     *  and null on a stall with no charger: neither means healthy. */
+    charger_state?: string | null;
+    /** Why the charger is down, e.g. "fault.communication_dropout". An open set. */
+    fault_code?: string | null;
+    /** SIM-clock instant the drawn repair ends; null when the twin has no end for it. */
+    fault_until?: string | null;
   }[];
   /** THE ARM CONTRACT (`public.ottoq_arm_timings` via the snapshot RPC).
    *
@@ -579,6 +611,65 @@ export interface TwinRunSummary {
   started_at: string | null; ended_at: string | null;
   sim_clock_start: string | null; sim_clock_current: string | null;
   tick_count: number; time_scale: number; seed: number | string; sim_minutes: number;
-  counters: TwinRunCounters;
+  /** ottoq_twin_run_list counts only the newest runs; an older run carries null. */
+  counters: TwinRunCounters | null;
+  /** Counters that reached the list's row guard (engine 0466): the number is a floor, not a count. */
+  counters_capped?: (keyof TwinRunCounters)[] | null;
   variability: { spread_mult: number; rate_mult: number; tuned_knobs: number; notes: string | null } | null;
+}
+
+// ── The KPI board (otto-q-core 0609/0610: public.ottoq_twin_kpi_board) ──
+/** One run's business KPIs, every figure from the run's own rows inside sim_clock_start..sim_clock_current.
+ *  A missing figure is null, never 0. `ok:false` carries `error` (run_required | unknown_run | no_state_history). */
+export interface TwinKpiBoard {
+  ok: boolean;
+  error?: string;
+  message?: string;
+  sim_run_id?: string;
+  depot_id?: string;
+  scenario?: string | null;
+  status?: string | null;
+  window?: { from: string; to: string; hours: number };
+  cars?: number;
+  fleet_hours?: number;
+  /** Car-hours per group: on_road, leaving, returning, ready, charging_dcfc, charging_l2, in_bay, queue,
+   *  between_steps, down, offline, other. A group no car was in is absent. */
+  split_hours?: Record<string, number>;
+  uptime?: { pct: number | null; on_road_pct: number | null; revenue_hours: number | null; revenue_hours_per_car_day: number | null };
+  turnaround?: {
+    arrivals: number; finished: number; still_in_depot: number;
+    p50_min: number | null; p90_min: number | null; dwell_p50_min: number | null;
+    served: number; first_service_p50_min: number | null; first_service_p90_min: number | null;
+    open_so_far_p50_min: number | null;
+  };
+  flow?: { arrivals: number; departures: number; departures_per_hour: number | null; sent_back_before_leaving: number };
+  departures?: {
+    dispatched: number; soc_avg: number | null; soc_min: number | null; at_99_or_more: number; soc_unknown: number;
+    trips_back: number; miles: number | null; kwh_used: number | null; soc_back_avg: number | null;
+  };
+  service?: {
+    steps: number; done: number; required: number; required_done: number; required_open: number; cancelled: number;
+    by_service: { svc: string; name: string; lane: string | null; done: number; total: number }[];
+  };
+  energy?: {
+    snapshots: number; to_cars_kwh: number | null; grid_import_kwh: number | null; grid_export_kwh: number | null;
+    solar_kwh: number | null; battery_out_kwh: number | null; battery_in_kwh: number | null; building_kwh: number | null;
+    grid_cost_usd: number | null; grid_price_usd_kwh: number | null; solar_share_pct: number | null;
+    peak_grid_kw_15min: number | null; peak_load_kw_15min: number | null;
+    /** 0611: the depot tariff priced on its own demand basis (NES GSA-3: the highest full 30 minutes of grid draw),
+     *  and the same readings with the battery output taken out. Absent on a board from before 0611. */
+    peak_grid_kw_30min?: number | null; peak_grid_30min_from?: string | null; peak_without_battery_kw_30min?: number | null;
+    demand_charge_usd_month?: number | null; demand_charge_without_battery_usd_month?: number | null;
+    demand_tariff?: {
+      schedule: string; utility: string; season: string; basis: string; usd_per_kw: number; block_kw: number | null;
+      usd_per_kw_above_block: number; source_url: string | null; priced: boolean;
+    } | null;
+  };
+  chargers?: {
+    dcfc_stalls: number; l2_stalls: number; dcfc_busy_pct: number | null; l2_busy_pct: number | null;
+    sessions_started: number; sessions_completed: number; sessions_faulted: number;
+  };
+  on_time?: { pct: number | null; on_time: number | null; late: number | null; stranded: number | null; with_due: number | null; p50_late_min: number | null };
+  charger_wait?: { p50_min: number | null; p95_min: number | null; p95_floor_min: number | null; charged: number | null; waiting_at_end: number | null; owing: number | null; waiting_p50_so_far_min: number | null };
+  basis?: Record<string, string>;
 }

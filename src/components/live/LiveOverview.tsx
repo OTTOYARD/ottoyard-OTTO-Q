@@ -5,23 +5,36 @@ import { useMemo } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useActivityFeed, useLiveDepot } from "@/lib/twin/hooks";
 import { STAGE_LABEL, STAGE_ORDER, countByStage, decisionActor, doubleBooked, energyView, humanize, joinFleet, simTime, stallBoard } from "@/lib/twin/model";
+import { MACHINE_KEYS, MACHINE_WORD, machineFacts, machineHeadline, machinesByCar, robotBoard, type MachineKey } from "@/lib/twin/robots";
 import { DEFAULT_CATEGORIES, decisionCategory, decisionKey, decisionPlace, describeDecision } from "@/lib/twin/decisionText";
 import { LiveRunBar, NoLiveRun } from "./LiveRunBar";
 import { TwinDepotView } from "./TwinDepotView";
 import { twinLink } from "@/lib/twin/twinLink";
 import { Chip, DECISION_TONE, Section, Stat, STAGE_TONE, fmt } from "./ui";
 
-export function LiveOverview({ fleetOperatorId = null, scopeLabel, onOpen }: {
+/** What each machine does to a car, in a line, for the cockpit that shows an owner its own cars. */
+const AT_WORK_NOTE: Record<MachineKey, string> = {
+  charge_arm: "A robot arm connects each car to its charger.",
+  clean_arm: "An overhead arm cleans the cabin during the charge.",
+  wash_gantry: "A machine washes the car in a wash bay.",
+};
+
+export function LiveOverview({ fleetOperatorId = null, scopeLabel, onOpen, onOpenRobots }: {
   fleetOperatorId?: string | null;
   scopeLabel?: string;
   /** Optional navigation: the cockpit passes its own tab switcher. */
   onOpen?: (tab: "fleet" | "depot" | "energy" | "decisions") => void;
+  /** The depot crew's cockpit has a Robots tab: with this, the overview shows the machines in a line and links to it. */
+  onOpenRobots?: () => void;
 }) {
   const { cards, snapshot, condition, layout, runId, runStatus, simClock } = useLiveDepot(fleetOperatorId);
   const feed = useActivityFeed(runId, { limit: 30, changesOnly: true });
   const rows = useMemo(() => joinFleet(cards.data, snapshot.data, condition.data), [cards.data, snapshot.data, condition.data]);
   const counts = countByStage(rows);
   const board = useMemo(() => stallBoard(layout.data, snapshot.data, rows), [layout.data, snapshot.data, rows]);
+  const robots = useMemo(() => (onOpenRobots ? robotBoard(layout.data, snapshot.data, rows) : null), [onOpenRobots, layout.data, snapshot.data, rows]);
+  // With no Robots tab (the owner's cockpit), the overview counts the cars in scope that each machine is at work on.
+  const atWork = useMemo(() => (onOpenRobots ? null : machinesByCar(rows, snapshot.data).working), [onOpenRobots, rows, snapshot.data]);
   const e = energyView(snapshot.data);
   const doubles = doubleBooked(rows);
   const oos = rows.filter((r) => r.stage === "out_of_service");
@@ -76,11 +89,33 @@ export function LiveOverview({ fleetOperatorId = null, scopeLabel, onOpen }: {
             ) : null}
           </Section>
 
+          {robots && onOpenRobots ? (
+            <Section title="Robots (whole depot)"
+              right={<button type="button" onClick={onOpenRobots} className="text-[11px] text-primary hover:underline [@media(pointer:coarse)]:-my-2 [@media(pointer:coarse)]:py-2 [@media(pointer:coarse)]:px-1">Open robots</button>}>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                {MACHINE_KEYS.map((k) => {
+                  const h = machineHeadline(k, robots, true);
+                  return <Stat key={k} label={`${machineFacts(k).short}s`} value={h.value} unit={h.unit} sub={h.sub} />;
+                })}
+              </div>
+            </Section>
+          ) : null}
+
+          {atWork ? (
+            <Section title={`Depot machines at work (${scopeLabel ?? "these vehicles"})`} right={link("fleet", "Open fleet")}>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3" data-testid="machines-at-work">
+                {MACHINE_KEYS.map((k) => (
+                  <Stat key={k} label={MACHINE_WORD[k]} value={atWork[k].length} unit={atWork[k].length === 1 ? "vehicle" : "vehicles"} sub={AT_WORK_NOTE[k]} />
+                ))}
+              </div>
+            </Section>
+          ) : null}
+
           <div className="grid gap-3 lg:grid-cols-2">
             <Section title="Stalls in use (whole depot)" right={link("depot", "Open depot")}>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {board.byType.map((t) => (
-                  <Stat key={t.type} label={humanize(t.type)} value={`${t.occupied}/${t.total}`} sub={`${t.reserved} held · ${t.available} free`} />
+                  <Stat key={t.type} label={humanize(t.type)} value={`${t.occupied}/${t.total}`} sub={`${t.reserved} held · ${t.available} free${t.down ? ` · ${t.down} down` : ""}`} />
                 ))}
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5 text-[11px]">

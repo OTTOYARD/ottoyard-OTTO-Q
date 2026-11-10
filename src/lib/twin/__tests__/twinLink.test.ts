@@ -14,6 +14,7 @@ import {
   shortRun,
   twinBackUrl,
   twinLink,
+  twinRobotUrl,
 } from "../twinLink";
 
 const RUN = "1ebae97a-d56a-44a6-ba1f-8fa4c4ae239e";
@@ -173,6 +174,12 @@ describe("words and links", () => {
   it("goes back to the twin on the same run", () => {
     expect(twinBackUrl(RUN, undefined)).toBe(`https://otto-twin.lovable.app/?run=${RUN}`);
     expect(twinBackUrl(RUN, "http://localhost:8080")).toBe(`http://localhost:8080/?run=${RUN}`);
+  });
+
+  it("opens the twin on a machine's engineering model (the twin's Robotics tab reads tab and robot)", () => {
+    expect(twinRobotUrl("charge_arm", undefined)).toBe("https://otto-twin.lovable.app/?tab=robotics&robot=charge_arm");
+    expect(twinRobotUrl("clean_arm", "  ")).toBe("https://otto-twin.lovable.app/?tab=robotics&robot=clean_arm");
+    expect(twinRobotUrl("wash_gantry", "http://localhost:8080")).toBe("http://localhost:8080/?tab=robotics&robot=wash_gantry");
   });
 });
 

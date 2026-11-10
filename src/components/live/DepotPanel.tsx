@@ -2,7 +2,9 @@
 // board OTTO-Q is working to, with its own reason for each booking.
 import { useMemo, useState } from "react";
 import { useLiveDepot } from "@/lib/twin/hooks";
+import { backText, downLabel } from "@/lib/twin/chargerFaults";
 import { allReservations, humanize, joinFleet, reservationsByPurpose, simTime, stallBoard, type StallRow } from "@/lib/twin/model";
+import { chargeStepWords } from "@/lib/twin/robots";
 import { LiveRunBar, NoLiveRun } from "./LiveRunBar";
 import { Chip, Section, Stat } from "./ui";
 
@@ -17,7 +19,10 @@ const STATUS_TONE: Record<StallRow["status"], string> = {
   occupied: "border-emerald-500/40 bg-emerald-500/15",
   reserved: "border-amber-500/40 bg-amber-500/10",
   available: "border-border bg-secondary/30",
+  down: "border-red-500/40 bg-red-500/10",
 };
+/** The charge arm's hold on the car at a stall, in the twin's words: "arm connected", "arm: Align with the cameras". */
+const armWords = (phase: string) => (phase === "charging" ? "arm connected" : `arm: ${chargeStepWords(phase) ?? humanize(phase)}`);
 
 export function DepotPanel({ fleetOperatorId = null, scopeLabel }: { fleetOperatorId?: string | null; scopeLabel?: string }) {
   const { cards, snapshot, condition, layout, runId, runStatus, simClock } = useLiveDepot(fleetOperatorId);
@@ -49,22 +54,26 @@ export function DepotPanel({ fleetOperatorId = null, scopeLabel }: { fleetOperat
                   label={TYPE_LABEL[t.type] ?? humanize(t.type)}
                   value={`${t.occupied}/${t.total}`}
                   unit="in use"
-                  sub={`${t.reserved} held · ${t.available} free`}
+                  sub={`${t.reserved} held · ${t.available} free${t.down ? ` · ${t.down} down` : ""}`}
                 />
               </button>
             ))}
           </div>
 
           {activeType ? (
-            <Section title={`${TYPE_LABEL[activeType] ?? humanize(activeType)} stalls`} right={<span className="text-[11px] text-muted-foreground">green in use · amber held · grey free</span>}>
+            <Section title={`${TYPE_LABEL[activeType] ?? humanize(activeType)} stalls`} right={<span className="text-[11px] text-muted-foreground">green in use · amber held · grey free · red down</span>}>
               <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5 lg:grid-cols-8">
                 {board.stalls.filter((s) => s.type === activeType).map((s) => (
-                  <div key={s.id} className={`rounded border px-2 py-1 ${STATUS_TONE[s.status]}`} title={s.reservedUntil ? `held until ${simTime(s.reservedUntil)}` : undefined}>
+                  <div key={s.id} className={`rounded border px-2 py-1 ${STATUS_TONE[s.status]}`}
+                    title={s.status === "down" && s.down ? `${downLabel(s.down)}. ${backText(s.down.until, simClock) ?? "The twin gives no repair time."} OTTO-Q sends no car to it.`
+                      : s.reservedUntil ? `held until ${simTime(s.reservedUntil)}` : undefined}>
                     <div className="truncate font-mono text-[10px] text-muted-foreground">{s.code.replace(/^NASH-/, "")}</div>
                     <div className="truncate font-mono text-[11px]">
-                      {s.status === "occupied" ? s.vehicleName ?? "in use" : s.status === "reserved" ? `→ ${s.reservedForName ?? "held"}` : "free"}
+                      {s.status === "occupied" ? s.vehicleName ?? "in use" : s.status === "down" ? <span className="text-red-300">down</span>
+                        : s.status === "reserved" ? `→ ${s.reservedForName ?? "held"}` : "free"}
                     </div>
-                    {s.armPhase ? <div className="text-[10px] text-sky-300">arm: {s.armPhase}</div> : null}
+                    {s.status === "down" && s.down ? <div className="truncate text-[10px] text-red-300/80">{downLabel(s.down).replace(/^Charger /, "")}</div> : null}
+                    {s.armPhase ? <div className="truncate text-[10px] text-sky-300">{armWords(s.armPhase)}</div> : null}
                   </div>
                 ))}
               </div>

@@ -1,8 +1,8 @@
 // ============================================================================
 // Read contracts the twin cockpit does not type itself.
 //
-//   ottoq_depot_cards 1.4   otto-q-core db/migrations/0460_*, 0506_*, 0507_*, 0509_*, 0512_*  (the ONE per-vehicle
-//                           read contract both cockpits project; the operator
+//   ottoq_depot_cards 1.5   otto-q-core db/migrations/0460_*, 0506_*, 0507_*, 0509_*, 0512_*, 0592_*, 0758_*  (the ONE
+//                           per-vehicle read contract both cockpits project; the operator
 //                           filter is the only difference between them)
 //   ottoq_activity_feed     otto-q-core (0079 + 0452..0457): "vehicle -> target, why"
 //   ottoq_twin_appointments reservations / inbound / overnight headline
@@ -19,6 +19,10 @@ export interface CardNeed {
   awaiting_triage?: boolean;
   /** 1.4 (0512): the triage check's verdict: 'confirm' | 'clear' | 'escalate'. */
   triage_verdict?: string;
+  /** 0758: when the work started and ends, the sim clock, as the engine wrote them; absent when the need has none.
+   *  The stall's cleaning arm's cabin clean carries both (performed_by 'stall_cabin_robot'). */
+  started_at?: string;
+  ends_at?: string;
 }
 
 export interface CardStep {
@@ -41,6 +45,9 @@ export interface CardStep {
   eta_source?: "charge_physics" | "plan" | null;
   /** 1.3 (0509): for the current step, whole minutes it has run past its planned duration; null until it has. */
   over_plan_min?: number | null;
+  /** 1.5 (0592): the station this step is at ("NASH-DCFC-STALL-08", 'charging' | 'wash' | 'service' | 'staging' ...). */
+  to_stall_code?: string | null;
+  to_stall_kind?: string | null;
 }
 
 export interface VehicleWorkCard {

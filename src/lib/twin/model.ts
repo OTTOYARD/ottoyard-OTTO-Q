@@ -7,6 +7,7 @@
 // ============================================================================
 import type { TwinFleetCondition, TwinLayout, TwinSnapshot, TwinVehicleCondition, TwinVisitCard } from "./types";
 import type { ActivityRow, CardDecision, CardVehicle, DepotCardsResponse, DepotReservation } from "./cards";
+import { stallDownOf, type ChargerDown } from "./chargerFaults";
 import { describeDecision, type DecisionText } from "./decisionText";
 
 // ── vehicle_state enum → stage ───────────────────────────────────────────────
@@ -78,6 +79,23 @@ export function stepAtomLabel(step: { leg_type: string; atom?: string | null }):
   if (step.leg_type !== "inspect" || !step.atom) return null;
   return STEP_ATOM_LABELS[step.atom] ?? humanize(step.atom);
 }
+const LEG_LABELS: Record<string, string> = {
+  charge_dcfc: "DC fast charge",
+  charge_l2: "Level 2 charge",
+  wash: "Wash bay",
+  detail: "Detailing",
+  service: "Service bay",
+  calibration: "Sensor calibration",
+  inspection: "Inspection",
+  stage: "Stage for dispatch",
+  taxi: "Taxi",
+  depart: "Depart",
+  arrive: "Arrive at depot",
+};
+/** A step's name on a card, the same on its "Now" line and in its stage list. */
+export function stepLabel(step: { leg_type: string; atom?: string | null }): string {
+  return stepAtomLabel(step) ?? LEG_LABELS[step.leg_type] ?? humanize(step.leg_type);
+}
 /** Whole minutes as "15 min", "1 h", "1 h 3 min"; null for a missing, non-finite or sub-minute value. */
 function minutesText(m: number | null | undefined): string | null {
   if (typeof m !== "number" || !Number.isFinite(m) || m < 1) return null;
@@ -102,6 +120,8 @@ export function overPlanText(step: { over_plan_min?: number | null }): string | 
 export function needNote(a: { must_do: boolean; performed_by?: string | null; awaiting_triage?: boolean }): { note: string | null; title: string } {
   const base = a.must_do ? "must do before dispatch" : "deferrable";
   if (a.performed_by === "charger_sensors") return { note: "charger sensors", title: `${base}; done by the charger's sensors during the charge, no technician` };
+  // otto-q-core 0758: the fast charger's overhead arm cleans the cabin while the car charges
+  if (a.performed_by === "stall_cabin_robot") return { note: "cleaning arm", title: `${base}; done by the stall's cleaning arm during the charge, no technician` };
   if (a.awaiting_triage) return { note: "awaiting triage", title: `${base}; waiting on the triage check's verdict (confirm, clear or escalate)` };
   return { note: null, title: base };
 }
@@ -216,13 +236,17 @@ export interface StallRow {
   type: string;
   zone: string | null;
   connectorKw: number | null;
-  /** 'occupied' | 'reserved' | 'available'. 'available' for a stall absent from stalls_status is
-   *  the snapshot's own convention (it only publishes non-available stalls). */
-  status: "occupied" | "reserved" | "available";
+  /** 'occupied' | 'reserved' | 'available' | 'down'. 'available' for a stall absent from stalls_status is
+   *  the snapshot's own convention (it only publishes non-available stalls). 'down' is a stall the twin has out of
+   *  use: its charger faulted (otto-q-core 0612) or the stall is offline. OTTO-Q sends no car to it, so it is never
+   *  counted as free. */
+  status: "occupied" | "reserved" | "available" | "down";
   vehicleName: string | null;
   reservedForName: string | null;
   reservedUntil: string | null;
   armPhase: string | null;
+  /** why the stall is out of use and when its repair ends (./chargerFaults), or null */
+  down: ChargerDown | null;
 }
 
 export interface StallTypeSummary {
@@ -231,6 +255,8 @@ export interface StallTypeSummary {
   occupied: number;
   reserved: number;
   available: number;
+  /** out of use: a faulted charger or an offline stall */
+  down: number;
 }
 
 export function stallBoard(
@@ -241,26 +267,34 @@ export function stallBoard(
   if (!layout) return { stalls: [], byType: [] };
   const nameById = new Map(fleet.map((r) => [r.id, r.name]));
   const statusById = new Map((snapshot?.stalls_status ?? []).map((s) => [s.id, s]));
+  // the car an arm's open cycle holds at a stall: the stall row itself does not name it
+  const armCarByStall = new Map((snapshot?.arm?.cycles ?? []).map((c) => [String(c.stall_id), c.vehicle_id]));
   const stalls: StallRow[] = layout.stalls.map((st) => {
     const s = statusById.get(st.id);
-    const occupied = !!s && (s.status === "occupied" || !!s.vehicle_id);
+    // A stall a robot still holds a car at is in use, whatever its status reads: while the charge arm pulls out, the
+    // car no longer points at the stall and the stall reads 'available' (the snapshot keeps the row for the tether).
+    const occupied = !!s && (s.status === "occupied" || !!s.vehicle_id || s.tethered === true);
+    const carId = s?.vehicle_id ?? (s?.tethered ? armCarByStall.get(String(st.id)) ?? null : null);
     const reservedBy = s?.reserved_by ?? null;
+    // a faulted charger's stall reads 'faulted' with no car on it: out of use, not free
+    const down = stallDownOf(s);
     return {
       id: st.id,
       code: st.code,
       type: st.type,
       zone: st.zone,
       connectorKw: st.connector_kw,
-      status: occupied ? "occupied" : reservedBy ? "reserved" : "available",
-      vehicleName: s?.vehicle_id ? nameById.get(s.vehicle_id) ?? null : null,
+      status: occupied ? "occupied" : down ? "down" : reservedBy ? "reserved" : "available",
+      vehicleName: carId ? nameById.get(carId) ?? null : null,
       reservedForName: reservedBy ? nameById.get(reservedBy) ?? null : null,
       reservedUntil: s?.reserved_until ?? null,
       armPhase: s?.tether_phase ?? null,
+      down,
     };
   });
   const m = new Map<string, StallTypeSummary>();
   for (const s of stalls) {
-    const e = m.get(s.type) ?? { type: s.type, total: 0, occupied: 0, reserved: 0, available: 0 };
+    const e = m.get(s.type) ?? { type: s.type, total: 0, occupied: 0, reserved: 0, available: 0, down: 0 };
     e.total += 1;
     e[s.status] += 1;
     m.set(s.type, e);

@@ -3,12 +3,13 @@ import { useMemo, useState } from "react";
 import { AlertTriangle, Search } from "lucide-react";
 import { useLiveDepot } from "@/lib/twin/hooks";
 import { STAGE_LABEL, STAGE_ORDER, countByStage, doubleBooked, joinFleet, operatorsOf, type Stage } from "@/lib/twin/model";
+import { MACHINE_KEYS, MACHINE_WORD, machinesByCar, type MachineKey } from "@/lib/twin/robots";
 import { LiveRunBar, NoLiveRun } from "./LiveRunBar";
 import type { OwnerCarSettings } from "@/lib/owner-board";
 import { VehicleLiveCard } from "./VehicleLiveCard";
 import { Chip, STAGE_TONE } from "./ui";
 
-export function FleetPanel({ fleetOperatorId = null, showOperatorFilter = true, scopeLabel, ownerSettings, highlightIds }: {
+export function FleetPanel({ fleetOperatorId = null, showOperatorFilter = true, scopeLabel, ownerSettings, highlightIds, machineNotes = false }: {
   fleetOperatorId?: string | null;
   showOperatorFilter?: boolean;
   scopeLabel?: string;
@@ -16,20 +17,28 @@ export function FleetPanel({ fleetOperatorId = null, showOperatorFilter = true, 
   ownerSettings?: Record<string, OwnerCarSettings> | null;
   /** The cars an agent's receipt names: marked, and listed first. */
   highlightIds?: ReadonlySet<string> | null;
+  /** The owner's cockpit: an opened card also says what the depot's machines do to the car, in an owner's words. */
+  machineNotes?: boolean;
 }) {
   const { cards, snapshot, condition, runId, runStatus, simClock } = useLiveDepot(fleetOperatorId);
   const [stage, setStage] = useState<Stage | "all">("all");
   const [op, setOp] = useState<string>("all");
   const [q, setQ] = useState("");
   const [open, setOpen] = useState<string | null>(null);
+  const [machine, setMachine] = useState<MachineKey | "all">("all");
 
   const rows = useMemo(() => joinFleet(cards.data, snapshot.data, condition.data), [cards.data, snapshot.data, condition.data]);
   const counts = useMemo(() => countByStage(rows), [rows]);
   const ops = useMemo(() => operatorsOf(cards.data), [cards.data]);
   const doubles = useMemo(() => doubleBooked(rows), [rows]);
+  // What the depot's machines are doing to each car (the charge arm, the cleaning arm, the wash machine), by car,
+  // and the cars each machine is at work on now.
+  const { lines: machines, working } = useMemo(() => machinesByCar(rows, snapshot.data), [rows, snapshot.data]);
+  const atWork = machine === "all" ? null : new Set(working[machine]);
   const shown = rows.filter(
     (r) =>
       (stage === "all" || r.stage === stage) &&
+      (!atWork || atWork.has(r.id)) &&
       (op === "all" || r.operatorId === op) &&
       (!q || r.name.toLowerCase().includes(q.toLowerCase()) || (r.stallCode ?? "").toLowerCase().includes(q.toLowerCase())),
   );
@@ -76,6 +85,20 @@ export function FleetPanel({ fleetOperatorId = null, showOperatorFilter = true, 
             </div>
           </div>
 
+          {MACHINE_KEYS.some((k) => working[k].length > 0) || machine !== "all" ? (
+            <div className="flex flex-wrap items-center gap-1.5 text-[11px]" data-testid="machines-at-work">
+              <span className="text-muted-foreground">Depot machines at work on these vehicles:</span>
+              {MACHINE_KEYS.map((k) => (
+                <button type="button" key={k} onClick={() => setMachine(machine === k ? "all" : k)} aria-pressed={machine === k} className="[@media(pointer:coarse)]:py-1"
+                  title={machine === k ? "Show every vehicle" : `Show only the vehicles the ${MACHINE_WORD[k].toLowerCase()} is at work on`}>
+                  <Chip tone={machine === k ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-200 ring-1 ring-current" : working[k].length ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200" : undefined}>
+                    {MACHINE_WORD[k]} <span className="font-mono">{working[k].length}</span>
+                  </Chip>
+                </button>
+              ))}
+            </div>
+          ) : null}
+
           {doubles.length > 0 ? (
             <div className="flex items-start gap-2 rounded-md border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs">
               <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-300" />
@@ -93,7 +116,7 @@ export function FleetPanel({ fleetOperatorId = null, showOperatorFilter = true, 
             <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
               {shown.map((r) => (
                 <VehicleLiveCard key={r.id} row={r} runId={runId} expanded={open === r.id} onToggle={() => setOpen(open === r.id ? null : r.id)} showOperator={showOperatorFilter}
-                  ownerSettings={ownerSettings?.[r.id] ?? null} highlighted={!!marked?.has(r.id)} />
+                  ownerSettings={ownerSettings?.[r.id] ?? null} highlighted={!!marked?.has(r.id)} machines={machines.get(r.id)} ownerNotes={machineNotes} />
               ))}
             </div>
           )}
