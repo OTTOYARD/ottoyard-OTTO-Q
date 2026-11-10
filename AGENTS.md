@@ -50,6 +50,20 @@ that pattern; do not build a parallel read surface.
     visit's needs, leaves out the drives, and leaves out a planned leg the engine closed with no duration when the
     stall's arm took the work.
   - **Through a charge the arm's hold is a lease the engine renews** (`tether_until`). It is not the charge's end.
+- **Words and names come from the twin (2026-11-10).** `src/lib/twin/publicNames.ts`, `plainWords.ts`, `eventFeed.ts`
+  and `secondLoop.ts` are **byte copies** of the twin's `src/lib/` files, and `decisionText.ts` is the twin's with its
+  one row-type import changed. **Never edit them here**: change the twin's copy, then copy it (`cmp` proves it), with
+  the tests beside them in `__tests__/`. **No vendor product name on screen** (Chase, 2026-10-07: *"I want to remove
+  all specific tool naming from our descriptions"*): `__tests__/publicNames.test.ts` reads every string this app
+  writes and fails on one, with its file and line. That scan cannot see a name that arrives as **data**, so:
+  - **Never draw the activity feed's `engine` column.** On an agent's pass it is the model's id
+    (`nvidia/nemotron-… -> cpsat_service`, 9 of the 60 rows of the test capture). A decision row's hover is
+    `proposedByTitle` (`model.ts`): who proposed, in public names, or nothing.
+  - **The agent's own words go through `publicText()`** (a directive, a rationale): it has named a product and quoted
+    `CLAUDE.md` by name.
+  - **Settings has no AI model picker** (removed 2026-11-10). It chose between three vendors' models by name and
+    nothing read the choice. `profiles.ai_preferences_jsonb.model` is still saved as it was. The payment and sign-in
+    brands stay where a buyer needs them (checkout, billing, the sign-in button).
 - **Card honesty rules — preserve them:** prune `skipped` legs · scope to the current visit ·
   **omit `deviation_s`** (corrupt baseline) · atoms use the JSON key `'svc'`.
 

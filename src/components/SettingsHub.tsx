@@ -413,27 +413,19 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
     }));
   };
 
-  const updateAIPreference = (key: string, value: any) => {
-    if (key === 'model') {
-      setProfile(prev => ({
-        ...prev,
-        ai_preferences_jsonb: {
-          ...prev.ai_preferences_jsonb,
-          model: value,
+  // The profile also holds ai_preferences_jsonb.model. No screen sets it now: it chose between three vendors' models
+  // by name, and nothing in the app or its functions read the choice. The saved value is kept as it is.
+  const updateAIPreference = (key: string, value: boolean) => {
+    setProfile(prev => ({
+      ...prev,
+      ai_preferences_jsonb: {
+        ...prev.ai_preferences_jsonb,
+        features: {
+          ...prev.ai_preferences_jsonb.features,
+          [key]: value,
         },
-      }));
-    } else {
-      setProfile(prev => ({
-        ...prev,
-        ai_preferences_jsonb: {
-          ...prev.ai_preferences_jsonb,
-          features: {
-            ...prev.ai_preferences_jsonb.features,
-            [key]: value,
-          },
-        },
-      }));
-    }
+      },
+    }));
   };
 
   return (
@@ -664,24 +656,6 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                       <Bot className="h-4 w-4 mr-2" />
                       AI Preferences
                     </h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>AI Model</Label>
-                        <Select
-                          value={profile.ai_preferences_jsonb.model}
-                          onValueChange={(value) => updateAIPreference('model', value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="claude">Claude (Anthropic)</SelectItem>
-                            <SelectItem value="openai">GPT-4o (OpenAI)</SelectItem>
-                            <SelectItem value="gemini">Gemini (Google)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
                     <div className="grid grid-cols-3 gap-4">
                       <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                         <Label className="text-sm">Predictive Maintenance</Label>
@@ -953,10 +927,10 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {[
-                    { name: 'Mapbox', desc: 'Live mapping and route optimization', icon: Map, status: 'connected' },
-                    { name: 'Supabase', desc: 'Database and authentication', icon: Database, status: 'connected' },
-                    { name: 'Stripe', desc: 'Payments and billing', icon: CreditCard, status: 'connected' },
-                    { name: 'Weather API', desc: 'Real-time weather data', icon: Activity, status: 'connected' },
+                    { name: 'Maps', desc: 'Live map and route optimization', icon: Map, status: 'connected' },
+                    { name: 'Data and sign-in', desc: 'Database and authentication', icon: Database, status: 'connected' },
+                    { name: 'Payments', desc: 'Card payments and billing', icon: CreditCard, status: 'connected' },
+                    { name: 'Weather', desc: 'Real-time weather data', icon: Activity, status: 'connected' },
                   ].map((service) => (
                     <div key={service.name} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center gap-3">
@@ -972,34 +946,6 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                     </div>
                   ))}
 
-                  <Separator />
-
-                  <div className="space-y-3">
-                    <h4 className="font-medium flex items-center">
-                      <Bot className="h-4 w-4 mr-2" />
-                      AI Services
-                    </h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <div>
-                          <p className="font-medium">Claude (Anthropic)</p>
-                          <p className="text-xs text-muted-foreground">Fleet analysis AI</p>
-                        </div>
-                        <Badge variant="outline" className={profile.ai_preferences_jsonb.model === 'claude' ? 'bg-primary/10 text-primary border-primary/20' : ''}>
-                          {profile.ai_preferences_jsonb.model === 'claude' ? 'Active' : 'Available'}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <div>
-                          <p className="font-medium">GPT-4o (OpenAI)</p>
-                          <p className="text-xs text-muted-foreground">Advanced reasoning</p>
-                        </div>
-                        <Badge variant="outline" className={profile.ai_preferences_jsonb.model === 'openai' ? 'bg-primary/10 text-primary border-primary/20' : ''}>
-                          {profile.ai_preferences_jsonb.model === 'openai' ? 'Active' : 'Available'}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

@@ -5,8 +5,9 @@
 // it fired and since when. This file turns each row into words an operator reads at a glance, puts it in one of
 // four domains, and says how its severity should look.
 //
-// PULSE and OrchestrAV carry this file verbatim from the twin cockpit (ottoyarddepot-sim src/lib/eventFeed.ts), so all
-// three cockpits word every event the same way. Change it there first.
+// Pure: no React, no stores, no imports. The twin carries it at src/lib/eventFeed.ts and OTTO-PULSE and OrchestrAV
+// carry it byte for byte at src/lib/twin/eventFeed.ts, so all three cockpits word every event the same way. Change the
+// twin's copy first, then copy it.
 
 export interface RunEventRow {
   row_key: string;
@@ -30,7 +31,7 @@ export const DOMAIN_META: Record<EventDomain, { label: string; color: string }> 
   charging: { label: "Charging", color: "#00B4A6" },
   vehicles: { label: "Vehicles", color: "#7C9CFF" },
   depot: { label: "Depot", color: "#E0B341" },
-  records: { label: "Records", color: "#8A8F98" },
+  records: { label: "Records", color: "#FFFFFF" },
 };
 
 /** Records are one row per settled operation or OEM hand-off: the ledger, not the story. Off by default. */
@@ -86,7 +87,7 @@ export function describeEvent(type: string, payload: Record<string, unknown> | n
     case "charge.session_faulted":
       return { title: "Charger fault ended the session", detail: join(words(p.reason), n(p.repair_minutes) !== null && `repair ${r0(p.repair_minutes)} min`, p.auto_rerouted === true && "rerouted") };
     case "ottoq.charge_start_refused":
-      return { title: "Charge start refused by the shield", detail: join(Array.isArray(p.blocking_rules) ? (p.blocking_rules as unknown[]).map(String).join(", ") : "", n(p.requested_kw) !== null && `${r0(p.requested_kw)} kW asked`) };
+      return { title: "Charge start refused by the safety shield", detail: join(Array.isArray(p.blocking_rules) ? (p.blocking_rules as unknown[]).map(String).join(", ") : "", n(p.requested_kw) !== null && `${r0(p.requested_kw)} kW asked`) };
     case "arm.mate_started": return { title: "Arm connecting" };
     case "arm.mate_latched": return { title: "Arm connected", detail: n(p.retries) ? `after ${r0(p.retries)} retries` : undefined };
     case "arm.demate_started": return { title: "Arm disconnecting" };

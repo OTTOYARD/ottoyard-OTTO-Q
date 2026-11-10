@@ -9,6 +9,7 @@ import type { TwinFleetCondition, TwinLayout, TwinSnapshot, TwinVehicleCondition
 import type { ActivityRow, CardDecision, CardVehicle, DepotCardsResponse, DepotReservation } from "./cards";
 import { stallDownOf, type ChargerDown } from "./chargerFaults";
 import { describeDecision, type DecisionText } from "./decisionText";
+import { proposedBy } from "./publicNames";
 
 // ── vehicle_state enum → stage ───────────────────────────────────────────────
 // VERBATIM from the twin cockpit (ottoyarddepot-sim src/lib/ottoq/channels.ts
@@ -406,6 +407,13 @@ export function decisionActor(d: ActivityRow): string {
   if (d.action === "orchestrator_agent") return "OTTO-Q agent";
   if (d.action === "bess_dispatch") return "Site battery";
   return d.display_name ?? "OTTO-Q";
+}
+
+/** A decision row's hover text: who proposed it, in public names, or nothing. The feed's `engine` column is never
+ *  drawn as it comes. On an agent's pass it is the model's id, and elsewhere an engine key (publicNames.proposedBy). */
+export function proposedByTitle(d: Pick<ActivityRow, "engine">): string | undefined {
+  const by = proposedBy(d.engine);
+  return by ? `Proposed by: ${by}` : undefined;
 }
 
 /** A card's last decision in the feed's words. The card carries the verb beside the rationale rather than in it. */

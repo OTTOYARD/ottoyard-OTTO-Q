@@ -4,7 +4,7 @@
 // its rationale, the decision history, and the twin variables this vehicle was dealt.
 import { ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import type { FleetRow } from "@/lib/twin/model";
-import { STAGE_LABEL, cardDecisionText, humanize, needNote, overPlanText, overdueText, simTime, stepLabel } from "@/lib/twin/model";
+import { STAGE_LABEL, cardDecisionText, humanize, needNote, overPlanText, overdueText, proposedByTitle, simTime, stepLabel } from "@/lib/twin/model";
 import { decisionKey, decisionPlace, describeDecision, holdText } from "@/lib/twin/decisionText";
 import { useActivityFeed } from "@/lib/twin/hooks";
 import type { OwnerCarSettings } from "@/lib/owner-board";
@@ -78,7 +78,7 @@ function History({ runId, vehicleId }: { runId: string; vehicleId: string }) {
         const place = decisionPlace(d);
         const why = [text.detail, holdText(d, simTime)].filter(Boolean).join(" · ");
         return (
-          <li key={decisionKey(d)} className="grid grid-cols-[64px_1fr] gap-2 text-[11px]" title={d.engine ? `engine: ${d.engine}` : undefined}>
+          <li key={decisionKey(d)} className="grid grid-cols-[64px_1fr] gap-2 text-[11px]" title={proposedByTitle(d)}>
             <span className="font-mono text-muted-foreground">{simTime(d.occurred_at)}</span>
             <span>
               <span className={`font-medium ${DECISION_TONE[text.tone]}`}>{text.title}</span>

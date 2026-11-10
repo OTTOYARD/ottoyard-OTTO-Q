@@ -2,13 +2,15 @@
 //
 // Pure, and deliberately free of React and of this app's stores, so the other cockpits that read the same feed
 // (PULSE, OrchestrAV: "one read contract, three projections") can carry this file verbatim and word every
-// decision the same way. The row type is the feed's columns; each cockpit supplies its own alias for it.
+// decision the same way. The row type is the feed's columns; each cockpit supplies its own alias for it, and that
+// import (with the note above it in a cockpit's copy) is the only line that differs.
 // In this cockpit the feed row is the shared twin layer's ActivityRow (./cards); the rest of this file is the
 // twin's src/lib/decisionText.ts, verbatim.
 import type { ActivityRow as ActivityFeedRow } from "./cards";
 import { confirmedText, isLocalGrade } from "./secondLoop";
 // The words a viewer reads come from one glossary (plainWords.ts), carried verbatim beside this file in every cockpit.
 import { ruleWords } from "./plainWords";
+import { publicLabel, publicPhrase, publicText, publicTextInline } from "./publicNames";
 
 /** Every clock in the cockpit reads Nashville time (the TopBar says "CT"). */
 export const DEPOT_TZ = "America/Chicago";
@@ -252,14 +254,15 @@ export function challengerText(r: ActivityFeedRow): DecisionText {
   };
 }
 
-/** Scalar fields of a structured rationale, as text. The last resort for an unknown verdict. */
+/** Scalar fields of a structured rationale, as text. The last resort for an unknown verdict. The engine or a model
+ *  wrote these words, not this app, so a product they name reads by its public name (publicNames.publicText). */
 export function decisionReasonText(r: ActivityFeedRow): string | null {
-  if (r.reason && !/^[a-z0-9_]+$/.test(r.reason) && !r.reason.startsWith("{")) return r.reason;
-  if (!r.rationale) return r.reason ?? null;
+  if (r.reason && !/^[a-z0-9_]+$/.test(r.reason) && !r.reason.startsWith("{")) return publicText(r.reason);
+  if (!r.rationale) return r.reason ? publicText(r.reason) : null;
   const entries = Object.entries(r.rationale).filter(([key, value]) =>
     key !== "verb" && value !== null && value !== undefined && !Array.isArray(value) && typeof value !== "object"
   );
-  return entries.length ? entries.map(([key, value]) => `${key}: ${String(value)}`).join(" · ") : null;
+  return entries.length ? entries.map(([key, value]) => `${key}: ${publicTextInline(String(value))}`).join(" · ") : null;
 }
 
 /** "held 18 min", or "since 14:05, still in force". Null for a one-tick event. `clock` lets a cockpit print the
@@ -286,13 +289,10 @@ export function holdText(
 // Exported so intelligenceStack.test.ts can assert it agrees with
 // STACK_PROVIDER_LABEL — two provider maps in one app is a drift waiting to
 // happen, and a provider renamed in one place must fail a test, not a demo.
-export const PROVIDER_LABEL: Record<string, string> = {
-  nvidia_cuopt: "cuOpt",
-  nvidia_nemotron: "Nemotron",
-  cpsat_service: "CP-SAT",
-  anthropic_advisor: "Advisor",
-  local_fallback: "local fallback",
-};
+// The names themselves live in src/lib/publicNames.ts (no product names on screen, Chase 2026-10-07).
+export const PROVIDER_LABEL: Record<string, string> = Object.fromEntries(
+  ["nvidia_cuopt", "nvidia_nemotron", "cpsat_service", "anthropic_advisor", "local_fallback"].map((k) => [k, publicLabel(k)]),
+);
 
 // THIS STRIP USED TO LIE, and the lie was in the engine's feed rather than here.
 // otto-q-core migration 0346: ottoq_activity_feed joined the proposer fire log on
@@ -305,6 +305,13 @@ export function solverLabel(detail: Record<string, unknown>): string {
   if (!raw) return "no solver call";
   // one chain can be served by more than one provider; the feed joins them with '+'
   return raw.split("+").map((p) => PROVIDER_LABEL[p] ?? p).join(" + ");
+}
+
+/** The same providers inside a sentence ("the lexicographic planner and the agent"), or null when no solver was called. */
+export function solverPhrase(detail: Record<string, unknown>): string | null {
+  const raw = typeof detail.solver_engine === "string" ? detail.solver_engine.trim() : "";
+  if (!raw) return null;
+  return raw.split("+").map((p) => publicPhrase(p.trim()) ?? p.trim().replace(/_/g, " ")).join(" and ");
 }
 
 // The kernel's own disposition, from ottoq_external_proposals joined on the chain
@@ -336,12 +343,13 @@ export function starvationNote(detail: Record<string, unknown>): string | null {
   const serviceable = Number(detail.frame_serviceable ?? 0);
   const held = Number(detail.frame_held ?? 0);
   if (serviceable > 0 && held >= serviceable) {
-    return `solver saw an empty instance: all ${serviceable} serviceable vehicles already held a place`;
+    return `the solver had nothing to plan: all ${serviceable} cars it could serve already had a place`;
   }
   return null;
 }
 
-/** "model timeout after 75000 ms" -> "model timed out after 75 s". Anything else passes through. */
+/** "model timeout after 75000 ms" -> "model timed out after 75 s". Anything else passes through, with a product it
+ *  names put in its public name: an upstream error is text this app does not write. */
 export function modelErrorText(err: unknown): string | null {
   if (typeof err !== "string" || !err.trim()) return null;
   const s = err.trim();
@@ -354,6 +362,7 @@ export function modelErrorText(err: unknown): string | null {
     // A JSON body, often cut off mid-string by the ledger, is not words; the status says enough.
     if (h[2].trim().startsWith("{")) return `HTTP ${h[1]}`;
   }
-  return s;
+  // The error is drawn inside a sentence ("The agent did not answer (…)"), so a name that starts it keeps a small letter.
+  return publicTextInline(s);
 }
 
