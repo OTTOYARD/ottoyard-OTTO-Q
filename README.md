@@ -59,12 +59,36 @@ owner's vehicles.
 
 | Tab | What it shows | Source |
 |---|---|---|
-| Overview | the live depot in 3D (OTTO-TWIN's own scene, framed), fleet by stage, the latest decisions | OTTO-TWIN `/view.html`, `ottoq_depot_cards`, `ottoq_activity_feed` |
-| Fleet | each vehicle, its work card, OTTO-Q's decisions about it; with an owner picked, what the owner's own agent set on its cars (charge limit, holds, service orders: on each card and in "Set by your agent"), and what outside agents asked about that owner's vehicles and what became of each ask (all read-only; the depot crew decides requests in OTTO-PULSE) | `ottoq_depot_cards`, twin snapshot, `ottoq_owner_board` (otto-q-core 0605/0606), `ottoq_agent_requests_for_operator` (otto-q-core 0559, readable here once 0560 is applied; until then each panel says it is built but not switched on) |
-| Depots | stall occupancy and the reservation board | `ottoq_depot_cards`, depot layout |
+| Overview | the live depot in 3D (OTTO-TWIN's own scene, framed), fleet by stage, how many of the vehicles in scope each depot machine is at work on, the latest decisions | OTTO-TWIN `/view.html`, `ottoq_depot_cards`, twin snapshot, `ottoq_activity_feed` |
+| Fleet | each vehicle, its work card, the depot's machines at work on it, its visit stage by stage, OTTO-Q's decisions about it; with an owner picked, what the owner's own agent set on its cars (charge limit, holds, service orders: on each card and in "Set by your agent"), and what outside agents asked about that owner's vehicles and what became of each ask (all read-only; the depot crew decides requests in OTTO-PULSE) | `ottoq_depot_cards`, twin snapshot, `ottoq_owner_board` (otto-q-core 0605/0606), `ottoq_agent_requests_for_operator` (otto-q-core 0559, readable here once 0560 is applied; until then each panel says it is built but not switched on) |
+| Depots | stall occupancy (a faulted charger reads down, with its fault and repair time; a stall says what its charge arm is doing) and the reservation board | `ottoq_depot_cards`, depot layout, twin snapshot |
 | Energy | site power balance, battery, tariff, charging now | twin snapshot, `ottoq_twin_events_window` |
 | Incidents | what went wrong this run, and standing depot conditions, including a car kept from leaving unfinished and a car held past the readiness gate's limit for a person (vehicle first: no car leaves with a service still needed) | `ottoq_run_event_feed` (the twin's Events wording) |
 | Performance | the five KPIs, the learning loop's dial ledger, who is coming back, the site power plan | `/sim_runs/:id/kpis`, `ottoq_dial_promotion_ledger`, `ottoq_twin_appointments`, `service_profiles` |
+
+## The depot's machines, for an owner
+
+Chase, 2026-11-09: *"Orchestra needs just user/asset/vehicle owner detail from a stall or stage perspective."*
+
+The depot has a charge arm at each fast charger, a cleaning arm over each fast charger, and a wash machine in each
+wash bay. An owner reads them only through its own cars:
+
+- **On each car's card (Fleet).** At rest, one line for each machine at work on the car: the charge arm connects, is
+  connected or disconnects (with a retry, when there was one), the cabin clean with its end time and a meter, the wash
+  or the detail with its end time. A finished clean keeps its line with the time it was done.
+- **In the opened card.** "Visit plan" lists the visit stage by stage: done, under way, to come, each with its station
+  ("fast charger 07", "wash bay 02"), its times, and who does it (the charge arm connects the car, the cleaning arm,
+  the wash machine, the charger's own sensors). A stage with no tag is a technician's, or needs no one. Under it, "The
+  depot's machines on this visit" says what each of those machines does to the car, in a few plain sentences.
+- **In the vehicle list.** A line counts the vehicles each machine is at work on. A click on one shows only those.
+- **On the Overview.** The same three counts, for the vehicles in scope.
+- **On the Depots tab.** Stall use is depot-wide. A stall names its car only when the car is the owner's.
+
+It all reads the shared twin layer (`src/lib/twin/robots.ts`, `src/components/live/MachineLines.tsx`). What a machine
+is comes from `src/lib/twin/robotFacts.json`, a byte copy of the twin's `public/cad/robot-facts.json`. What it is
+doing comes from the twin snapshot and `ottoq_depot_cards`. The depot crew's view of every machine is OTTO-PULSE's
+Robots tab, and the engineering model is the twin's Robotics tab: neither is in this cockpit.
+Screenshots: `docs/screenshots/2026-11-09-robots/` (its README says which are a staged scene).
 
 ## The live 3D depot on the Overview tab
 
