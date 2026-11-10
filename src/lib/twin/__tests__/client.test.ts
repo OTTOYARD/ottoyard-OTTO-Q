@@ -37,3 +37,14 @@ describe("twinApi.activityFeed", () => {
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("twinApi.kpiBoard", () => {
+  it("asks the engine's own KPI board for the run, the read the twin's KPI tab uses", async () => {
+    const fetch = vi.fn().mockResolvedValue(reply(200, '{"ok":true,"service":{"by_service":[{"svc":"interior_tidy","name":"Interior tidy","lane":"cabin","done":204,"total":215}]}}'));
+    vi.stubGlobal("fetch", fetch);
+    const board = await twinApi.kpiBoard("run-1");
+    expect(board.ok && board.service.by_service[0]).toEqual({ svc: "interior_tidy", name: "Interior tidy", lane: "cabin", done: 204, total: 215 });
+    expect(String(fetch.mock.calls[0][0])).toMatch(/\/rest\/v1\/rpc\/ottoq_twin_kpi_board$/);
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ p_sim_run_id: "run-1" });
+  });
+});

@@ -128,6 +128,17 @@ export function twinBackUrl(run: string, base: string | undefined = import.meta.
   return url.toString();
 }
 
+/**
+ * The twin, opened on a machine's engineering model. The twin keeps the CAD (its Robotics tab reads
+ * `?tab=robotics&robot=`); the cockpits keep what a machine does and link here for the rest.
+ */
+export function twinRobotUrl(robot: "charge_arm" | "clean_arm" | "wash_gantry", base: string | undefined = import.meta.env.VITE_TWIN_URL): string {
+  const url = new URL((base && base.trim()) || TWIN_APP_URL);
+  url.searchParams.set("tab", "robotics");
+  url.searchParams.set("robot", robot);
+  return url.toString();
+}
+
 /** "4b09…": how the twin names a run in its own panel header; the full id goes in a tooltip. */
 export const shortRun = (run: string) => `${run.slice(0, 4)}…`;
 

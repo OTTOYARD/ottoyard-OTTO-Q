@@ -1,31 +1,17 @@
 // One vehicle, live. At rest: owner, state, SoC vs target, stall, current step + progress,
-// next step, open needs. Expanded: reservations with OTTO-Q's reason, the last decision and
+// next step, the depot's machines at work on it, open needs. Expanded: the visit's plan stage by
+// stage with the machine that does each, reservations with OTTO-Q's reason, the last decision and
 // its rationale, the decision history, and the twin variables this vehicle was dealt.
 import { ChevronDown, ChevronUp, MapPin } from "lucide-react";
-import type { CardStep } from "@/lib/twin/cards";
 import type { FleetRow } from "@/lib/twin/model";
-import { STAGE_LABEL, cardDecisionText, humanize, needNote, overPlanText, overdueText, simTime, stepAtomLabel } from "@/lib/twin/model";
+import { STAGE_LABEL, cardDecisionText, humanize, needNote, overPlanText, overdueText, simTime, stepLabel } from "@/lib/twin/model";
 import { decisionKey, decisionPlace, describeDecision, holdText } from "@/lib/twin/decisionText";
 import { useActivityFeed } from "@/lib/twin/hooks";
 import type { OwnerCarSettings } from "@/lib/owner-board";
 import { OwnerSettingChips } from "@/components/agents/OwnerAgent";
+import type { MachineLine } from "@/lib/twin/robots";
+import { MachineLines, MachineNotes, VisitPlan } from "./MachineLines";
 import { Chip, DECISION_TONE, SocBar, STAGE_TONE, fmt } from "./ui";
-
-const LEG_LABELS: Record<string, string> = {
-  charge_dcfc: "DC fast charge",
-  charge_l2: "Level 2 charge",
-  wash: "Wash bay",
-  detail: "Detailing",
-  service: "Service bay",
-  calibration: "Sensor calibration",
-  inspection: "Inspection",
-  stage: "Stage for dispatch",
-  taxi: "Taxi",
-  depart: "Depart",
-  arrive: "Arrive at depot",
-};
-const leg = (s: string | null | undefined) => (s ? LEG_LABELS[s] ?? humanize(s) : "");
-const stepName = (s: CardStep) => stepAtomLabel(s) ?? leg(s.leg_type);
 
 function Needs({ row }: { row: FleetRow }) {
   // The twin's visit atoms carry est minutes + must_do; the card's needs are the same atoms
@@ -114,6 +100,8 @@ export function VehicleLiveCard({
   showOperator = true,
   ownerSettings = null,
   highlighted = false,
+  machines = [],
+  ownerNotes = false,
 }: {
   row: FleetRow;
   runId: string;
@@ -124,6 +112,10 @@ export function VehicleLiveCard({
   ownerSettings?: OwnerCarSettings | null;
   /** One of the cars the agent's receipt (the link this tab was opened with) names. */
   highlighted?: boolean;
+  /** What the depot's machines are doing to this car, or did on this visit (lib/twin/robots vehicleMachines). */
+  machines?: MachineLine[];
+  /** The owner's cockpit: the expanded card also says what each of those machines does, in an owner's words. */
+  ownerNotes?: boolean;
 }) {
   const cur = row.card?.current_step ?? null;
   const next = row.card?.next_step ?? null;
@@ -166,7 +158,7 @@ export function VehicleLiveCard({
         {cur ? (
           <div className="mt-2">
             <div className="flex justify-between text-[11px]">
-              <span>Now: <span className="font-medium">{stepName(cur)}</span></span>
+              <span>Now: <span className="font-medium">{stepLabel(cur)}</span></span>
               <span className="font-mono text-muted-foreground">
                 {cur.eta_source === "charge_physics" ? (
                   <span title="from the charge curve at the car's state of charge now">until ~{simTime(cur.expected_end ?? cur.planned_end)}</span>
@@ -187,7 +179,7 @@ export function VehicleLiveCard({
         ) : null}
         {next ? (
           <div className="mt-1 text-[11px] text-muted-foreground">
-            Next: <span className="text-foreground">{stepName(next)}</span>
+            Next: <span className="text-foreground">{stepLabel(next)}</span>
             {overdueText(next) ? (
               <>
                 {" "}planned <span className="font-mono">{simTime(next.planned_start)}</span>,{" "}
@@ -199,12 +191,21 @@ export function VehicleLiveCard({
           </div>
         ) : null}
 
+        <MachineLines lines={machines} />
+
         <div className="mt-2"><Needs row={row} /></div>
         {ownerSettings ? <div className="mt-1.5"><OwnerSettingChips settings={ownerSettings} /></div> : null}
       </button>
 
       {expanded ? (
         <div className="mt-3 space-y-3 border-t border-border pt-3">
+          <div>
+            <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Visit plan</div>
+            <VisitPlan row={row} />
+          </div>
+
+          {ownerNotes ? <MachineNotes row={row} lines={machines} /> : null}
+
           <div>
             <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Reservations</div>
             {row.reservations.length === 0 ? (

@@ -260,7 +260,7 @@ const Index = () => {
 
           <TabsContent value="fleet" className="space-y-6">
             <FleetPanel fleetOperatorId={fleetOperatorId} showOperatorFilter={!fleetOperatorId} scopeLabel={fleetOperatorId ? "your fleet" : "all owners"}
-              ownerSettings={board?.by_vehicle ?? null} highlightIds={receiptCars} />
+              ownerSettings={board?.by_vehicle ?? null} highlightIds={receiptCars} machineNotes />
             <OwnerSettingsPanel fleetOperatorId={fleetOperatorId} query={ownerBoard} />
             <ScopedDecisionFeed fleetOperatorId={fleetOperatorId} />
             <AgentRequestsPanel fleetOperatorId={fleetOperatorId} />

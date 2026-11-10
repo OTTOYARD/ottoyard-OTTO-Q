@@ -37,6 +37,19 @@ that pattern; do not build a parallel read surface.
 - ⚠️ **`CLAUDE.md` in this repo is stale.** It describes an "OttoCommand AI" objective and says data
   access is "mock now" — neither reflects the current system, which reads live `gxdrc` data. Treat
   it as historical; **this file and the context repo are current.**
+- **The depot's machines, for an owner (2026-11-09).** Chase: *"Orchestra needs just user/asset/vehicle owner detail
+  from a stall or stage perspective."* So this cockpit has **no depot-wide robots view** (that is OTTO-PULSE's Robots
+  tab) and no CAD (that is the twin's). An owner reads the machines through its own cars: the machine lines and the
+  stage list on `VehicleLiveCard` (`src/components/live/MachineLines.tsx`), the count in `FleetPanel` and
+  `LiveOverview`. `src/lib/twin/robots.ts` reads what each machine is DOING from the snapshot and the depot cards;
+  `src/lib/twin/robotFacts.json` says what each machine IS and is a **byte copy of the twin's
+  `public/cad/robot-facts.json`: never edit it here**.
+  - **A stall or a machine names a car only when that car is in the owner's own card feed.** The snapshot carries
+    every owner's cars: pass the owner's rows to `robotBoard`, `stallBoard` and `machinesByCar`, never the snapshot's.
+  - **The card feed holds ONE step under way** (the first active leg), so `planStages` adds work under way from the
+    visit's needs, leaves out the drives, and leaves out a planned leg the engine closed with no duration when the
+    stall's arm took the work.
+  - **Through a charge the arm's hold is a lease the engine renews** (`tether_until`). It is not the charge's end.
 - **Card honesty rules — preserve them:** prune `skipped` legs · scope to the current visit ·
   **omit `deviation_s`** (corrupt baseline) · atoms use the JSON key `'svc'`.
 

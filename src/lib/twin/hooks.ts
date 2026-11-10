@@ -128,6 +128,16 @@ export function useKpiFive(simRunId: string | null | undefined) {
   });
 }
 
+/** The run's KPI board: a measurement over the whole run so far, so a 30-second refresh is plenty. */
+export function useKpiBoard(simRunId: string | null | undefined) {
+  return useQuery({
+    queryKey: ["twin", "kpi-board", simRunId],
+    queryFn: () => twinApi.kpiBoard(simRunId as string),
+    enabled: !!simRunId,
+    refetchInterval: 30_000,
+  });
+}
+
 /** The site power plan in force: re-published every tick, so it polls with the live panels. */
 export function useSitePowerPlan(simRunId: string | null | undefined) {
   return useQuery({

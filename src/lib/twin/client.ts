@@ -7,7 +7,7 @@
 // Reads only. Nothing here can change the world.
 // ============================================================================
 import { OTTOQ_ANON_KEY, OTTOQ_URL } from "./config";
-import type { TwinEventsWindow, TwinFleetCondition, TwinLayout, TwinSnapshot, TwinWearWindow } from "./types";
+import type { TwinEventsWindow, TwinFleetCondition, TwinKpiBoard, TwinLayout, TwinSnapshot, TwinWearWindow } from "./types";
 import type { ActivityRow, AppointmentsResponse, DepotCardsResponse } from "./cards";
 import type { DialPromotion, KpiFive, SitePowerPlan } from "./plan";
 import type { RunEventRow } from "./eventFeed";
@@ -78,6 +78,9 @@ export const twinApi = {
   eventsWindow: (simRunId: string) => ottoqRpc<TwinEventsWindow>("ottoq_twin_events_window", { p_sim_run_id: simRunId }),
   wearWindow: (simRunId: string) => ottoqRpc<TwinWearWindow>("ottoq_twin_wear_window", { p_sim_run_id: simRunId }),
   appointments: (simRunId: string) => ottoqRpc<AppointmentsResponse>("ottoq_twin_appointments", { p_sim_run_id: simRunId }),
+  /** The run's business KPIs (otto-q-core 0609-0611), as the twin cockpit's KPI tab reads them. The robots view takes
+   *  each service's count for the run from it (service.by_service). */
+  kpiBoard: (simRunId: string) => ottoqRpc<TwinKpiBoard>("ottoq_twin_kpi_board", { p_sim_run_id: simRunId }),
   /** ottoq_kpi_five for one run, through the control door exactly as the twin cockpit's KPI tab reads it. */
   kpis: (simRunId: string) => twinGet<KpiFive>(`/sim_runs/${simRunId}/kpis`),
   /** The run's site power plan (ServiceProfile, 0442): the forward schedule in force now. */
