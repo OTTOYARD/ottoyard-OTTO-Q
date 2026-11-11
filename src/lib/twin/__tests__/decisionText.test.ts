@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 import fx from "./fixtures/live_capture.json";
 import type { ActivityRow, DepotCardsResponse } from "../cards";
 import { decisionCategory, describeDecision, holdText, isPlace, modelErrorText } from "../decisionText";
-import { cardDecisionText, decisionActor, simTime } from "../model";
+import { cardDecisionText, decisionActor, proposedByTitle, simTime } from "../model";
+import { PRODUCT_NAMES } from "../publicNames";
 
 const feed = fx.feed as unknown as ActivityRow[];
 const cards = fx.cards as unknown as DepotCardsResponse;
@@ -27,7 +28,8 @@ describe("every decision in the capture reads as a verdict in words", () => {
     for (const r of agent) {
       const t = describeDecision(r);
       expect(t.title).toBe("Agent: readiness first");
-      expect(t.detail).toMatch(/^CP-SAT: completed → kernel: (no action|nothing to dispose)$/);
+      // the solver is named by what it does, never by its product (publicNames.ts): this line read "CP-SAT: completed"
+      expect(t.detail).toMatch(/^Lexicographic planner: completed → kernel: (no action|nothing to dispose)$/);
       expect(isPlace(r.target, "")).toBe(false); // "objective: readiness_first" is a label, not a place
     }
   });
@@ -59,6 +61,37 @@ describe("every decision in the capture reads as a verdict in words", () => {
     expect(decisionCategory("bess_dispatch")).toBe("energy");
     expect(decisionCategory("itinerary_amended")).toBe("plans");
     expect(decisionCategory("task_start")).toBe("dispatch");
+  });
+});
+
+describe("no decision in the capture names a product, in its words or in its hover text", () => {
+  // The feed's `engine` column is the model's id on an agent's pass. Both cockpits drew it as the row's hover text.
+  it("the capture does carry the model's id, on the 9 agent rows of 60", () => {
+    const withId = feed.filter((r) => /nemotron/i.test(r.engine ?? ""));
+    expect(withId.length).toBe(9);
+    expect(withId[0].engine).toBe("nvidia/nemotron-3-ultra-550b-a55b -> cpsat_service");
+    expect(withId.every((r) => r.action === "orchestrator_agent")).toBe(true);
+  });
+
+  it("the hover names who proposed, in public names, and is absent for the decide path's own decisions", () => {
+    const titles = feed.map((r) => proposedByTitle(r));
+    expect(titles.filter(Boolean).length).toBe(9);
+    for (const r of feed) {
+      const title = proposedByTitle(r);
+      if (r.action === "orchestrator_agent") expect(title).toBe("Proposed by: Agent → Lexicographic planner");
+      else expect(title, r.engine ?? "").toBeUndefined();
+    }
+    expect(proposedByTitle({ engine: "forward_lex" })).toBe("Proposed by: Lexicographic planner");
+    expect(proposedByTitle({ engine: null })).toBeUndefined();
+  });
+
+  it("nothing a row puts on screen carries a product name, a model's id or an engine key", () => {
+    for (const r of feed) {
+      const t = describeDecision(r);
+      const shown = [t.title, t.detail ?? "", holdText(r, simTime) ?? "", proposedByTitle(r) ?? ""].join(" | ");
+      expect(PRODUCT_NAMES.some((re) => re.test(shown)), shown).toBe(false);
+      expect(shown, shown).not.toMatch(/nemotron|cuopt|cp-?sat|cpsat|or-tools|nvidia\/|deterministic_v1/i);
+    }
   });
 });
 

@@ -3,7 +3,7 @@
 // row, not one per tick. The wording is src/lib/twin/decisionText.ts, which is the twin's own file carried verbatim.
 import { useMemo, useState } from "react";
 import { useActivityFeed, useDepotCards, useSnapshot } from "@/lib/twin/hooks";
-import { decisionActor, simTime } from "@/lib/twin/model";
+import { decisionActor, proposedByTitle, simTime } from "@/lib/twin/model";
 import {
   CATEGORY_LABEL,
   DEFAULT_CATEGORIES,
@@ -15,17 +15,19 @@ import {
   type DecisionCategory,
 } from "@/lib/twin/decisionText";
 import type { ActivityRow } from "@/lib/twin/cards";
+import { publicText } from "@/lib/twin/publicNames";
 import { LiveRunBar, NoLiveRun } from "./LiveRunBar";
 import { DECISION_TONE } from "./ui";
 
 const CATEGORIES = Object.keys(CATEGORY_LABEL) as DecisionCategory[];
 
-/** The agent's first applied directive, when it gave one: the one sentence of its reasoning worth a line. */
+/** The agent's first applied directive, when it gave one: the one sentence of its reasoning worth a line. They are
+ *  the model's own words, so a product or a file of ours that they name reads by its public name. */
 function agentDirective(d: ActivityRow): string | null {
   if (d.action !== "orchestrator_agent") return null;
   const applied = (d.rationale as { applied?: { text?: unknown }[] } | null)?.applied;
   const text = Array.isArray(applied) ? applied[0]?.text : null;
-  return typeof text === "string" && text ? text : null;
+  return typeof text === "string" && text ? publicText(text) : null;
 }
 
 export function DecisionFeed({ vehicleIds, limit = 60, scopeLabel }: { vehicleIds?: Set<string> | null; limit?: number; scopeLabel?: string }) {
@@ -96,7 +98,7 @@ export function DecisionFeed({ vehicleIds, limit = 60, scopeLabel }: { vehicleId
                 const hold = holdText(d, simTime);
                 const directive = agentDirective(d);
                 return (
-                  <li key={decisionKey(d)} className="grid grid-cols-[70px_1fr] gap-2 px-3 py-2 text-[12px]" title={d.engine ? `engine: ${d.engine}` : undefined}>
+                  <li key={decisionKey(d)} className="grid grid-cols-[70px_1fr] gap-2 px-3 py-2 text-[12px]" title={proposedByTitle(d)}>
                     <span className="font-mono text-muted-foreground">{simTime(d.occurred_at)}</span>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-1.5">

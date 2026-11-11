@@ -4,7 +4,7 @@
 import { useMemo } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useActivityFeed, useLiveDepot } from "@/lib/twin/hooks";
-import { STAGE_LABEL, STAGE_ORDER, countByStage, decisionActor, doubleBooked, energyView, humanize, joinFleet, simTime, stallBoard } from "@/lib/twin/model";
+import { STAGE_LABEL, STAGE_ORDER, countByStage, decisionActor, doubleBooked, energyView, humanize, joinFleet, proposedByTitle, simTime, stallBoard } from "@/lib/twin/model";
 import { MACHINE_KEYS, MACHINE_WORD, machineFacts, machineHeadline, machinesByCar, robotBoard, type MachineKey } from "@/lib/twin/robots";
 import { DEFAULT_CATEGORIES, decisionCategory, decisionKey, decisionPlace, describeDecision } from "@/lib/twin/decisionText";
 import { LiveRunBar, NoLiveRun } from "./LiveRunBar";
@@ -150,7 +150,7 @@ export function LiveOverview({ fleetOperatorId = null, scopeLabel, onOpen, onOpe
                   const text = describeDecision(d);
                   const place = decisionPlace(d);
                   return (
-                    <li key={decisionKey(d)} className="grid grid-cols-[64px_1fr] gap-2 text-[12px]" title={d.engine ? `engine: ${d.engine}` : undefined}>
+                    <li key={decisionKey(d)} className="grid grid-cols-[64px_1fr] gap-2 text-[12px]" title={proposedByTitle(d)}>
                       <span className="font-mono text-muted-foreground">{simTime(d.occurred_at)}</span>
                       {/* min-w-0: a grid track is at least as wide as its content, so without it a long
                           line widens the whole page (to ~620 px on a phone) instead of truncating */}
