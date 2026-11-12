@@ -334,8 +334,8 @@ describe("one car's machines", () => {
     ]);
   });
   it("a wash, a detail, and a seat that has ended", () => {
-    expect(vehicleMachines(row("v7"), snapshot)[0]).toMatchObject({ machine: "wash_gantry", title: "Robotic wash", words: "The machine washes the car.", state: "working", startedAt: "2026-11-07T16:03:00+00:00", endsAt: "2026-11-07T16:08:00+00:00" });
-    expect(vehicleMachines(row("v8"), snapshot)[0]).toMatchObject({ title: "Robotic detail", words: "The machine cleans the cabin, then washes the car.", state: "working" });
+    expect(vehicleMachines(row("v7"), snapshot)[0]).toMatchObject({ machine: "wash_gantry", title: "Robotic wash", words: "The machine washes the car. Then 2 robot arms polish its sensors.", state: "working", startedAt: "2026-11-07T16:03:00+00:00", endsAt: "2026-11-07T16:08:00+00:00" });
+    expect(vehicleMachines(row("v8"), snapshot)[0]).toMatchObject({ title: "Robotic detail", words: "The machine washes the car. Then 2 robot arms polish its sensors. The doors stay shut.", state: "working" });
     expect(vehicleMachines(row("v9"), snapshot)[0]).toMatchObject({ title: "Robotic wash", words: "Done. The car can leave.", state: "done", progress: 100, doneAt: "2026-11-07T16:04:00+00:00" });
     expect(vehicleMachines(row("v7"), snapshot)[0].doneAt).toBeNull();
   });
