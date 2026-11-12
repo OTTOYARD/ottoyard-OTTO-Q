@@ -16,7 +16,7 @@
 //                (otto-q-core 0758, 0764, 0765) and publishes it on the car's visit: an interior_tidy atom with
 //                performed_by 'stall_cabin_robot', the stall (robot_stall_id) and its times (started_at, ends_at).
 //   wash_gantry  OTTO-WASH, one in each wash bay. The engine seats a car and times the work (0746) and publishes the
-//                seat on the car (bay_seat: since, ends_at; 0762). It washes without a brush, dries, and wipes the sensors. No door opens.
+//                seat on the car (bay_seat: since, ends_at; 0762). It washes without a brush and dries. Then 2 robot arms polish the sensors. No door opens.
 //
 // Nothing here invents a state. A field the feed does not carry reads null. The moves inside a step (which side the
 // arm is on, which pass the machine makes) stay in the twin, which draws them: a cockpit says the step and its times.
@@ -509,7 +509,7 @@ export function vehicleMachines(
     out.push({
       machine: "wash_gantry", title: interior ? "Robotic detail" : "Robotic wash",
       words: finished ? "Done. The car can leave."
-        : interior ? "The machine washes the car and wipes its sensors. The doors stay shut." : "The machine washes the car and wipes its sensors.",
+        : interior ? "The machine washes the car. Then 2 robot arms polish its sensors. The doors stay shut." : "The machine washes the car. Then 2 robot arms polish its sensors.",
       state: finished ? "done" : "working",
       progress: progressPct(since, endsAt, simClock), startedAt: since, endsAt, doneAt: finished ? endsAt : null,
     });

@@ -60,8 +60,8 @@ describe("an owner's car at rest: the depot's machines at work on it", () => {
     const done = card("v4");
     expect(done.text).toMatch(/Charge arm disconnects/);
     expect(done.text).toMatch(/Cabin clean Done\. 9:58 AM/);
-    expect(card("v7").text).toMatch(/Robotic wash The machine washes the car and wipes its sensors\. until 10:08 AM/);
-    expect(card("v8").text).toMatch(/Robotic detail The machine washes the car and wipes its sensors\. The doors stay shut\./);
+    expect(card("v7").text).toMatch(/Robotic wash The machine washes the car\. Then 2 robot arms polish its sensors\. until 10:08 AM/);
+    expect(card("v8").text).toMatch(/Robotic detail The machine washes the car\. Then 2 robot arms polish its sensors\. The doors stay shut\./);
     expect(card("v9").text).toMatch(/Robotic wash Done\. The car can leave\. 10:04 AM/);
   });
 
