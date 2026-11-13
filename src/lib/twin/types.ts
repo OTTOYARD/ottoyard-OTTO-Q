@@ -97,6 +97,14 @@ export interface TwinVisitCard {
 export interface TwinVehicle {
   id: string; av_id: string; make: string; platform: string;
   state: string; soc: number; stall_id: string | null;
+  /** The vehicle's model, and where its charge inlet is (otto-q-core 0824). `port` is null for a car with no port
+   *  profile, and absent from a backend older than 0824. Metres; `along_m` is from the middle of the car, positive
+   *  toward the nose. */
+  model?: string | null;
+  port?: {
+    profile: string; face: 'left' | 'right' | 'rear'; along_m: number; height_m: number; lateral_m: number;
+    connector: 'CCS1' | 'NACS'; either_side: boolean; assumed: boolean; length_m: number; width_m: number;
+  } | null;
   /**
    * The vehicle's open visit workflow. THREE distinct readings, and collapsing
    * any two of them would put a claim on screen that OTTO-Q never made:
