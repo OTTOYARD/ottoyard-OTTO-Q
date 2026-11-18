@@ -15,7 +15,9 @@ const fleet: FleetRow[] = joinFleet(cards, snapshot, null);
 describe("the facts file is the twin's", () => {
   it("names the three machines, each with its steps, facts and safety lines", () => {
     expect(ROBOT_FACTS.source.repo).toBe("OTTOYARD/ottoyarddepot-sim");
-    expect(ROBOT_FACTS.machines.map((m) => m.key)).toEqual([...MACHINE_KEYS]);
+    // the three this cockpit shows live, in order, and the twin's service bay wheel machine (no live feed yet)
+    expect(ROBOT_FACTS.machines.map((m) => m.key)).toEqual([...MACHINE_KEYS, "tire_bay"]);
+    expect(ROBOT_FACTS.machines.find((m) => (m.key as string) === "tire_bay")?.stallType).toBe("service_bay");
     expect(machineFacts("charge_arm").name).toBe("OTTO-CHARGE ARM");
     expect(machineFacts("clean_arm").stallType).toBe("dcfc");
     expect(machineFacts("wash_gantry").stallType).toBe("wash_bay");
