@@ -8,8 +8,9 @@
 // Three machines work at the twin depot. The twin's Robotics tab holds their engineering models; this file holds what
 // a machine IS (./robotFacts.json, a verbatim copy of the twin's public/cad/robot-facts.json) and reads what each one
 // is DOING from the snapshot the twin cockpit reads. The facts file also carries OTTO-TIRE, the service bays' wheel
-// machine (ottoyarddepot-sim, 2026-11-17). It is not one of MACHINE_KEYS: OTTO-Q sends no wheel work yet, so there is
-// nothing live to show, and this file invents no state. It joins them when the engine says which car needs a wheel.
+// machine (ottoyarddepot-sim, 2026-11-17), with its two jobs: a worn set replaced, and the quarterly rotation. OTTO-Q
+// sends that work since otto-q-core 0842, and the snapshot names a service-bay seat's work since 0843
+// (bay_seat.work, e.g. ["tire_rotation"]). It is not yet one of MACHINE_KEYS: this file does not read that seat yet.
 // The three live machines:
 //
 //   charge_arm   OTTO-CHARGE ARM, one at each fast charger. The engine publishes its hold on the car at each stall
